@@ -29,6 +29,12 @@ LOGGER.addHandler(HANDLER)
 BOT = commands.Bot(command_prefix='./')
 
 
+# Get bot latency.
+@BOT.command()
+async def ping(ctx):
+    await ctx.send(f"Pong! `{round(BOT.latency * 1000)}ms`")
+
+
 # Once the bot is finished logging in and setting things up:
 @BOT.event
 async def on_ready():

@@ -6,8 +6,8 @@ Main bot file.
 import logging
 import os
 
-import discord
 import dotenv
+from discord.ext import commands
 
 import functions
 
@@ -25,26 +25,29 @@ HANDLER.setFormatter(logging.Formatter(
 LOGGER.setLevel(logging.DEBUG)
 LOGGER.addHandler(HANDLER)
 
-# Initialize a Client instance.
-CLIENT = discord.Client()
+# Initialize a Bot instance.
+BOT = commands.Bot(command_prefix='./')
 
 
 # Once the bot is finished logging in and setting things up:
-@CLIENT.event
+@BOT.event
 async def on_ready():
     print("Hello, world!")
 
 
 # Every time a message is received:
-@CLIENT.event
+@BOT.event
 async def on_message(message):
     # If message was sent by the bot, just return.
-    if message.author == CLIENT.user:
+    if message.author == BOT.user:
         return
+
+    # First, try processing message as a command.
+    await BOT.process_commands(message)
 
     # If message matches some form of "Marco", play Marco Polo.
     if functions.REGEX_MARCO.match(message.content):
         await message.channel.send(functions.marco_polo(message.content))
 
 # Run bot.
-CLIENT.run(TOKEN)
+BOT.run(TOKEN)

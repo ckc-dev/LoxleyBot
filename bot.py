@@ -75,6 +75,37 @@ async def purge_error(ctx, error):
         await ctx.channel.send(f"Sorry {ctx.message.author.mention}, you don't have the permissions required to use this command.")
 
 
+# Count channel messages.
+@BOT.command()
+async def count(ctx):
+    # Initialize empty counter.
+    count = 0
+
+    # Count all channel messages.
+    async for _ in ctx.channel.history(limit=None):
+        count += 1
+
+    # Initialize empty message string and dictionary
+    # containing thresholds and messages as key-value pairs.
+    message = ""
+    messages = {
+        1: "Seems like it's just getting started, welcome everyone!",
+        500: "Keep it up!",
+        1000: "Gaining traction!",
+        5000: "That's a lot!",
+        10000: "Whoa! That's A LOT!"
+    }
+
+    # Select a message to send based on total number of messages sent to channel.
+    for threshold, string in messages.items():
+        if count < threshold:
+            break
+        message = string
+
+    # Send message with results.
+    await ctx.channel.send(f"I've found {count + 1} messages in {ctx.channel.mention}. {message}")
+
+
 # Once the bot is finished logging in and setting things up:
 @BOT.event
 async def on_ready():

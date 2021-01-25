@@ -3,6 +3,7 @@ Main bot file.
 """
 
 # Import required modules.
+import asyncio
 import logging
 import os
 
@@ -33,6 +34,45 @@ BOT = commands.Bot(command_prefix='./')
 @BOT.command()
 async def ping(ctx):
     await ctx.send(f"Pong! `{round(BOT.latency * 1000)}ms`")
+
+
+# Delete channel messages.
+@BOT.command()
+@commands.has_permissions(manage_messages=True)
+async def purge(ctx, amount=None):
+    # If user does not specify an amount, ask for it.
+    if not amount:
+        await ctx.channel.send("Please provide an amount of messages to delete, or use 'all' to purge the channel.")
+
+    # Delete all messages.
+    elif amount.upper() == "ALL":
+        # Initialize empty counter.
+        count = 0
+
+        # Warn user that this might be a slow operation.
+        await ctx.channel.send("Please be patient, this might take some time...")
+
+        # Count all messages in channel.
+        async for _ in ctx.channel.history(limit=None):
+            count += 1
+
+        # Pause for a few seconds while user reads the message.
+        await asyncio.sleep(5)
+
+        # 1 is added to account for the message used to run the command.
+        await ctx.channel.purge(limit=count + 1)
+
+    # Delete a specified amount of messages.
+    else:
+        # 1 is added to account for the message used to run the command.
+        await ctx.channel.purge(limit=int(amount) + 1)
+
+
+# If user does not have permission to manage messages, send an error message.
+@purge.error
+async def purge_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.channel.send(f"Sorry {ctx.message.author.mention}, you don't have the permissions required to use this command.")
 
 
 # Once the bot is finished logging in and setting things up:

@@ -31,15 +31,25 @@ BOT_PREFIX = "./"
 BOT = commands.Bot(command_prefix=BOT_PREFIX)
 BOT.activity = discord.Game(f"{BOT_PREFIX}help")
 
-# Once the bot is finished logging in and setting things up:
+
 @BOT.event
 async def on_ready():
+    """
+    Runs once the bot is finished logging in and setting things up.
+    """
+
     print("Hello, world!")
 
 
-# Every time a message is received:
 @BOT.event
 async def on_message(message):
+    """
+    Runs every time a message is received.
+
+    Args:
+        message (discord.Message): Received message.
+    """
+
     # If message was sent by the bot, just return.
     if message.author == BOT.user:
         return
@@ -52,9 +62,15 @@ async def on_message(message):
         await message.channel.send(functions.marco_polo(message.content))
 
 
-# When an error occurs while trying to run a command:
 @BOT.event
 async def on_command_error(ctx, error):
+    """Runs every time an error occurs while trying to run a command.
+
+    Args:
+        ctx (discord.ext.commands.context.Context): Context passed to function.
+        error (discord.ext.commands.CommandError): Base exception for all command related errors.
+    """
+
     # Warn for missing permissions.
     if isinstance(error, commands.MissingPermissions):
         await ctx.channel.send(f"Sorry {ctx.message.author.mention}, you don't have the permissions required to use this command.")

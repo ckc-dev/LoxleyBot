@@ -6,6 +6,7 @@ Main bot file.
 import logging
 import os
 
+import discord
 import dotenv
 from discord.ext import commands
 
@@ -27,7 +28,7 @@ LOGGER.addHandler(HANDLER)
 
 # Initialize a Bot instance.
 BOT = commands.Bot(command_prefix='./')
-
+BOT.activity = discord.Game("./help")
 
 # Once the bot is finished logging in and setting things up:
 @BOT.event

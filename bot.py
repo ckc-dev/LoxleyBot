@@ -27,8 +27,9 @@ LOGGER.setLevel(logging.DEBUG)
 LOGGER.addHandler(HANDLER)
 
 # Initialize a Bot instance.
-BOT = commands.Bot(command_prefix='./')
-BOT.activity = discord.Game("./help")
+BOT_PREFIX = "./"
+BOT = commands.Bot(command_prefix=BOT_PREFIX)
+BOT.activity = discord.Game(f"{BOT_PREFIX}help")
 
 # Once the bot is finished logging in and setting things up:
 @BOT.event

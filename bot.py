@@ -3,11 +3,9 @@ Main bot file.
 """
 
 # Import required modules.
-import asyncio
 import logging
 import os
 
-import discord
 import dotenv
 from discord.ext import commands
 
@@ -31,124 +29,6 @@ LOGGER.addHandler(HANDLER)
 BOT = commands.Bot(command_prefix='./')
 
 
-# Get bot latency.
-@BOT.command()
-async def ping(ctx):
-    await ctx.send(f"Pong! `{round(BOT.latency * 1000)}ms`")
-
-
-# Delete channel messages.
-@BOT.command()
-@commands.has_permissions(manage_messages=True)
-async def purge(ctx, amount=None):
-    # If user does not specify an amount, ask for it.
-    if not amount:
-        await ctx.channel.send("Please provide an amount of messages to delete, or use 'all' to purge the channel.")
-
-    # Delete all messages.
-    elif amount.upper() == "ALL":
-        # Initialize empty counter.
-        count = 0
-
-        # Warn user that this might be a slow operation.
-        await ctx.channel.send("Please be patient, this might take some time...")
-
-        # Count all messages in channel.
-        async for _ in ctx.channel.history(limit=None):
-            count += 1
-
-        # Pause for a few seconds while user reads the message.
-        await asyncio.sleep(5)
-
-        # 1 is added to account for the message used to run the command.
-        await ctx.channel.purge(limit=count + 1)
-
-    # Delete a specified amount of messages.
-    else:
-        # 1 is added to account for the message used to run the command.
-        await ctx.channel.purge(limit=int(amount) + 1)
-
-
-# Kick a user.
-@BOT.command()
-@commands.has_permissions(kick_members=True)
-async def kick(ctx, member: discord.Member, *, reason=None):
-    # Kick user from server.
-    await member.kick(reason=reason)
-
-    # Send a message warning user was kicked, both to channel command was run on and to kicked user.
-    await ctx.send(f"Kicked {member.mention}. Reason: `{reason}`")
-    await member.send(f"You have been kicked from `{ctx.guild}`. Reason: `{reason}`.")
-
-
-# Ban a user.
-@BOT.command()
-@commands.has_permissions(ban_members=True)
-async def ban(ctx, member: discord.Member, *, reason=None):
-    # Ban user from server.
-    await member.ban(reason=reason)
-
-    # Send a message warning user was banned, both to channel command was run on and to kicked user.
-    await ctx.send(f"Banned {member.mention}. Reason: `{reason}`")
-    await member.send(f"You have been banned from `{ctx.guild}`. Reason: `{reason}`.")
-
-
-# Unban a member.
-@BOT.command()
-@commands.has_permissions(ban_members=True)
-async def unban(ctx, *, member):
-    # Get user name and discriminator.
-    name, discriminator = member.split("#")
-
-    # Look for user in ban list.
-    for ban in await ctx.guild.bans():
-        # If user is found, unban them and send a message to the channel command was run on.
-        if (ban.user.name, ban.user.discriminator) == (name, discriminator):
-            await ctx.guild.unban(ban.user)
-            await ctx.send(f"Unbanned {ban.user.name}#{ban.user.discriminator}")
-
-
-# If user does not have permission to use a command, send an error message.
-@purge.error
-@kick.error
-@ban.error
-@unban.error
-async def command_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.channel.send(f"Sorry {ctx.message.author.mention}, you don't have the permissions required to use this command.")
-
-
-# Count channel messages.
-@BOT.command()
-async def count(ctx):
-    # Initialize empty counter.
-    count = 0
-
-    # Count all channel messages.
-    async for _ in ctx.channel.history(limit=None):
-        count += 1
-
-    # Initialize empty message string and dictionary
-    # containing thresholds and messages as key-value pairs.
-    message = ""
-    messages = {
-        1: "Seems like it's just getting started, welcome everyone!",
-        500: "Keep it up!",
-        1000: "Gaining traction!",
-        5000: "That's a lot!",
-        10000: "Whoa! That's A LOT!"
-    }
-
-    # Select a message to send based on total number of messages sent to channel.
-    for threshold, string in messages.items():
-        if count < threshold:
-            break
-        message = string
-
-    # Send message with results.
-    await ctx.channel.send(f"I've found {count + 1} messages in {ctx.channel.mention}. {message}")
-
-
 # Once the bot is finished logging in and setting things up:
 @BOT.event
 async def on_ready():
@@ -168,6 +48,20 @@ async def on_message(message):
     # If message matches some form of "Marco", play Marco Polo.
     if functions.REGEX_MARCO.match(message.content):
         await message.channel.send(functions.marco_polo(message.content))
+
+
+# When an error occurs while trying to run a command:
+@BOT.event
+async def on_command_error(ctx, error):
+    # Warn for missing permissions.
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.channel.send(f"Sorry {ctx.message.author.mention}, you don't have the permissions required to use this command.")
+
+
+# Load all cogs.
+for file in os.listdir("cogs"):
+    if file.endswith(".py"):
+        BOT.load_extension(f"cogs.{file[:-3]}")
 
 # Run bot.
 BOT.run(TOKEN)

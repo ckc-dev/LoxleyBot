@@ -7,6 +7,7 @@ import asyncio
 import logging
 import os
 
+import discord
 import dotenv
 from discord.ext import commands
 
@@ -68,9 +69,51 @@ async def purge(ctx, amount=None):
         await ctx.channel.purge(limit=int(amount) + 1)
 
 
-# If user does not have permission to manage messages, send an error message.
+# Kick a user.
+@BOT.command()
+@commands.has_permissions(kick_members=True)
+async def kick(ctx, member: discord.Member, *, reason=None):
+    # Kick user from server.
+    await member.kick(reason=reason)
+
+    # Send a message warning user was kicked, both to channel command was run on and to kicked user.
+    await ctx.send(f"Kicked {member.mention}. Reason: `{reason}`")
+    await member.send(f"You have been kicked from `{ctx.guild}`. Reason: `{reason}`.")
+
+
+# Ban a user.
+@BOT.command()
+@commands.has_permissions(ban_members=True)
+async def ban(ctx, member: discord.Member, *, reason=None):
+    # Ban user from server.
+    await member.ban(reason=reason)
+
+    # Send a message warning user was banned, both to channel command was run on and to kicked user.
+    await ctx.send(f"Banned {member.mention}. Reason: `{reason}`")
+    await member.send(f"You have been banned from `{ctx.guild}`. Reason: `{reason}`.")
+
+
+# Unban a member.
+@BOT.command()
+@commands.has_permissions(ban_members=True)
+async def unban(ctx, *, member):
+    # Get user name and discriminator.
+    name, discriminator = member.split("#")
+
+    # Look for user in ban list.
+    for ban in await ctx.guild.bans():
+        # If user is found, unban them and send a message to the channel command was run on.
+        if (ban.user.name, ban.user.discriminator) == (name, discriminator):
+            await ctx.guild.unban(ban.user)
+            await ctx.send(f"Unbanned {ban.user.name}#{ban.user.discriminator}")
+
+
+# If user does not have permission to use a command, send an error message.
 @purge.error
-async def purge_error(ctx, error):
+@kick.error
+@ban.error
+@unban.error
+async def command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.channel.send(f"Sorry {ctx.message.author.mention}, you don't have the permissions required to use this command.")
 

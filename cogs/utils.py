@@ -79,6 +79,9 @@ class Utils(commands.Cog):
         # Initialize empty counter.
         count = 0
 
+        # Warn user that this might be a slow operation.
+        await ctx.channel.send("Please be patient, this might take some time...")
+
         # Count all channel messages.
         async for _ in ctx.channel.history(limit=None):
             count += 1

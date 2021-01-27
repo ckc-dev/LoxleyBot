@@ -68,12 +68,14 @@ class Utils(commands.Cog):
             await ctx.channel.purge(limit=int(amount) + 1)
 
     @commands.command()
-    async def count(self, ctx):
+    async def count(self, ctx, end_message_id: int = None):
         """
-        Counts number of messages sent to a channel.
+        Counts number of messages sent to a channel up to a specified message ID.
+        If ID is not provided, counts total number of messages sent to channel.
 
         Args:
             ctx (discord.ext.commands.context.Context): Context passed to function.
+            end_message_id (int, optional): ID of a message to stop counting when reached. Defaults to None.
         """
 
         # Initialize empty counter.
@@ -83,8 +85,12 @@ class Utils(commands.Cog):
         await ctx.channel.send("Please be patient, this might take some time...")
 
         # Count all channel messages.
-        async for _ in ctx.channel.history(limit=None):
+        async for message in ctx.channel.history(limit=None):
             count += 1
+
+            # If end message has been reached, stop counting.
+            if message.id == end_message_id:
+                break
 
         # Initialize empty message string and dictionary
         # containing thresholds and messages as key-value pairs.

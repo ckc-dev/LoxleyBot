@@ -77,6 +77,53 @@ class Management(commands.Cog):
                 await ctx.send(f"Unbanned {ban.user.name}#{ban.user.discriminator}.")
 
 
+class MassManagement(commands.Cog, name="Mass Management"):
+    """
+    Mass management cog. Contains functions used in server management.
+    """
+
+    # Initialize cog.
+    def __init__(self, bot):
+        self.bot = bot
+
+        # Get main Management cog.
+        self.management = self.bot.get_cog("Management")
+
+    @commands.command()
+    @commands.has_permissions(kick_members=True)
+    async def masskick(self, ctx, *members: discord.Member):
+        """
+        Kicks multiple users at once.
+        Does not take a reason as an argument,
+        following reason is given: "Kicked in a mass kick. No specific reason provided.".
+
+        Args:
+            ctx (discord.ext.commands.context.Context): Context passed to function.
+            members ([discord.Member]): List of members to kick from server.
+        """
+
+        # Kick members.
+        for member in members:
+            await self.management.kick(ctx, member, reason="Kicked in a mass kick. No specific reason provided.")
+
+    @commands.command()
+    @commands.has_permissions(ban_members=True)
+    async def massban(self, ctx, *members: discord.Member):
+        """
+        Bans multiple users at once.
+        Does not take a reason as an argument,
+        following reason is given: "Banned in a mass ban. No specific reason provided.".
+
+        Args:
+            ctx (discord.ext.commands.context.Context): Context passed to function.
+            members ([discord.Member]): List of members to ban from server.
+        """
+
+        # Ban members.
+        for member in members:
+            await self.management.ban(ctx, member, reason="Banned in a mass ban. No specific reason provided.")
+
+
 def setup(bot):
     """
     Binds the cog to the bot.
@@ -86,3 +133,4 @@ def setup(bot):
     """
 
     bot.add_cog(Management(bot))
+    bot.add_cog(MassManagement(bot))

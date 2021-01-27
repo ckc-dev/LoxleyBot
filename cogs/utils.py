@@ -3,8 +3,6 @@ Contains cogs used for useful, often small and simple functions.
 """
 
 # Import required modules.
-import asyncio
-
 from discord.ext import commands
 
 
@@ -30,42 +28,34 @@ class Utils(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(manage_messages=True)
-    async def purge(self, ctx, amount=None):
+    async def purge(self, ctx, amount: str = None):
         """
         Deletes an amount of messages from a channel.
 
         Args:
             ctx (discord.ext.commands.context.Context): Context passed to function.
             amount (str, optional): Amount of messages to delete.
-                                      Either a number or "all". Defaults to None.
+                                    Either a number or "all". Defaults to None.
         """
 
-        # If user does not specify an amount, ask for it.
-        if not amount:
-            await ctx.channel.send("Please provide an amount of messages to delete, or use 'all' to purge the channel.")
-
         # Delete all messages.
-        elif amount.upper() == "ALL":
-            # Initialize empty counter.
-            count = 0
-
-            # Warn user that this might be a slow operation.
-            await ctx.channel.send("Please be patient, this might take some time...")
-
-            # Count all messages in channel.
-            async for _ in ctx.channel.history(limit=None):
-                count += 1
-
-            # Pause for a few seconds while user reads the message.
-            await asyncio.sleep(5)
-
-            # 1 is added to account for the message used to run the command.
-            await ctx.channel.purge(limit=count + 1)
+        if isinstance(amount, str) and amount.upper() == "ALL":
+            limit = None
 
         # Delete a specified amount of messages.
         else:
-            # 1 is added to account for the message used to run the command.
-            await ctx.channel.purge(limit=int(amount) + 1)
+            try:
+                # 1 is added to account for the message used to run the command.
+                limit = int(amount) + 1
+
+            # If user does not specify a valid amount, ask for it.
+            except (TypeError, ValueError):
+                await ctx.channel.send("Please provide an amount of messages to delete, or use 'all' to purge the channel.")
+                return None
+
+        # Delete messages.
+        async for message in ctx.channel.history(limit=limit):
+            await message.delete()
 
     @commands.command()
     async def count(self, ctx, end_message_id: int = None):

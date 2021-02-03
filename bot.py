@@ -26,6 +26,10 @@ HANDLER.setFormatter(logging.Formatter(
 LOGGER.setLevel(logging.DEBUG)
 LOGGER.addHandler(HANDLER)
 
+# If database file does not exist, create it.
+if not os.path.exists("sqlite.db"):
+    functions.create_database()
+
 # Initialize a Bot instance.
 BOT_PREFIX = "./"
 BOT = commands.Bot(command_prefix=BOT_PREFIX)

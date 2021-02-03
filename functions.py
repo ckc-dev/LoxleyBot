@@ -153,3 +153,84 @@ def create_database():
             last_message_id INTEGER NOT NULL,
             count INTEGER NOT NULL);""")
     connection.close()
+
+
+def update_database(guild_id, channel_id, last_message_id, count):
+    """
+    Updates database with current message count for a channel.
+
+    Args:
+        guild_id (int): ID of this guild.
+        channel_id (int): ID of this channel.
+        last_message_id (int): ID of the last message sent to this channel.
+        count (int): Message count for this channel.
+    """
+
+    # Connect to the database.
+    connection = sqlite3.connect("sqlite.db")
+    cursor = connection.cursor()
+
+    # Store query parameters in a tuple.
+    params = (guild_id, channel_id)
+
+    # Try to get the message count for this channel from the database.
+    results = cursor.execute(
+        """SELECT count
+            FROM message_counts
+            WHERE guild_id=? AND channel_id=?;""", params).fetchone()
+
+    # If there are no records on the database for this channel:
+    if not results:
+        # Save last message ID and message count to the database.
+        params = (*params, last_message_id, count)
+        cursor.execute(
+            """INSERT INTO
+                message_counts (
+                    guild_id,
+                    channel_id,
+                    last_message_id,
+                    count)
+                VALUES (?, ?, ?, ?);""", params)
+
+    # If there is a record on the database for this channel:
+    else:
+        # Update last message ID and message count.
+        params = (count, last_message_id, *params)
+        cursor.execute(
+            """UPDATE
+                message_counts
+                SET count = ?, last_message_id = ?
+                WHERE guild_id=? AND channel_id=?;""", params)
+
+    # Commit changes and close connection to the database.
+    connection.commit()
+    connection.close()
+
+
+def query_database(guild_id, channel_id):
+    """
+    Queries database for the current message count for a channel.
+
+    Args:
+        guild_id (int): ID of this guild.
+        channel_id (int): ID of this channel.
+
+    Returns:
+        (int): A tuple containing the message count for this channel
+               and the ID of the last message sent to this channel, respectively.
+    """
+
+    # Connect to the database.
+    connection = sqlite3.connect("sqlite.db")
+    cursor = connection.cursor()
+
+    # Get the message count for this channel and last message ID from the database.
+    results = cursor.execute(
+        """SELECT
+            count, last_message_id
+            FROM message_counts
+            WHERE guild_id=? AND channel_id=?;""", (guild_id, channel_id)).fetchone()
+
+    # Close connection to the database.
+    connection.close()
+    return results

@@ -3,6 +3,7 @@ Contains cogs used for useful, often small and simple functions.
 """
 
 # Import required modules.
+import functions
 from discord.ext import commands
 
 
@@ -74,13 +75,25 @@ class Utils(commands.Cog):
         # Warn user that this might be a slow operation.
         await ctx.channel.send("Please be patient, this might take some time...")
 
-        # Count all channel messages.
+        # If user does not specify when to stop counting:
+        if not end_message_id:
+            # Get last message information from database.
+            query = functions.query_database(ctx.guild.id, ctx.channel.id)
+
+            # If it exists, update counter and id of the message to stop counting when found.
+            if query:
+                end_message_id = query[1]
+                count = query[0]
+
+        # Count messages until end message is reached.
         async for message in ctx.channel.history(limit=None):
             count += 1
-
-            # If end message has been reached, stop counting.
             if message.id == end_message_id:
                 break
+
+        # Update database.
+        functions.update_database(
+            ctx.guild.id, ctx.channel.id, ctx.channel.last_message_id, count)
 
         # Initialize empty message string and dictionary
         # containing thresholds and messages as key-value pairs.
@@ -99,7 +112,7 @@ class Utils(commands.Cog):
                 break
             message = string
 
-        # Send message with results.
+        # Send message with results. 1 is added to account for the message used to run the command.
         await ctx.channel.send(f"I've found {count + 1} messages in {ctx.channel.mention}. {message}")
 
 

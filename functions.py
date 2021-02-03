@@ -1,10 +1,11 @@
 """
-Contains functions used in the main bot file.
+Contains functions used in other parts of the bot.
 """
 
 # Import required modules.
 import random
 import re
+import sqlite3
 
 REGEX_MARCO = re.compile(r"^\s*(m+)(a+)(r+)(c+)(o+)([.…?!\s]*)$", re.I)
 
@@ -133,3 +134,22 @@ def marco_polo(string):
 
     # Return string.
     return s
+
+
+def create_database():
+    """
+    Creates a SQLite database.
+    """
+
+    # Connect to the database file or create a new one, if it doesn't exist.
+    connection = sqlite3.connect("sqlite.db")
+    cursor = connection.cursor()
+
+    # Create tables and close connection to the database.
+    cursor.execute(
+        """CREATE TABLE message_counts (
+            guild_id INTEGER NOT NULL,
+            channel_id INTEGER NOT NULL,
+            last_message_id INTEGER NOT NULL,
+            count INTEGER NOT NULL);""")
+    connection.close()

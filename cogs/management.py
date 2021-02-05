@@ -12,8 +12,15 @@ class Management(commands.Cog):
     Management cog. Contains functions used in server management.
     """
 
-    # Initialize cog.
     def __init__(self, bot):
+        """
+        Initializes cog.
+
+        Args:
+            bot (discord.ext.commands.Bot): Bot use with cog.
+        """
+
+        # Initialize bot.
         self.bot = bot
 
     @commands.command()
@@ -82,8 +89,15 @@ class MassManagement(commands.Cog, name="Mass Management"):
     Mass management cog. Contains functions used in server management.
     """
 
-    # Initialize cog.
     def __init__(self, bot):
+        """
+        Initializes cog.
+
+        Args:
+            bot (discord.ext.commands.Bot): Bot use with cog.
+        """
+
+        # Initialize bot.
         self.bot = bot
 
         # Get main Management cog.
@@ -99,7 +113,7 @@ class MassManagement(commands.Cog, name="Mass Management"):
 
         Args:
             ctx (discord.ext.commands.context.Context): Context passed to function.
-            members ([discord.Member]): List of members to kick from server.
+            members (List[discord.Member]): List of members to kick from server.
         """
 
         # Kick members.
@@ -116,7 +130,7 @@ class MassManagement(commands.Cog, name="Mass Management"):
 
         Args:
             ctx (discord.ext.commands.context.Context): Context passed to function.
-            members ([discord.Member]): List of members to ban from server.
+            members (List[discord.Member]): List of members to ban from server.
         """
 
         # Ban members.
@@ -126,7 +140,7 @@ class MassManagement(commands.Cog, name="Mass Management"):
 
 def setup(bot):
     """
-    Binds the cog to the bot.
+    Binds cogs to the bot.
 
     Args:
         bot (discord.ext.commands.Bot): Bot to bind cog to.

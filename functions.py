@@ -46,8 +46,8 @@ def marco_polo(string):
         Generates a string of characters, based on user input.
 
         Args:
-            groups ([str]): A list containing groups of characters to generate string from.
-                            E.g.: ["mm"] or ["RrrRr", "c"].
+            groups (List[str]): A list containing groups of characters to generate string from.
+                                E.g.: ["mm"] or ["RrrRr", "c"].
             sub (str): String (character) to substitute groups of characters with. E.g.: "P" or "L".
 
         Returns:
@@ -83,6 +83,7 @@ def marco_polo(string):
         Returns:
             str: Generated string. E.g.: "..." or "!?!?!?".
         """
+
         # Initialize empty string and dictionary.
         s = ""
         d = {}
@@ -216,8 +217,8 @@ def query_database(guild_id, channel_id):
         channel_id (int): ID of this channel.
 
     Returns:
-        (int): A tuple containing the message count for this channel
-               and the ID of the last message sent to this channel, respectively.
+        Tuple[int, int]: A tuple containing the message count for this channel
+                         and the ID of the last message sent to this channel, respectively.
     """
 
     # Connect to the database.

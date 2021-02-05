@@ -68,7 +68,8 @@ async def on_message(message):
 
 @BOT.event
 async def on_command_error(ctx, error):
-    """Runs every time an error occurs while trying to run a command.
+    """
+    Runs every time an error occurs while trying to run a command.
 
     Args:
         ctx (discord.ext.commands.context.Context): Context passed to function.
@@ -78,7 +79,6 @@ async def on_command_error(ctx, error):
     # Warn for missing permissions.
     if isinstance(error, commands.MissingPermissions):
         await ctx.channel.send(f"Sorry {ctx.message.author.mention}, you don't have the permissions required to use this command.")
-
 
 # Load all cogs.
 for file in os.listdir("cogs"):

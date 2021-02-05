@@ -17,21 +17,21 @@ if not settings.BOT_TOKEN:
     raise ValueError("'BOT_TOKEN' environment variable was not provided.")
 
 # Set up logging.
-LOGGER = logging.getLogger('discord')
+LOGGER = logging.getLogger("discord")
 HANDLER = logging.FileHandler(
     filename=settings.BOT_LOG_FILENAME,
-    encoding='utf-8',
-    mode='w')
+    encoding="utf-8",
+    mode="w")
 HANDLER.setFormatter(logging.Formatter(
-    '%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+    "%(asctime)s:%(levelname)s:%(name)s: %(message)s"))
 LOGGER.setLevel(logging.DEBUG)
 LOGGER.addHandler(HANDLER)
 
 # If database file does not exist, create it.
-cursor = settings.DATABASE_CONNECTION.cursor()
-cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-database_has_tables = cursor.fetchall()
-cursor.close()
+CURSOR = settings.DATABASE_CONNECTION.cursor()
+CURSOR.execute("SELECT name FROM sqlite_master WHERE type='table';")
+database_has_tables = CURSOR.fetchall()
+CURSOR.close()
 if not database_has_tables:
     functions.create_database()
 

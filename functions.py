@@ -5,11 +5,9 @@ Contains functions used in other parts of the bot.
 # Import required modules.
 import random
 import re
-import sqlite3
+import settings
 
 REGEX_MARCO = re.compile(r"^\s*(m+)(a+)(r+)(c+)(o+)([.…?!\s]*)$", re.I)
-DATABASE_NAME = "sqlite.db"
-DATABASE_CONNECTION = sqlite3.connect(DATABASE_NAME)
 
 
 def marco_polo(string):
@@ -145,7 +143,7 @@ def create_database():
     """
 
     # Connect to the database.
-    cursor = DATABASE_CONNECTION.cursor()
+    cursor = settings.DATABASE_CONNECTION.cursor()
 
     # Create tables and close connection to the database.
     cursor.execute(
@@ -169,7 +167,7 @@ def update_database(guild_id, channel_id, last_message_id, count):
     """
 
     # Connect to the database.
-    cursor = DATABASE_CONNECTION.cursor()
+    cursor = settings.DATABASE_CONNECTION.cursor()
 
     # Store query parameters in a tuple.
     params = (guild_id, channel_id)
@@ -204,7 +202,7 @@ def update_database(guild_id, channel_id, last_message_id, count):
                 WHERE guild_id=? AND channel_id=?;""", params)
 
     # Commit changes and close connection to the database.
-    DATABASE_CONNECTION.commit()
+    settings.DATABASE_CONNECTION.commit()
     cursor.close()
 
 
@@ -222,7 +220,7 @@ def query_database(guild_id, channel_id):
     """
 
     # Connect to the database.
-    cursor = DATABASE_CONNECTION.cursor()
+    cursor = settings.DATABASE_CONNECTION.cursor()
 
     # Get the message count for this channel and last message ID from the database.
     results = cursor.execute(

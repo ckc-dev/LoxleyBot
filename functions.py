@@ -8,6 +8,8 @@ import re
 import sqlite3
 
 REGEX_MARCO = re.compile(r"^\s*(m+)(a+)(r+)(c+)(o+)([.…?!\s]*)$", re.I)
+DATABASE_NAME = "sqlite.db"
+DATABASE_CONNECTION = sqlite3.connect(DATABASE_NAME)
 
 
 def marco_polo(string):
@@ -142,9 +144,8 @@ def create_database():
     Creates a SQLite database.
     """
 
-    # Connect to the database file or create a new one, if it doesn't exist.
-    connection = sqlite3.connect("sqlite.db")
-    cursor = connection.cursor()
+    # Connect to the database.
+    cursor = DATABASE_CONNECTION.cursor()
 
     # Create tables and close connection to the database.
     cursor.execute(
@@ -153,7 +154,7 @@ def create_database():
             channel_id INTEGER NOT NULL,
             last_message_id INTEGER NOT NULL,
             count INTEGER NOT NULL);""")
-    connection.close()
+    cursor.close()
 
 
 def update_database(guild_id, channel_id, last_message_id, count):
@@ -168,8 +169,7 @@ def update_database(guild_id, channel_id, last_message_id, count):
     """
 
     # Connect to the database.
-    connection = sqlite3.connect("sqlite.db")
-    cursor = connection.cursor()
+    cursor = DATABASE_CONNECTION.cursor()
 
     # Store query parameters in a tuple.
     params = (guild_id, channel_id)
@@ -204,8 +204,8 @@ def update_database(guild_id, channel_id, last_message_id, count):
                 WHERE guild_id=? AND channel_id=?;""", params)
 
     # Commit changes and close connection to the database.
-    connection.commit()
-    connection.close()
+    DATABASE_CONNECTION.commit()
+    cursor.close()
 
 
 def query_database(guild_id, channel_id):
@@ -222,8 +222,7 @@ def query_database(guild_id, channel_id):
     """
 
     # Connect to the database.
-    connection = sqlite3.connect("sqlite.db")
-    cursor = connection.cursor()
+    cursor = DATABASE_CONNECTION.cursor()
 
     # Get the message count for this channel and last message ID from the database.
     results = cursor.execute(
@@ -232,6 +231,6 @@ def query_database(guild_id, channel_id):
             FROM message_counts
             WHERE guild_id=? AND channel_id=?;""", (guild_id, channel_id)).fetchone()
 
-    # Close connection to the database.
-    connection.close()
+    # Close connection to the database and return results.
+    cursor.close()
     return results

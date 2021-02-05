@@ -12,15 +12,25 @@ class Utils(commands.Cog):
     Utils cog. Contains useful, often small and simple functions.
     """
 
-    # Initialize cog.
     def __init__(self, bot):
+        """
+        Initializes cog.
+
+        Args:
+            bot (discord.ext.commands.Bot): Bot use with cog.
+        """
+
+        # Initialize bot.
         self.bot = bot
 
         # Start updating database.
         self.auto_update_database.start()
 
-    # When cog is unloaded:
     def cog_unload(self):
+        """
+        Runs when cog is unloaded.
+        """
+
         # Stop trying to update database.
         self.auto_update_database.cancel()
 
@@ -168,7 +178,7 @@ class Utils(commands.Cog):
 
 def setup(bot):
     """
-    Binds the cog to the bot.
+    Binds cogs to the bot.
 
     Args:
         bot (discord.ext.commands.Bot): Bot to bind cog to.

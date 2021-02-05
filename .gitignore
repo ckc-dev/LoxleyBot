@@ -1,7 +1,19 @@
-__pycache__/
-.env
-.vscode/
+# Databse files.
 *.db
+
+# Environment variables.
+.env
+
+# Log files.
 *.log
+
+# Python cache, byte code, and virtual environment.
+__pycache__/
 *.pyc
 venv/
+
+# TODO file.
+*.todo
+
+# VS Code workspace settingts.
+.vscode/

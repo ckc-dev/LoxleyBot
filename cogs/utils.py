@@ -133,7 +133,7 @@ class Utils(commands.Cog):
         # Initialize empty message string and dictionary
         # containing thresholds and messages as key-value pairs.
         message = ""
-        messages = {
+        MESSAGES = {
             1: "Seems like it's just getting started, welcome everyone!",
             500: "Keep it up!",
             1000: "Gaining traction!",
@@ -142,7 +142,7 @@ class Utils(commands.Cog):
         }
 
         # Select a message to send based on total number of messages sent to channel.
-        for threshold, string in messages.items():
+        for threshold, string in MESSAGES.items():
             if count < threshold:
                 break
             message = string

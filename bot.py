@@ -7,27 +7,28 @@ import logging
 import os
 
 import discord
-import dotenv
 from discord.ext import commands
 
 import functions
+import settings
 
 # Make sure bot token was provided.
-dotenv.load_dotenv()
-TOKEN = os.getenv("BOT_TOKEN")
-if not TOKEN:
+if not settings.BOT_TOKEN:
     raise ValueError("'BOT_TOKEN' environment variable was not provided.")
 
 # Set up logging.
 LOGGER = logging.getLogger('discord')
-HANDLER = logging.FileHandler(filename='bot.log', encoding='utf-8', mode='w')
+HANDLER = logging.FileHandler(
+    filename=settings.BOT_LOG_FILENAME,
+    encoding='utf-8',
+    mode='w')
 HANDLER.setFormatter(logging.Formatter(
     '%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 LOGGER.setLevel(logging.DEBUG)
 LOGGER.addHandler(HANDLER)
 
 # If database file does not exist, create it.
-cursor = functions.DATABASE_CONNECTION.cursor()
+cursor = settings.DATABASE_CONNECTION.cursor()
 cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
 database_has_tables = cursor.fetchall()
 cursor.close()
@@ -35,9 +36,8 @@ if not database_has_tables:
     functions.create_database()
 
 # Initialize a Bot instance.
-BOT_PREFIX = "./"
-BOT = commands.Bot(command_prefix=BOT_PREFIX)
-BOT.activity = discord.Game(f"{BOT_PREFIX}help")
+BOT = commands.Bot(command_prefix=settings.BOT_PREFIX)
+BOT.activity = discord.Game(settings.BOT_ACTIVITY)
 
 
 @BOT.event
@@ -90,4 +90,4 @@ for file in os.listdir("cogs"):
         BOT.load_extension(f"cogs.{file[:-3]}")
 
 # Run bot.
-BOT.run(TOKEN)
+BOT.run(settings.BOT_TOKEN)

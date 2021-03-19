@@ -10,7 +10,7 @@
 # Python cache, byte code, and virtual environment.
 __pycache__/
 *.pyc
-venv/
+.venv/
 
 # TODO files.
 *.todo

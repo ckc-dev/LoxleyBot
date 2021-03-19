@@ -148,7 +148,11 @@ class Utils(commands.Cog):
             message = string
 
         # Send message with results. 1 is added to account for the message used to run the command.
-        await ctx.channel.send(f"I've found {count + 1} messages in {ctx.channel.mention}. {message}")
+        if not end_message_id:
+            await ctx.channel.send(f"I've found {count + 1} messages in {ctx.channel.mention}. {message}")
+        else:
+            end_message = await ctx.channel.fetch_message(end_message_id)
+            await end_message.reply(f"I've found {count + 1} messages up to this message.", mention_author=False)
 
     @tasks.loop(hours=24)
     async def auto_update_database(self):

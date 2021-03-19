@@ -8,7 +8,17 @@ import re
 
 import settings
 
-REGEX_MARCO = re.compile(r"^\s*(m+)(a+)(r+)(c+)(o+)([.…?!\s]*)$", re.I)
+REGEX_MARCO = re.compile(r"""
+    ^           # Match line start.
+    \s*         # Match between 0 and ∞ whitespace characters.
+    (m+)        # CAPTURE GROUP ("m" character) | Match between 1 and ∞ "m".
+    (a+)        # CAPTURE GROUP ("a" character) | Match between 1 and ∞ "a".
+    (r+)        # CAPTURE GROUP ("r" character) | Match between 1 and ∞ "r".
+    (c+)        # CAPTURE GROUP ("c" character) | Match between 1 and ∞ "c".
+    (o+)        # CAPTURE GROUP ("o" character) | Match between 1 and ∞ "o".
+    ([.…?!\s]*) # CAPTURE GROUP (punctuation) | Match between 0 and ∞ of ".",
+                # "…", "?", "!", or any whitespace character.
+    $           # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
 
 
 def marco_polo(string):

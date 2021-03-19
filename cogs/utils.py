@@ -126,9 +126,10 @@ class Utils(commands.Cog):
         # Count messages.
         count = await self.count_messages(ctx.channel, end_message_id)
 
-        # Update database.
-        functions.update_database(
-            ctx.guild.id, ctx.channel.id, ctx.channel.last_message_id, count)
+        # If all channel messages are being counted, update database.
+        if not end_message_id:
+            functions.update_database(
+                ctx.guild.id, ctx.channel.id, ctx.channel.last_message_id, count)
 
         # Initialize empty message string and dictionary
         # containing thresholds and messages as key-value pairs.

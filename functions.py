@@ -148,7 +148,7 @@ def marco_polo(string):
     return s
 
 
-def create_database():
+def database_create():
     """
     Creates a SQLite database.
     """
@@ -159,14 +159,21 @@ def create_database():
     # Create tables and close connection to the database.
     CURSOR.execute(
         """CREATE TABLE message_counts (
-            guild_id INTEGER NOT NULL,
-            channel_id INTEGER NOT NULL,
-            last_message_id INTEGER NOT NULL,
-            count INTEGER NOT NULL);""")
+                guild_id INTEGER NOT NULL,
+                channel_id INTEGER NOT NULL,
+                last_message_id INTEGER NOT NULL,
+                count INTEGER NOT NULL
+            );
+            CREATE TABLE copypastas (
+                id INTEGER NOT NULL,
+                guild_id INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                contents TEXT NOT NULL
+            );""")
     CURSOR.close()
 
 
-def update_database(guild_id, channel_id, last_message_id, count):
+def database_message_count_update(guild_id, channel_id, last_message_id, count):
     """
     Updates database with current message count for a channel.
 
@@ -217,7 +224,7 @@ def update_database(guild_id, channel_id, last_message_id, count):
     CURSOR.close()
 
 
-def query_database(guild_id, channel_id):
+def database_message_count_query(guild_id, channel_id):
     """
     Queries database for the current message count for a channel.
 
@@ -243,3 +250,94 @@ def query_database(guild_id, channel_id):
     # Close connection to the database and return results.
     CURSOR.close()
     return results
+
+
+def database_copypasta_query(guild_id, copypasta_id=None):
+    """
+    Queries database for a copypasta.
+
+    Args:
+        guild_id (int): ID of guild to which copypasta belongs.
+        copypasta_id (int, optional): ID of to-be-queried copypasta. Defaults to None.
+
+    Returns:
+        Tuple[int, str, str]: Tuple containing copypasta data.
+    """
+
+    # Connect to the database.
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+
+    # Get either a random or specific copypasta from database,
+    # based on whether or not the user specifies a copypasta ID.
+    if not copypasta_id:
+        results = CURSOR.execute(
+            """SELECT
+                id, title, contents
+                FROM copypastas
+                WHERE guild_id=?
+                ORDER BY RANDOM();""", (guild_id, )).fetchone()
+    else:
+        results = CURSOR.execute(
+            """SELECT
+                id, title, contents
+                FROM copypastas
+                WHERE guild_id=?
+                AND id=?;""", (guild_id, copypasta_id)).fetchone()
+
+    # Close connection to the database and return results.
+    CURSOR.close()
+    return results
+
+
+def database_copypasta_add(guild_id, title, contents):
+    """
+    Adds a copypasta to the database.
+
+    Args:
+        guild_id (int): ID of guild to which copypasta will belong.
+        title (str): Title of the copypasta.
+        contents (str): Contents of the copypasta.
+    """
+
+    # Connect to the database.
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+
+    # Add copypasta to the database.
+    CURSOR.execute(
+        """INSERT INTO
+            copypastas(id,guild_id,title,contents)
+            VALUES (
+                COALESCE(
+                    (SELECT id FROM copypastas WHERE guild_id=? ORDER BY id DESC LIMIT 1) + 1,
+                    1),
+                ?,
+                ?,
+                ?);""", (guild_id, guild_id, title, contents))
+
+    # Commit changes and close connection to the database.
+    settings.DATABASE_CONNECTION.commit()
+    CURSOR.close()
+
+
+def database_copypasta_delete(guild_id, copypasta_id):
+    """
+    Deletes a copypasta from the database.
+
+    Args:
+        guild_id (int): ID of guild to which copypasta belongs.
+        copypasta_id (int): ID of to-be-deleted copypasta.
+    """
+
+    # Connect to the database.
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+
+    # Delete copypasta from database.
+    CURSOR.execute(
+        """DELETE FROM
+            copypastas
+            WHERE guild_id=?
+            AND id=?;""", (guild_id, copypasta_id))
+
+    # Commit changes and close connection to the database.
+    settings.DATABASE_CONNECTION.commit()
+    CURSOR.close()

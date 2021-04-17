@@ -33,7 +33,7 @@ CURSOR.execute("SELECT name FROM sqlite_master WHERE type='table';")
 database_has_tables = CURSOR.fetchall()
 CURSOR.close()
 if not database_has_tables:
-    functions.create_database()
+    functions.database_create()
 
 # Initialize a Bot instance.
 BOT = commands.Bot(command_prefix=settings.BOT_PREFIX)

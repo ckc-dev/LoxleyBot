@@ -74,10 +74,39 @@ class Entertainment(commands.Cog):
                 message = f"**\"{title}\"** | ID: {copypasta_id}\n\n{contents}"
             return message
 
-        # Initialize RegEx for each argument.
-        REGEX_ID = re.compile(r"^\s*(?:(?:-i|--id)\s*)?(?P<id>\d+)\s*$")
-        REGEX_ADD = re.compile(r"^\s*(?:-a|--add)\s*[\"'](?P<title>.+)[\"']\s*[\"'](?P<contents>.+)[\"']\s*$")
-        REGEX_DELETE = re.compile(r"^\s*(?:(?:-d|--delete)\s*)(?P<id>\d+)\s*$")
+        # Initialize RegExes for each argument.
+        REGEX_ID = re.compile(r"""
+            ^               # Match line start.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            (?:-i|--id)?    # Match either "-i" or "--id", either 0 or 1 times.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            (?P<id>\d+)     # CAPTURE GROUP (id) | Match between 1 and ∞ digits.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            $               # Match line end.""", re.VERBOSE)
+
+        REGEX_ADD = re.compile(r"""
+            ^                   # Match line start.
+            \s*                 # Match between 0 and ∞ whitespace characters.
+            (?:-a|--add)        # Match either "-a" or "--add".
+            \s*                 # Match between 0 and ∞ whitespace characters.
+            [\"']               # Match either '"' or "'".
+            (?P<title>.+)       # CAPTURE GROUP (title) | Match any character between 1 and ∞ times.
+            [\"']               # Match either '"' or "'".
+            \s*                 # Match between 0 and ∞ whitespace characters.
+            [\"']               # Match either '"' or "'".
+            (?P<contents>.+)    # CAPTURE GROUP (contents) | Match any character between 1 and ∞ times.
+            [\"']               # Match either '"' or "'".
+            \s*                 # Match between 0 and ∞ whitespace characters.
+            $                   # Match line end.""", re.VERBOSE)
+
+        REGEX_DELETE = re.compile(r"""
+            ^               # Match line start.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            (?:-d|--delete) # Match either "-d" or "--delete".
+            \s*             # Match between 0 and ∞ whitespace characters.
+            (?P<id>\d+)     # CAPTURE GROUP (id) | Match between 1 and ∞ digits.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            $               # Match line end.""", re.VERBOSE)
 
         # If no argument was provided, send a random copypasta.
         if arguments is None:

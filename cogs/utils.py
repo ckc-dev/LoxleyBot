@@ -24,7 +24,7 @@ class Utils(commands.Cog):
         self.bot = bot
 
         # Start updating database.
-        self.auto_update_database.start()
+        self.database_auto_update.start()
 
     def cog_unload(self):
         """
@@ -32,7 +32,7 @@ class Utils(commands.Cog):
         """
 
         # Stop trying to update database.
-        self.auto_update_database.cancel()
+        self.database_auto_update.cancel()
 
     @commands.command()
     async def ping(self, ctx):
@@ -95,7 +95,7 @@ class Utils(commands.Cog):
         # If user does not specify when to stop counting:
         if not end_message_id:
             # Get last message information from database.
-            query = functions.query_database(channel.guild.id, channel.id)
+            query = functions.database_message_count_query(channel.guild.id, channel.id)
 
             # If it exists, update counter and ID of the message to stop the count when found.
             if query:
@@ -128,7 +128,7 @@ class Utils(commands.Cog):
 
         # If all channel messages are being counted, update database.
         if not end_message_id:
-            functions.update_database(
+            functions.database_message_count_update(
                 ctx.guild.id, ctx.channel.id, ctx.channel.last_message_id, count)
 
         # Initialize empty message string and dictionary
@@ -156,7 +156,7 @@ class Utils(commands.Cog):
             await end_message.reply(f"I've found {count + 1} messages up to this message.", mention_author=False)
 
     @tasks.loop(hours=24)
-    async def auto_update_database(self):
+    async def database_auto_update(self):
         """
         Updates database every 24 hours.
         """
@@ -168,10 +168,10 @@ class Utils(commands.Cog):
                 count = await self.count_messages(channel)
 
                 # Update database.
-                functions.update_database(
+                functions.database_message_count_update(
                     guild.id, channel.id, channel.last_message_id, count)
 
-    @auto_update_database.before_loop
+    @database_auto_update.before_loop
     async def before_auto_update_database(self):
         """
         Runs before loop starts.

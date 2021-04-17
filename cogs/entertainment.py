@@ -82,7 +82,7 @@ class Entertainment(commands.Cog):
             \s*             # Match between 0 and ∞ whitespace characters.
             (?P<id>\d+)     # CAPTURE GROUP (id) | Match between 1 and ∞ digits.
             \s*             # Match between 0 and ∞ whitespace characters.
-            $               # Match line end.""", re.VERBOSE)
+            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
 
         REGEX_ADD = re.compile(r"""
             ^                   # Match line start.
@@ -97,7 +97,7 @@ class Entertainment(commands.Cog):
             (?P<contents>.+)    # CAPTURE GROUP (contents) | Match any character between 1 and ∞ times.
             [\"']               # Match either '"' or "'".
             \s*                 # Match between 0 and ∞ whitespace characters.
-            $                   # Match line end.""", re.VERBOSE)
+            $                   # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
 
         REGEX_DELETE = re.compile(r"""
             ^               # Match line start.
@@ -106,7 +106,7 @@ class Entertainment(commands.Cog):
             \s*             # Match between 0 and ∞ whitespace characters.
             (?P<id>\d+)     # CAPTURE GROUP (id) | Match between 1 and ∞ digits.
             \s*             # Match between 0 and ∞ whitespace characters.
-            $               # Match line end.""", re.VERBOSE)
+            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
 
         # If no argument was provided, send a random copypasta.
         if arguments is None:

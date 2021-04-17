@@ -9,16 +9,16 @@ import re
 import settings
 
 REGEX_MARCO = re.compile(r"""
-    ^           # Match line start.
-    \s*         # Match between 0 and ∞ whitespace characters.
-    (m+)        # CAPTURE GROUP ("m" character) | Match between 1 and ∞ "m".
-    (a+)        # CAPTURE GROUP ("a" character) | Match between 1 and ∞ "a".
-    (r+)        # CAPTURE GROUP ("r" character) | Match between 1 and ∞ "r".
-    (c+)        # CAPTURE GROUP ("c" character) | Match between 1 and ∞ "c".
-    (o+)        # CAPTURE GROUP ("o" character) | Match between 1 and ∞ "o".
-    ([.…?!\s]*) # CAPTURE GROUP (punctuation) | Match between 0 and ∞ of ".",
-                # "…", "?", "!", or any whitespace character.
-    $           # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
+    ^                           # Match line start.
+    \s*                         # Match between 0 and ∞ whitespace characters.
+    (?P<m>m+)                   # CAPTURE GROUP ("m" character) | Match between 1 and ∞ "m".
+    (?P<a>a+)                   # CAPTURE GROUP ("a" character) | Match between 1 and ∞ "a".
+    (?P<r>r+)                   # CAPTURE GROUP ("r" character) | Match between 1 and ∞ "r".
+    (?P<c>c+)                   # CAPTURE GROUP ("c" character) | Match between 1 and ∞ "c".
+    (?P<o>o+)                   # CAPTURE GROUP ("o" character) | Match between 1 and ∞ "o".
+    (?P<punctuation>[.…?!\s]*)  # CAPTURE GROUP (punctuation) | Match between 0 and ∞ of ".",
+                                # "…", "?", "!", or any whitespace character.
+    $                           # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
 
 
 def marco_polo(string):
@@ -115,20 +115,12 @@ def marco_polo(string):
     # Match some form of "Marco" in user string.
     match = REGEX_MARCO.match(string)
 
-    # Initialize strings for each letter in matched pattern, plus punctuation.
-    m = match.group(1)
-    a = match.group(2)
-    r = match.group(3)
-    c = match.group(4)
-    o = match.group(5)
-    p = match.group(6)
-
     # Key-value pairs for what each character will be substituted with.
     character_dicts = [
-        {"P": [m]},
-        {"O": [a]},
-        {"L": [r, c]},
-        {"O": [o]},
+        {"P": [match.group("m")]},
+        {"O": [match.group("a")]},
+        {"L": [match.group("r"), match.group("c")]},
+        {"O": [match.group("o")]},
     ]
 
     # Initialize empty string.
@@ -141,6 +133,7 @@ def marco_polo(string):
 
     # If there's punctuation present, generate a punctuation
     # string and add it to main to-be-returned string.
+    p = match.group("punctuation")
     if len(p) > 0:
         s += gen_punctuation_string(p)
 

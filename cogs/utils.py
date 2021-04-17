@@ -17,7 +17,7 @@ class Utils(commands.Cog):
         Initializes cog.
 
         Args:
-            bot (discord.ext.commands.Bot): Bot use with cog.
+            bot (discord.ext.commands.Bot): Bot to use with cog.
         """
 
         # Initialize bot.
@@ -95,7 +95,8 @@ class Utils(commands.Cog):
         # If user does not specify when to stop counting:
         if not end_message_id:
             # Get last message information from database.
-            query = functions.database_message_count_query(channel.guild.id, channel.id)
+            query = functions.database_message_count_query(
+                channel.guild.id, channel.id)
 
             # If it exists, update counter and ID of the message to stop the count when found.
             if query:

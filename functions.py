@@ -150,19 +150,19 @@ def database_create():
     CURSOR = settings.DATABASE_CONNECTION.cursor()
 
     # Create tables and close connection to the database.
-    CURSOR.execute(
-        """CREATE TABLE message_counts (
-                guild_id INTEGER NOT NULL,
-                channel_id INTEGER NOT NULL,
-                last_message_id INTEGER NOT NULL,
-                count INTEGER NOT NULL
-            );
-            CREATE TABLE copypastas (
-                id INTEGER NOT NULL,
-                guild_id INTEGER NOT NULL,
-                title TEXT NOT NULL,
-                contents TEXT NOT NULL
-            );""")
+    CURSOR.execute("""
+        CREATE TABLE message_counts(
+                   guild_id INTEGER NOT NULL,
+                 channel_id INTEGER NOT NULL,
+            last_message_id INTEGER NOT NULL,
+                      count INTEGER NOT NULL
+        );
+        CREATE TABLE copypastas(
+                  id INTEGER NOT NULL,
+            guild_id INTEGER NOT NULL,
+               title TEXT NOT NULL,
+            contents TEXT NOT NULL
+        );""")
     CURSOR.close()
 
 
@@ -184,33 +184,35 @@ def database_message_count_update(guild_id, channel_id, last_message_id, count):
     params = (guild_id, channel_id)
 
     # Try to get the message count for this channel from the database.
-    results = CURSOR.execute(
-        """SELECT count
-            FROM message_counts
-            WHERE guild_id=? AND channel_id=?;""", params).fetchone()
+    results = CURSOR.execute("""
+        SELECT count
+          FROM message_counts
+         WHERE guild_id = ?
+           AND channel_id = ?;""", params).fetchone()
 
     # If there are no records on the database for this channel:
     if not results:
         # Save last message ID and message count to the database.
         params = (*params, last_message_id, count)
-        CURSOR.execute(
-            """INSERT INTO
-                message_counts (
-                    guild_id,
-                    channel_id,
-                    last_message_id,
-                    count)
-                VALUES (?, ?, ?, ?);""", params)
+        CURSOR.execute("""
+            INSERT INTO message_counts(
+                guild_id,
+                channel_id,
+                last_message_id,
+                count
+            )
+            VALUES(?, ?, ?, ?);""", params)
 
     # If there is a record on the database for this channel:
     else:
         # Update last message ID and message count.
-        params = (count, last_message_id, *params)
-        CURSOR.execute(
-            """UPDATE
-                message_counts
-                SET count = ?, last_message_id = ?
-                WHERE guild_id=? AND channel_id=?;""", params)
+        params = (last_message_id, count, *params)
+        CURSOR.execute("""
+            UPDATE message_counts
+               SET last_message_id = ?,
+                   count = ?
+             WHERE guild_id = ?
+               AND channel_id = ?;""", params)
 
     # Commit changes and close connection to the database.
     settings.DATABASE_CONNECTION.commit()
@@ -234,11 +236,12 @@ def database_message_count_query(guild_id, channel_id):
     CURSOR = settings.DATABASE_CONNECTION.cursor()
 
     # Get the message count for this channel and last message ID from the database.
-    results = CURSOR.execute(
-        """SELECT
-            count, last_message_id
-            FROM message_counts
-            WHERE guild_id=? AND channel_id=?;""", (guild_id, channel_id)).fetchone()
+    results = CURSOR.execute("""
+        SELECT count,
+               last_message_id
+          FROM message_counts
+         WHERE guild_id = ?
+           AND channel_id = ?;""", (guild_id, channel_id)).fetchone()
 
     # Close connection to the database and return results.
     CURSOR.close()
@@ -263,19 +266,21 @@ def database_copypasta_query(guild_id, copypasta_id=None):
     # Get either a random or specific copypasta from database,
     # based on whether or not the user specifies a copypasta ID.
     if not copypasta_id:
-        results = CURSOR.execute(
-            """SELECT
-                id, title, contents
-                FROM copypastas
-                WHERE guild_id=?
-                ORDER BY RANDOM();""", (guild_id, )).fetchone()
+        results = CURSOR.execute("""
+            SELECT id,
+                   title,
+                   contents
+              FROM copypastas
+             WHERE guild_id = ?
+             ORDER BY RANDOM();""", (guild_id, )).fetchone()
     else:
-        results = CURSOR.execute(
-            """SELECT
-                id, title, contents
-                FROM copypastas
-                WHERE guild_id=?
-                AND id=?;""", (guild_id, copypasta_id)).fetchone()
+        results = CURSOR.execute("""
+            SELECT id,
+                   title,
+                   contents
+              FROM copypastas
+             WHERE guild_id = ?
+               AND id = ?;""", (guild_id, copypasta_id)).fetchone()
 
     # Close connection to the database and return results.
     CURSOR.close()
@@ -296,16 +301,23 @@ def database_copypasta_add(guild_id, title, contents):
     CURSOR = settings.DATABASE_CONNECTION.cursor()
 
     # Add copypasta to the database.
-    CURSOR.execute(
-        """INSERT INTO
-            copypastas(id,guild_id,title,contents)
-            VALUES (
-                COALESCE(
-                    (SELECT id FROM copypastas WHERE guild_id=? ORDER BY id DESC LIMIT 1) + 1,
-                    1),
-                ?,
-                ?,
-                ?);""", (guild_id, guild_id, title, contents))
+    CURSOR.execute("""
+        INSERT INTO copypastas(
+            id,
+            guild_id,
+            title,
+            contents
+        )
+        VALUES(
+            COALESCE(
+                 (SELECT id
+                    FROM copypastas
+                   WHERE guild_id = ?
+                ORDER BY id DESC
+                   LIMIT 1) + 1,
+                1
+            ), ?, ?, ?
+        );""", (guild_id, guild_id, title, contents))
 
     # Commit changes and close connection to the database.
     settings.DATABASE_CONNECTION.commit()
@@ -325,11 +337,10 @@ def database_copypasta_delete(guild_id, copypasta_id):
     CURSOR = settings.DATABASE_CONNECTION.cursor()
 
     # Delete copypasta from database.
-    CURSOR.execute(
-        """DELETE FROM
-            copypastas
-            WHERE guild_id=?
-            AND id=?;""", (guild_id, copypasta_id))
+    CURSOR.execute("""
+        DELETE FROM copypastas
+              WHERE guild_id = ?
+                AND id = ?;""", (guild_id, copypasta_id))
 
     # Commit changes and close connection to the database.
     settings.DATABASE_CONNECTION.commit()

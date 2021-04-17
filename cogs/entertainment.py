@@ -19,7 +19,7 @@ class Entertainment(commands.Cog):
         Initializes cog.
 
         Args:
-            bot (discord.ext.commands.Bot): Bot use with cog.
+            bot (discord.ext.commands.Bot): Bot to use with cog.
         """
 
         # Initialize bot.

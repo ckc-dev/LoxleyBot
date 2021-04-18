@@ -156,7 +156,9 @@ def database_create():
                  channel_id INTEGER NOT NULL,
             last_message_id INTEGER NOT NULL,
                       count INTEGER NOT NULL
-        );
+        );""")
+
+    CURSOR.execute("""
         CREATE TABLE copypastas(
                   id INTEGER NOT NULL,
             guild_id INTEGER NOT NULL,

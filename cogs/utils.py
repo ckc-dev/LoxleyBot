@@ -91,21 +91,25 @@ class Utils(commands.Cog):
 
         # Initialize empty counter.
         count = 0
+        count_all = False
 
         # If user does not specify when to stop counting:
         if not end_message_id:
+            count_all = True
             # Get last message information from database.
             query = functions.database_message_count_query(
                 channel.guild.id, channel.id)
 
-            # If it exists, update counter and ID of the message to stop the count when found.
+            # If it exists, update ID of the message to stop the count when found.
             if query:
                 end_message_id = query[1]
-                count = query[0]
 
         # Count messages until end message is reached.
         async for message in channel.history(limit=None):
             if message.id == end_message_id:
+                # If all messages are being counted, add last saved count to current count.
+                if count_all:
+                    count += query[0]
                 break
             count += 1
         return count

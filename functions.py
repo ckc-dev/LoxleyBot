@@ -163,7 +163,8 @@ def database_create():
                   id INTEGER NOT NULL,
             guild_id INTEGER NOT NULL,
                title TEXT NOT NULL,
-            contents TEXT NOT NULL
+            contents TEXT NOT NULL,
+            count INTEGER DEFAULT 0
         );""")
     CURSOR.close()
 
@@ -284,7 +285,16 @@ def database_copypasta_query(guild_id, copypasta_id=None):
              WHERE guild_id = ?
                AND id = ?;""", (guild_id, copypasta_id)).fetchone()
 
-    # Close connection to the database and return results.
+    # Add 1 to number of times this copypasta was sent, if it exists.
+    if results:
+        CURSOR.execute("""
+            UPDATE copypastas
+               SET count = count + 1
+             WHERE guild_id = ?
+               AND id = ?;""", (guild_id, results[0]))
+
+    # Commit changes, close connection to the database and return results.
+    settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
     return results
 
@@ -358,7 +368,7 @@ def database_copypasta_search(guild_id, query):
         query (str): What to search for in copypasta title or contents.
 
     Returns:
-        List[Tuple[int, str, str]]: A list of tuples containing copypasta data.
+        List[Tuple[int, str, str, int]]: A list of tuples containing copypasta data.
     """
 
     # Connect to the database.
@@ -366,13 +376,15 @@ def database_copypasta_search(guild_id, query):
 
     # Search for copypastas that contain query in either their title or contents.
     results = CURSOR.execute("""
-        SELECT id,
-               title,
-               contents
-          FROM copypastas
-         WHERE guild_id = ?
-           AND(title LIKE ?
-            OR contents LIKE ?);""", (guild_id, f"%{query}%", f"%{query}%")).fetchall()
+          SELECT id,
+                 title,
+                 contents,
+                 count
+            FROM copypastas
+           WHERE guild_id = ?
+             AND(title LIKE ?
+              OR contents LIKE ?)
+        ORDER BY count DESC;""", (guild_id, f"%{query}%", f"%{query}%")).fetchall()
 
     # Close connection to the database and return results.
     CURSOR.close()

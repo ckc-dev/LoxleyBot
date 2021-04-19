@@ -81,7 +81,7 @@ class Entertainment(commands.Cog):
             Returns a string formatted as a table from a list of copypastas.
 
             Args:
-                copypastas (List[Tuple[int, str, str]]): A list of tuples containing copypasta data.
+                copypastas (List[Tuple[int, str, str, int]]): A list of tuples containing copypasta data.
                 query (str, optional): What user is searching for in copypasta title or contents. Defaults to None.
 
             Returns:
@@ -116,14 +116,15 @@ class Entertainment(commands.Cog):
             HEADING_ID = "ID"
             HEADING_TITLE = "TITLE"
             HEADING_CONTENTS = "CONTENTS"
+            HEADING_COUNT = "COUNT"
             SEPARATOR = "|"
             PADDING = "…"
 
             # Initialize character length limits.
             # These are constant and tables will truncate data once a value surpass its limit.
             # IDs have no limit, since they are unique identifiers.
-            # 4 is subtracted from line limit to account for the amount of separators used.
-            LIMIT_LEN_LINE = 80 - 4
+            # 5 is subtracted from line limit to account for the amount of separators used.
+            LIMIT_LEN_LINE = 80 - 5
             LIMIT_LEN_TITLE = 16
 
             # Initialize character length max values.
@@ -133,27 +134,34 @@ class Entertainment(commands.Cog):
                              len(str(max(copypastas, key=lambda l: l[0])[0])))
             max_len_title = max(len(HEADING_TITLE),
                                 min(LIMIT_LEN_TITLE, len(max(copypastas, key=lambda l: len(l[1]))[1])))
+            max_len_count = max(len(HEADING_COUNT),
+                                len(str(max(copypastas, key=lambda l: l[3])[3])))
             max_len_contents = max(len(HEADING_CONTENTS),
-                                   min(LIMIT_LEN_LINE - max_len_id - max_len_title, len(max(copypastas, key=lambda l: len(l[2]))[2])))
+                                   min(LIMIT_LEN_LINE
+                                       - max_len_id
+                                       - max_len_title
+                                       - max_len_count, len(max(copypastas, key=lambda l: len(l[2]))[2])))
 
             # Initialize heading sections and add them to main string.
             section_id = HEADING_ID.center(max_len_id)
             section_title = HEADING_TITLE.center(max_len_title)
             section_contents = HEADING_CONTENTS.center(max_len_contents)
-            string += f"{SEPARATOR}{section_id}{SEPARATOR}{section_title}{SEPARATOR}{section_contents}{SEPARATOR}\n"
+            section_count = HEADING_COUNT.center(max_len_count)
+            string += f"{SEPARATOR}{section_id}{SEPARATOR}{section_title}{SEPARATOR}{section_contents}{SEPARATOR}{section_count}{SEPARATOR}\n"
 
             # For each row in table (or copypasta in list):
             for copypasta in copypastas:
                 # Initialize copypasta data.
-                id, title, contents = copypasta
+                id, title, contents, count = copypasta
 
-                # Initialize ID and title sections.
+                # Initialize ID, title and count sections.
                 section_id = str(id).rjust(max_len_id)
                 if len(title) <= max_len_title:
                     section_title = title.ljust(max_len_title)
                 else:
                     section_title = title[:max_len_title
                                           - len(PADDING)] + PADDING
+                section_count = str(count).ljust(max_len_count)
 
                 # If user query is in the copypasta contents:
                 if query in contents:
@@ -227,7 +235,7 @@ class Entertainment(commands.Cog):
                 section_contents = section_contents.ljust(max_len_contents)
 
                 # Add this row (or copypasta) to main string.
-                string += f"{SEPARATOR}{section_id}{SEPARATOR}{section_title}{SEPARATOR}{section_contents}{SEPARATOR}\n"
+                string += f"{SEPARATOR}{section_id}{SEPARATOR}{section_title}{SEPARATOR}{section_contents}{SEPARATOR}{section_count}{SEPARATOR}\n"
 
             # Close Markdown code block and return main string.
             string += "```"

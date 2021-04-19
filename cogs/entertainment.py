@@ -305,7 +305,7 @@ class Entertainment(commands.Cog):
             # Get copypasta ID from argument, delete it from database and notify user.
             copypasta_id = REGEX_DELETE.match(arguments).group("id")
             functions.database_copypasta_delete(ctx.guild.id, copypasta_id)
-            await ctx.send("Copypasta with ID {copypasta_id} deleted!")
+            await ctx.send(f"Copypasta with ID {copypasta_id} deleted!")
 
         # If argument used to search for a copypasta was provided:
         elif REGEX_SEARCH.match(arguments):

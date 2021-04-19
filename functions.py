@@ -347,3 +347,33 @@ def database_copypasta_delete(guild_id, copypasta_id):
     # Commit changes and close connection to the database.
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
+
+
+def database_copypasta_search(guild_id, query):
+    """
+    Searches for one or more copypastas on the database.
+
+    Args:
+        guild_id (int): ID of guild to which copypastas belong.
+        query (str): What to search for in copypasta title or contents.
+
+    Returns:
+        List[Tuple[int, str, str]]: A list of tuples containing copypasta data.
+    """
+
+    # Connect to the database.
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+
+    # Search for copypastas that contain query in either their title or contents.
+    results = CURSOR.execute("""
+        SELECT id,
+               title,
+               contents
+          FROM copypastas
+         WHERE guild_id = ?
+           AND(title LIKE ?
+            OR contents LIKE ?);""", (guild_id, f"%{query}%", f"%{query}%")).fetchall()
+
+    # Close connection to the database and return results.
+    CURSOR.close()
+    return results

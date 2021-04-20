@@ -359,13 +359,14 @@ def database_copypasta_delete(guild_id, copypasta_id):
     CURSOR.close()
 
 
-def database_copypasta_search(guild_id, query):
+def database_copypasta_search(guild_id, query=None):
     """
     Searches for one or more copypastas on the database.
 
     Args:
         guild_id (int): ID of guild to which copypastas belong.
-        query (str): What to search for in copypasta title or contents.
+        query (str, optional): What to search for in copypasta title or contents. Defaults to None.
+                               If query is None, all copypastas that belong to this guild will be returned.
 
     Returns:
         List[Tuple[int, str, str, int]]: A list of tuples containing copypasta data.
@@ -384,7 +385,7 @@ def database_copypasta_search(guild_id, query):
            WHERE guild_id = ?
              AND(title LIKE ?
               OR contents LIKE ?)
-        ORDER BY count DESC;""", (guild_id, f"%{query}%", f"%{query}%")).fetchall()
+        ORDER BY count DESC;""", (guild_id, f"%{query or ''}%", f"%{query or ''}%")).fetchall()
 
     # Close connection to the database and return results.
     CURSOR.close()

@@ -6,6 +6,7 @@ Contains cogs used for functions related to fun and entertainment.
 import re
 
 import functions
+import settings
 from discord.ext import commands
 
 
@@ -45,6 +46,8 @@ class Entertainment(commands.Cog):
                 Deletes a copypasta from the database.
             "./copypasta [-s|--search] <query>"
                 Searches for a copypasta by title or contents.
+            "./copypasta [-l|--list]"
+                Lists all copypastas belonging to this guild.
         """
 
         def copypasta_query(guild_id, copypasta_id=None):
@@ -76,23 +79,27 @@ class Entertainment(commands.Cog):
                 message = f"**\"{title}\"** | ID: {copypasta_id}\n\n{contents}"
             return message
 
-        def copypasta_list(copypastas, query=None):
+        def copypasta_table(copypasta_list, query=None):
             """
-            Returns a string formatted as a table from a list of copypastas.
+            Returns a list of strings formatted as tables,
+            generated from a list of copypastas.
+
+            If list passed to function is empty,
+            returns a list containing a single string, as an error message.
 
             Args:
                 copypastas (List[Tuple[int, str, str, int]]): A list of tuples containing copypasta data.
                 query (str, optional): What user is searching for in copypasta title or contents. Defaults to None.
 
             Returns:
-                str: String containing a list of copypastas, formatted as a table.
+                List[str]: List containing strings formatted as tables, in which are cells containing copypasta data.
             """
 
-            # If list is empty, either no copypasta matches user query or no copypasta belongs to guild.
-            if not copypastas:
+            # If copypasta list is empty, either no copypasta matches user query or no copypasta belongs to guild.
+            if not copypasta_list:
                 if query:
-                    return f"No copypasta matching the query \"{query}\" was found in \"{ctx.guild}\"."
-                return f"No copypasta was found in \"{ctx.guild}\"."
+                    return [f"No copypasta matching the query \"{query}\" was found in \"{ctx.guild}\"."]
+                return [f"No copypasta was found in \"{ctx.guild}\"."]
 
             def divide_in_pairs(n):
                 """
@@ -109,8 +116,8 @@ class Entertainment(commands.Cog):
 
                 return (n // 2, n // 2) if n % 2 == 0 else (n // 2, n // 2 + 1)
 
-            # Initialize main string by opening a Markdown code block.
-            string = "```"
+            # Initialize how many characters each row should have.
+            CHARACTERS_PER_ROW = 80
 
             # Initialize table headings, separator and padding.
             HEADING_ID = "ID"
@@ -122,35 +129,42 @@ class Entertainment(commands.Cog):
 
             # Initialize character length limits.
             # These are constant and tables will truncate data once a value surpass its limit.
-            # IDs have no limit, since they are unique identifiers.
-            # 5 is subtracted from line limit to account for the amount of separators used.
-            LIMIT_LEN_LINE = 80 - 5
-            LIMIT_LEN_TITLE = 16
+            # IDs and counts have no limit, since they are identifiers.
+            # 5 is subtracted from characters per row to account for the amount of separators used.
+            # Title limit is set to a fourth of the maximum amount of characters per row.
+            LIMIT_LEN_LINE = CHARACTERS_PER_ROW - 5
+            LIMIT_LEN_TITLE = CHARACTERS_PER_ROW // 4
 
             # Initialize character length max values.
-            # These are generated every time a table is created,
-            # based on the already defined limits and values from the copypasta.
+            # These are generated every time a list of tables is created,
+            # based on the already defined limits and values from the copypastas.
             max_len_id = max(len(HEADING_ID),
-                             len(str(max(copypastas, key=lambda l: l[0])[0])))
+                             len(str(max(copypasta_list, key=lambda l: l[0])[0])))
             max_len_title = max(len(HEADING_TITLE),
-                                min(LIMIT_LEN_TITLE, len(max(copypastas, key=lambda l: len(l[1]))[1])))
+                                min(LIMIT_LEN_TITLE, len(max(copypasta_list, key=lambda l: len(l[1]))[1])))
             max_len_count = max(len(HEADING_COUNT),
-                                len(str(max(copypastas, key=lambda l: l[3])[3])))
+                                len(str(max(copypasta_list, key=lambda l: l[3])[3])))
             max_len_contents = max(len(HEADING_CONTENTS),
                                    min(LIMIT_LEN_LINE
                                        - max_len_id
                                        - max_len_title
-                                       - max_len_count, len(max(copypastas, key=lambda l: len(l[2]))[2])))
+                                       - max_len_count, len(max(copypasta_list, key=lambda l: len(l[2]))[2])))
 
-            # Initialize heading sections and add them to main string.
+            # Initialize table list.
+            table_list = []
+
+            # Initialize first table by opening a Markdown code block.
+            table = "```"
+
+            # Initialize heading sections and add them to table.
             section_id = HEADING_ID.center(max_len_id)
             section_title = HEADING_TITLE.center(max_len_title)
             section_contents = HEADING_CONTENTS.center(max_len_contents)
             section_count = HEADING_COUNT.center(max_len_count)
-            string += f"{SEPARATOR}{section_id}{SEPARATOR}{section_title}{SEPARATOR}{section_contents}{SEPARATOR}{section_count}{SEPARATOR}\n"
+            table += f"{SEPARATOR}{section_id}{SEPARATOR}{section_title}{SEPARATOR}{section_contents}{SEPARATOR}{section_count}{SEPARATOR}\n"
 
             # For each row in table (or copypasta in list):
-            for copypasta in copypastas:
+            for copypasta in copypasta_list:
                 # Initialize copypasta data.
                 id, title, contents, count = copypasta
 
@@ -163,8 +177,8 @@ class Entertainment(commands.Cog):
                                           - len(PADDING)] + PADDING
                 section_count = str(count).ljust(max_len_count)
 
-                # If user query is in the copypasta contents:
-                if query in contents:
+                # If user made a query and it is in the copypasta contents:
+                if query and query in contents:
                     # Limit query length.
                     if len(query) >= max_len_contents:
                         query = query[:max_len_contents]
@@ -193,10 +207,10 @@ class Entertainment(commands.Cog):
                         right_remaining_characters += unused_spaces
                         left_remaining_characters -= unused_spaces
 
-                        # Disable padding on the left, since this cell starts with the first character on `contents`.
+                        # Disable padding on the left, since this cell starts with the first character in `contents`.
                         padding_on_left = False
 
-                    # If there are more "open spaces" than characters to left of query:
+                    # If there are more "open spaces" than characters to right of query:
                     if len(characters_to_right_of_query) <= right_remaining_characters:
                         # Add those "spaces" to the ones on the left and remove them from here.
                         unused_spaces = (right_remaining_characters
@@ -204,7 +218,7 @@ class Entertainment(commands.Cog):
                         left_remaining_characters += unused_spaces
                         right_remaining_characters -= unused_spaces
 
-                        # Disable padding on the right, since this cell ends with the last character on `contents`.
+                        # Disable padding on the right, since this cell ends with the last character in `contents`.
                         padding_on_right = False
 
                     # Initialize contents section.
@@ -222,7 +236,7 @@ class Entertainment(commands.Cog):
 
                 # If user query is not in the copypasta contents:
                 else:
-                    # If the number of characters in `content` is within max length, don't do anything.
+                    # If the number of characters in `contents` is within its max length, don't do anything.
                     if len(contents) <= max_len_contents:
                         section_contents = contents
 
@@ -234,12 +248,26 @@ class Entertainment(commands.Cog):
                 # Justify cell to the left.
                 section_contents = section_contents.ljust(max_len_contents)
 
-                # Add this row (or copypasta) to main string.
-                string += f"{SEPARATOR}{section_id}{SEPARATOR}{section_title}{SEPARATOR}{section_contents}{SEPARATOR}{section_count}{SEPARATOR}\n"
+                # Add this row (or copypasta) to table.
+                table += f"{SEPARATOR}{section_id}{SEPARATOR}{section_title}{SEPARATOR}{section_contents}{SEPARATOR}{section_count}{SEPARATOR}\n"
 
-            # Close Markdown code block and return main string.
-            string += "```"
-            return string
+                # If there is no more space for another row in the table:
+                # (3 is added to account for closing code block.)
+                if len(table) + 3 + CHARACTERS_PER_ROW > settings.DISCORD_CHARACTER_LIMIT:
+                    # Close this table by closing the Markdown code block,
+                    # append it to list of tables, and open a new table.
+                    table += "```"
+                    table_list.append(table)
+                    table = "```"
+
+                # If there is space, but this is already the last copypasta:
+                elif copypasta == copypasta_list[-1]:
+                    # Close this table by closing the Markdown code block and append it to list of tables.
+                    table += "```"
+                    table_list.append(table)
+
+            # Return list of tables.
+            return table_list
 
         # Initialize RegExes for each argument.
         REGEX_ID = re.compile(r"""
@@ -284,6 +312,13 @@ class Entertainment(commands.Cog):
             \s*             # Match between 0 and ∞ whitespace characters.
             $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
 
+        REGEX_LIST = re.compile(r"""
+            ^               # Match line start.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            (?:-l|--list)   # Match either "-l" or "--list".
+            \s*             # Match between 0 and ∞ whitespace characters.
+            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
+
         # If no argument was provided, send a random copypasta.
         if arguments is None:
             await ctx.send(copypasta_query(ctx.guild.id))
@@ -307,14 +342,24 @@ class Entertainment(commands.Cog):
             functions.database_copypasta_delete(ctx.guild.id, copypasta_id)
             await ctx.send(f"Copypasta with ID {copypasta_id} deleted!")
 
-        # If argument used to search for a copypasta was provided:
+        # If argument used to search for copypastas was provided:
         elif REGEX_SEARCH.match(arguments):
             # Get search results from database.
             query = REGEX_SEARCH.match(arguments).group("query")
             results = functions.database_copypasta_search(ctx.guild.id, query)
 
-            # Send results formatted as a table.
-            await ctx.send(copypasta_list(results, query))
+            # Send results formatted as one or more tables.
+            for row in copypasta_table(results, query):
+                await ctx.send(row)
+
+        # If argument used to list all available copypastas was provided:
+        elif REGEX_LIST.match(arguments):
+            # Get all copypastas from database.
+            results = functions.database_copypasta_search(ctx.guild.id)
+
+            # Send results formatted as one or more tables.
+            for row in copypasta_table(results):
+                await ctx.send(row)
 
         # If no valid argument was provided, send an error message.
         else:

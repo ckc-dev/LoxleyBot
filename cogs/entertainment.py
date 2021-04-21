@@ -313,11 +313,31 @@ class Entertainment(commands.Cog):
             $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
 
         REGEX_LIST = re.compile(r"""
-            ^               # Match line start.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?:-l|--list)   # Match either "-l" or "--list".
-            \s*             # Match between 0 and ∞ whitespace characters.
-            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
+            ^                                           # Match line start.
+            \s*                                         # Match between 0 and ∞ whitespace characters.
+            (?:-l|--list)                               # Match either "-l" or "--list".
+            \s*                                         # Match between 0 and ∞ whitespace characters.
+            (-i|--id|-t|--title|-c|--contents|--count)? # CAPTURE GROUP (1 - value) Match one of ["-i",
+                                                        # "--id", "-t", "--title", "-c", "--contents",
+                                                        # "--count"] either 1 or 0 times.
+            \s*                                         # Match between 0 and ∞ whitespace characters.
+            (-a|--ascending|-d|--descending)?           # CAPTURE GROUP (2 - arrangement) Match one of ["-a",
+                                                        # "--ascending", "-d", "--descending"] either 0 or 1 times.
+            \s*                                         # Match between 0 and ∞ whitespace characters.
+            $                                           # Match line end.
+            |                                           # OR (same as above but with parameters switched.)
+            ^                                           # Match line start.
+            \s*                                         # Match between 0 and ∞ whitespace characters.
+            (?:-l|--list)                               # Match either "-l" or "--list".
+            \s*                                         # Match between 0 and ∞ whitespace characters.
+            (-a|--ascending|-d|--descending)?           # CAPTURE GROUP (3 - arrangement) Match one of ["-a",
+                                                        # "--ascending", "-d", "--descending"] either 0 or 1 times.
+            \s*                                         # Match between 0 and ∞ whitespace characters.
+            (-i|--id|-t|--title|-c|--contents|--count)? # CAPTURE GROUP (4 - value) Match one of ["-i",
+                                                        # "--id", "-t", "--title", "-c", "--contents",
+                                                        # "--count"] either 1 or 0 times.
+            \s*                                         # Match between 0 and ∞ whitespace characters.
+            $                                           # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
 
         # If no argument was provided, send a random copypasta.
         if arguments is None:
@@ -354,8 +374,47 @@ class Entertainment(commands.Cog):
 
         # If argument used to list all available copypastas was provided:
         elif REGEX_LIST.match(arguments):
+            # Get matching string.
+            match = REGEX_LIST.match(arguments)
+
+            # Initialize dictionaries containing possible arrangements
+            # and fields by which results will be ordered by.
+            FIELDS = {
+                "": "count",
+                "-I": "id",
+                "-T": "title",
+                "-C": "contents",
+                "--ID": "id",
+                "--TITLE": "title",
+                "--CONTENTS": "contents",
+                "--COUNT": "count"
+            }
+            ARRANGEMENTS = {
+                "": "DESC",
+                "-A": "ASC",
+                "-D": "DESC",
+                "--ASCENDING": "ASC",
+                "--DESCENDING": "DESC",
+            }
+
+            # Get arrangement and field arguments passed to the command.
+            field = ((match.group(1) or "")
+                     + (match.group(4) or "")).upper()
+            arrangement = ((match.group(2) or "")
+                           + (match.group(3) or "")).upper()
+
+            # Initialize values which will be passed to database function.
+            order_field = FIELDS[field]
+
+            # If user specifies a field but not an arrangement, arrange ascending.
+            if field and not arrangement:
+                order_arrangement = "ASC"
+            else:
+                order_arrangement = ARRANGEMENTS[arrangement]
+
             # Get all copypastas from database.
-            results = functions.database_copypasta_search(ctx.guild.id)
+            results = functions.database_copypasta_search(
+                ctx.guild.id, order_field=order_field, order_arrangement=order_arrangement)
 
             # Send results formatted as one or more tables.
             for row in copypasta_table(results):

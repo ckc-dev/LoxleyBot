@@ -359,7 +359,7 @@ def database_copypasta_delete(guild_id, copypasta_id):
     CURSOR.close()
 
 
-def database_copypasta_search(guild_id, query=None):
+def database_copypasta_search(guild_id, query=None, order_field="count", order_arrangement="DESC"):
     """
     Searches for one or more copypastas on the database.
 
@@ -367,6 +367,8 @@ def database_copypasta_search(guild_id, query=None):
         guild_id (int): ID of guild to which copypastas belong.
         query (str, optional): What to search for in copypasta title or contents. Defaults to None.
                                If query is None, all copypastas that belong to this guild will be returned.
+        order_value (str, optional): Which field results will be ordered by. Defaults to "count".
+        order_arrangement (str, optional): Which arrangement results will follow. Defaults to "DESC".
 
     Returns:
         List[Tuple[int, str, str, int]]: A list of tuples containing copypasta data.
@@ -376,7 +378,7 @@ def database_copypasta_search(guild_id, query=None):
     CURSOR = settings.DATABASE_CONNECTION.cursor()
 
     # Search for copypastas that contain query in either their title or contents.
-    results = CURSOR.execute("""
+    results = CURSOR.execute(f"""
           SELECT id,
                  title,
                  contents,
@@ -385,7 +387,7 @@ def database_copypasta_search(guild_id, query=None):
            WHERE guild_id = ?
              AND(title LIKE ?
               OR contents LIKE ?)
-        ORDER BY count DESC;""", (guild_id, f"%{query or ''}%", f"%{query or ''}%")).fetchall()
+        ORDER BY {order_field} {order_arrangement};""", (guild_id, f"%{query or ''}%", f"%{query or ''}%")).fetchall()
 
     # Close connection to the database and return results.
     CURSOR.close()

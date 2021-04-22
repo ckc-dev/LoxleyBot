@@ -279,6 +279,15 @@ class Entertainment(commands.Cog):
             \s*             # Match between 0 and ∞ whitespace characters.
             $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
 
+        REGEX_TITLE = re.compile(r"""
+            ^               # Match line start.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            (?:-t|--title)? # Match either "-t" or "--title", either 0 or 1 times.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            (?P<title>.+)   # CAPTURE GROUP (title) | Match between 1 and ∞ characters.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
+
         REGEX_ADD = re.compile(r"""
             ^                   # Match line start.
             \s*                 # Match between 0 and ∞ whitespace characters.
@@ -420,9 +429,26 @@ class Entertainment(commands.Cog):
             for row in copypasta_table(results):
                 await ctx.send(row)
 
-        # If no valid argument was provided, send an error message.
-        else:
-            await ctx.send("Invalid argument.")
+        # If a copypasta title was provided:
+        elif REGEX_TITLE.match(arguments):
+            # Get all copypastas containing user query in their title.
+            copypasta_title = REGEX_TITLE.match(arguments).group("title")
+            results = functions.database_copypasta_search(
+                ctx.guild.id, copypasta_title, search_by_title=True)
+
+            # Notify user if there's no copypasta containing user query in their title.
+            if not results:
+                await ctx.send(f"I have not found any copypastas with \"{copypasta_title}\" in their title.")
+            else:
+                # If there's more than one copypasta containing user query in their title,
+                # send them all one or more tables. If not, send it as a single message.
+                if len(results) > 1:
+                    await ctx.send(f"I have found multiple copypastas with \"{copypasta_title}\" in their title:")
+                    for row in copypasta_table(results):
+                        await ctx.send(row)
+                else:
+                    copypasta_id = results[0][0]
+                    await ctx.send(copypasta_query(ctx.guild.id, copypasta_id))
 
 
 def setup(bot):

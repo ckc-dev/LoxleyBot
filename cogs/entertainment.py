@@ -178,13 +178,13 @@ class Entertainment(commands.Cog):
                 section_count = str(count).ljust(max_len_count)
 
                 # If user made a query and it is in the copypasta contents:
-                if query and query in contents:
+                if query and query.upper() in contents.upper():
                     # Limit query length.
                     if len(query) >= max_len_contents:
                         query = query[:max_len_contents]
 
                     # Get index at which user query starts in contents.
-                    query_start_index = contents.find(query)
+                    query_start_index = contents.upper().find(query.upper())
 
                     # Check how many characters will remain after removing length of query from max length.
                     remaining_characters = max_len_contents - len(query)
@@ -223,7 +223,7 @@ class Entertainment(commands.Cog):
 
                     # Initialize contents section.
                     section_contents = (characters_to_left_of_query[len(characters_to_left_of_query) - left_remaining_characters:]
-                                        + query
+                                        + contents[query_start_index:query_start_index + len(query)]
                                         + characters_to_right_of_query[:right_remaining_characters])
 
                     # Add padding to cell, if required.

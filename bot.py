@@ -36,7 +36,7 @@ if not database_has_tables:
     functions.database_create()
 
 # Initialize a Bot instance.
-BOT = commands.Bot(command_prefix=settings.BOT_PREFIX)
+BOT = commands.Bot(command_prefix=functions.get_guild_prefix)
 BOT.activity = discord.Game(settings.BOT_ACTIVITY)
 
 
@@ -83,6 +83,20 @@ async def on_command_error(ctx, error):
     # Warn for missing permissions.
     if isinstance(error, commands.MissingPermissions):
         await ctx.channel.send(f"Sorry {ctx.message.author.mention}, you don't have the permissions required to use this command.")
+
+
+@BOT.event
+async def on_guild_join(guild):
+    """
+    Runs every time the bot joins a guild.
+
+    Args:
+        guild (discord.Guild): Guild bot has joined.
+    """
+
+    # Set this guild prefix to default prefix.
+    functions.change_guild_prefix(guild.id, settings.BOT_DEFAULT_PREFIX)
+
 
 # Load all cogs.
 for file in os.listdir("cogs"):

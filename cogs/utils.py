@@ -160,6 +160,23 @@ class Utils(commands.Cog):
             end_message = await ctx.channel.fetch_message(end_message_id)
             await end_message.reply(f"I've found {count + 1} messages up to this message.", mention_author=False)
 
+    @commands.command()
+    async def prefix(self, ctx, new_prefix: str):
+        """
+        Changes the command prefix for a guild.
+
+        Args:
+            ctx ([type]): [description]
+            new_prefix (str): Prefix to change to.
+        """
+
+        # Get current guild prefix from database.
+        cur_prefix = functions.get_guild_prefix(self.bot, ctx)
+
+        # Update guild prefix and notify user.
+        functions.change_guild_prefix(ctx.guild.id, new_prefix)
+        await ctx.send(f"Prefix changed from \"{cur_prefix}\" to \"{new_prefix}\"!")
+
     @tasks.loop(hours=24)
     async def database_auto_update(self):
         """

@@ -21,6 +21,56 @@ REGEX_MARCO = re.compile(r"""
     $                           # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
 
 
+def change_guild_prefix(guild_id, prefix):
+    """
+    Changes the saved prefix on the database for a guild.
+
+    Args:
+        guild_id (int): ID of guild which will have its prefix changed.
+        prefix (str): What to change guild prefix to.
+    """
+
+    # Connect to the database and update guild prefix.
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    CURSOR.execute("""
+        UPDATE guild_prefixes
+           SET prefix = ?
+         WHERE guild_id = ?;""", (prefix, guild_id))
+
+    # Commit changes and close connection to the database.
+    settings.DATABASE_CONNECTION.commit()
+    CURSOR.close()
+
+
+def get_guild_prefix(client, message):
+    """
+    Gets a guild prefix from the database.
+
+    Args:
+        client (discord.ext.commands.Bot): Client to which guild prefix will be queried.
+        message (discord.Message): Message coming from guild which prefix will be queried.
+
+    Returns:
+        str: Guild prefix.
+    """
+
+    # Initialize guild ID.
+    guild_id = message.guild.id
+
+    # Connect to the database.
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+
+    # Get the message count for this channel and last message ID from the database.
+    results = CURSOR.execute("""
+        SELECT prefix
+          FROM guild_prefixes
+         WHERE guild_id = ?;""", (guild_id, )).fetchone()
+
+    # Close connection to the database and return results.
+    CURSOR.close()
+    return results[0]
+
+
 def marco_polo(string):
     """
     Returns an answer to "Marco", "Marco!", "Marco..." or something along those lines.
@@ -155,17 +205,18 @@ def database_create():
                    guild_id INTEGER NOT NULL,
                  channel_id INTEGER NOT NULL,
             last_message_id INTEGER NOT NULL,
-                      count INTEGER NOT NULL
-        );""")
-
+                      count INTEGER NOT NULL);""")
     CURSOR.execute("""
         CREATE TABLE copypastas(
                   id INTEGER NOT NULL,
             guild_id INTEGER NOT NULL,
                title TEXT NOT NULL,
             contents TEXT NOT NULL,
-            count INTEGER DEFAULT 0
-        );""")
+            count INTEGER DEFAULT 0);""")
+    CURSOR.execute("""
+        CREATE TABLE guild_prefixes(
+            guild_id INTEGER NOT NULL,
+              prefix TEXT NOT NULL);""")
     CURSOR.close()
 
 

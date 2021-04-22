@@ -359,7 +359,7 @@ def database_copypasta_delete(guild_id, copypasta_id):
     CURSOR.close()
 
 
-def database_copypasta_search(guild_id, query=None, order_field="count", order_arrangement="DESC"):
+def database_copypasta_search(guild_id, query=None, search_by_title=False, order_field="count", order_arrangement="DESC"):
     """
     Searches for one or more copypastas on the database.
 
@@ -367,7 +367,8 @@ def database_copypasta_search(guild_id, query=None, order_field="count", order_a
         guild_id (int): ID of guild to which copypastas belong.
         query (str, optional): What to search for in copypasta title or contents. Defaults to None.
                                If query is None, all copypastas that belong to this guild will be returned.
-        order_value (str, optional): Which field results will be ordered by. Defaults to "count".
+        search_by_title (bool, optional): Whether or not to search only by title. Defaults to False.
+        order_field (str, optional): Which field results will be ordered by. Defaults to "count".
         order_arrangement (str, optional): Which arrangement results will follow. Defaults to "DESC".
 
     Returns:
@@ -377,6 +378,12 @@ def database_copypasta_search(guild_id, query=None, order_field="count", order_a
     # Connect to the database.
     CURSOR = settings.DATABASE_CONNECTION.cursor()
 
+    # Initialize search parameters.
+    params = {
+        "guild_id": guild_id,
+        "query": f"%{query or ''}%"
+    }
+
     # Search for copypastas that contain query in either their title or contents.
     results = CURSOR.execute(f"""
           SELECT id,
@@ -384,10 +391,10 @@ def database_copypasta_search(guild_id, query=None, order_field="count", order_a
                  contents,
                  count
             FROM copypastas
-           WHERE guild_id = ?
-             AND(title LIKE ?
-              OR contents LIKE ?)
-        ORDER BY {order_field} {order_arrangement};""", (guild_id, f"%{query or ''}%", f"%{query or ''}%")).fetchall()
+           WHERE guild_id = :guild_id
+             AND(title LIKE :query
+            {'OR contents LIKE :query' if not search_by_title else ''})
+        ORDER BY {order_field} {order_arrangement};""", params).fetchall()
 
     # Close connection to the database and return results.
     CURSOR.close()

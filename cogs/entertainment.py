@@ -377,9 +377,15 @@ class Entertainment(commands.Cog):
             query = REGEX_SEARCH.match(arguments).group("query")
             results = functions.database_copypasta_search(ctx.guild.id, query)
 
-            # Send results formatted as one or more tables.
-            for row in copypasta_table(results, query):
-                await ctx.send(row)
+            # If more than one copypasta is found, send them all as one or more tables.
+            # If not, send it as a single message.
+            if len(results) > 1:
+                for row in copypasta_table(results, query):
+                    await ctx.send(row)
+            else:
+                copypasta_id = results[0][0]
+                await ctx.send(f"I have only found one coypasta when searching for \"{query}\":")
+                await ctx.send(copypasta_query(ctx.guild.id, copypasta_id))
 
         # If argument used to list all available copypastas was provided:
         elif REGEX_LIST.match(arguments):

@@ -30,12 +30,28 @@ def change_guild_prefix(guild_id, prefix):
         prefix (str): What to change guild prefix to.
     """
 
-    # Connect to the database and update guild prefix.
+    # Connect to the database.
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
-        UPDATE guild_prefixes
-           SET prefix = ?
-         WHERE guild_id = ?;""", (prefix, guild_id))
+
+    # Try to get current guild prefix.
+    results = CURSOR.execute("""
+        SELECT prefix
+          FROM guild_prefixes
+         WHERE guild_id = ?;""", (guild_id, )).fetchone()
+
+    # If no prefix was found, bot has just joined guild,
+    # create a new record on the database.
+    if not results:
+        CURSOR.execute("""
+            INSERT INTO guild_prefixes (guild_id, prefix)
+                 VALUES (?, ?)""", (guild_id, prefix))
+
+    # Else, update guild prefix.
+    else:
+        CURSOR.execute("""
+            UPDATE guild_prefixes
+               SET prefix = ?
+             WHERE guild_id = ?;""", (prefix, guild_id))
 
     # Commit changes and close connection to the database.
     settings.DATABASE_CONNECTION.commit()

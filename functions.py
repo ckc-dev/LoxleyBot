@@ -71,6 +71,31 @@ def get_guild_prefix(client, message):
     return results[0]
 
 
+def delete_guild_data(guild_id):
+    """
+    Deletes all data for a guild from the database.
+
+    Args:
+        guild_id (int): ID of guild whose data will be deleted.
+    """
+
+    # Connect to the database and delete guild data.
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    CURSOR.execute("""
+        DELETE FROM message_counts
+              WHERE guild_id = ?;""", (guild_id, ))
+    CURSOR.execute("""
+        DELETE FROM copypastas
+              WHERE guild_id = ?;""", (guild_id, ))
+    CURSOR.execute("""
+        DELETE FROM guild_prefixes
+              WHERE guild_id = ?;""", (guild_id, ))
+
+    # Commit changes and close connection to the database.
+    settings.DATABASE_CONNECTION.commit()
+    CURSOR.close()
+
+
 def marco_polo(string):
     """
     Returns an answer to "Marco", "Marco!", "Marco..." or something along those lines.

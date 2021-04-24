@@ -98,6 +98,18 @@ async def on_guild_join(guild):
     functions.change_guild_prefix(guild.id, settings.BOT_DEFAULT_PREFIX)
 
 
+@BOT.event
+async def on_guild_remove(guild):
+    """
+    Runs every time the bot leaves a guild.
+
+    Args:
+        guild (discord.Guild): Guild bot has left.
+    """
+
+    # Delete all data for this guild from the database.
+    functions.delete_guild_data(guild.id)
+
 # Load all cogs.
 for file in os.listdir("cogs"):
     if file.endswith(".py"):

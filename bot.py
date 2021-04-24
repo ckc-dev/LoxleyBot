@@ -69,6 +69,10 @@ async def on_message(message):
     if functions.REGEX_MARCO.match(message.content):
         await message.channel.send(functions.marco_polo(message.content))
 
+    # If message mentions bot, send a help message.
+    if BOT.user in message.mentions:
+        await message.channel.send(f"Hello! Use {functions.get_guild_prefix(BOT, message)}help to get more information on how to use me. Did you know I can play Marco Polo?")
+
 
 @BOT.event
 async def on_command_error(ctx, error):

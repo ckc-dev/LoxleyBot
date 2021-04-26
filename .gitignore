@@ -8,8 +8,8 @@
 *.log
 
 # Python cache, byte code, and virtual environment.
-__pycache__/
 *.pyc
+__pycache__/
 .venv/
 
 # TODO files.

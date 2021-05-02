@@ -44,7 +44,9 @@ class Entertainment(commands.Cog):
             Returns:
                 str: Formatted copypasta.
             """
-            return "ID: {} | **'{}'**\n{}".format(*copypasta)
+            return "{}: {} | **'{}'**\n{}".format(
+                functions.get_localized_message(ctx.guild.id, "COPYPASTA_ID"),
+                *copypasta)
 
         def format_copypasta_list(copypasta_list, emphasis=None):
             """
@@ -66,10 +68,14 @@ class Entertainment(commands.Cog):
                 in which are cells containing copypasta data.
             """
             CHARACTERS_PER_ROW = settings.COPYPASTA_LIST_CHARACTERS_PER_ROW
-            HEADING_ID = "ID"
-            HEADING_TITLE = "TITLE"
-            HEADING_CONTENTS = "CONTENTS"
-            HEADING_COUNT = "COUNT"
+            HEADING_ID = functions.get_localized_message(
+                ctx.guild.id, "COPYPASTA_ID")
+            HEADING_TITLE = functions.get_localized_message(
+                ctx.guild.id, "COPYPASTA_TITLE")
+            HEADING_CONTENTS = functions.get_localized_message(
+                ctx.guild.id, "COPYPASTA_CONTENTS")
+            HEADING_COUNT = functions.get_localized_message(
+                ctx.guild.id, "COPYPASTA_COUNT")
             SEPARATOR = "|"
             PADDING = "…"
             PADDING_LEN = len(PADDING)
@@ -302,7 +308,8 @@ class Entertainment(commands.Cog):
         if arguments is None:
             copypasta = functions.database_copypasta_get(ctx.guild.id)
             if not copypasta:
-                await ctx.send(f"No copypasta was found in `{ctx.guild}`.")
+                await ctx.send(functions.get_localized_message(
+                    ctx.guild.id, "COPYPASTA_NONE_FOUND").format(ctx.guild))
             else:
                 await ctx.send(format_copypasta(copypasta))
 
@@ -311,7 +318,9 @@ class Entertainment(commands.Cog):
             id_ = REGEX_ID.match(arguments).group("id")
             copypasta = functions.database_copypasta_get(ctx.guild.id, id_)
             if not copypasta:
-                await ctx.send(f"No copypasta with ID {id_} was found in `{ctx.guild}`.")
+                await ctx.send(functions.get_localized_message(
+                    ctx.guild.id, "COPYPASTA_NONE_FOUND_ID").format(
+                        id_, ctx.guild))
             else:
                 await ctx.send(format_copypasta(copypasta))
 
@@ -319,20 +328,24 @@ class Entertainment(commands.Cog):
         elif REGEX_ADD.match(arguments):
             title, contents = REGEX_ADD.match(arguments).groups()
             functions.database_copypasta_add(ctx.guild.id, title, contents)
-            await ctx.send(f"'{title}' added!")
+            await ctx.send(functions.get_localized_message(
+                ctx.guild.id, "COPYPASTA_ADD").format(title))
 
         # Delete a copypasta from the database.
         elif REGEX_DELETE.match(arguments):
             id_ = REGEX_DELETE.match(arguments).group("id")
             functions.database_copypasta_delete(ctx.guild.id, id_)
-            await ctx.send(f"Copypasta with ID {id_} deleted!")
+            await ctx.send(functions.get_localized_message(
+                ctx.guild.id, "COPYPASTA_DELETE").format(id_))
 
         # Search for one or more copypastas.
         elif REGEX_SEARCH.match(arguments):
             query = REGEX_SEARCH.match(arguments).group("query")
             results = functions.database_copypasta_search(ctx.guild.id, query)
             if not results:
-                await ctx.send(f"No copypasta matching the query '{query}' was found in `{ctx.guild}`.")
+                await ctx.send(functions.get_localized_message(
+                    ctx.guild.id, "COPYPASTA_NONE_FOUND_QUERY").format(
+                        query, ctx.guild))
             else:
                 if len(results) > 1:
                     for row in format_copypasta_list(results, query):
@@ -343,7 +356,9 @@ class Entertainment(commands.Cog):
                     # it was sent is updated.
                     copypasta = functions.database_copypasta_get(ctx.guild.id,
                                                                  results[0][0])
-                    await ctx.send(f"I have only found one copypasta when searching for '{query}':")
+                    await ctx.send(functions.get_localized_message(
+                        ctx.guild.id, "COPYPASTA_ONE_FOUND_QUERY").format(
+                            query))
                     await ctx.send(format_copypasta(copypasta))
 
         # List all available copypastas.
@@ -385,7 +400,8 @@ class Entertainment(commands.Cog):
                 ctx.guild.id, field=order_field, arrangement=order_arrangement)
 
             if not results:
-                await ctx.send(f"No copypasta was found in `{ctx.guild}`.")
+                await ctx.send(functions.get_localized_message(
+                    ctx.guild.id, "COPYPASTA_NONE_FOUND").format(ctx.guild))
             else:
                 for row in format_copypasta_list(results):
                     await ctx.send(row)
@@ -397,10 +413,14 @@ class Entertainment(commands.Cog):
             results = functions.database_copypasta_search(
                 ctx.guild.id, title, by_title=True)
             if not results:
-                await ctx.send(f"No copypasta with '{title}' in its title was found in `{ctx.guild}`.")
+                await ctx.send(functions.get_localized_message(
+                    ctx.guild.id, "COPYPASTA_NONE_FOUND_TITLE").format(
+                        title, ctx.guild))
             else:
                 if len(results) > 1:
-                    await ctx.send(f"I have found {len(results)} copypastas with '{title}' in their title:")
+                    await ctx.send(functions.get_localized_message(
+                        ctx.guild.id, "COPYPASTA_MULTIPLE_FOUND_TITLE").format(
+                            len(results), title))
                     for row in format_copypasta_list(results):
                         await ctx.send(row)
                 else:

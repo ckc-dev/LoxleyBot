@@ -1,5 +1,6 @@
 """Contains general use functions used in other parts of the bot."""
 
+import json
 import random
 import re
 
@@ -169,9 +170,26 @@ def database_create():
             contents TEXT NOT NULL,
                count INTEGER DEFAULT 0);""")
     CURSOR.execute("""
-        CREATE TABLE guild_prefixes(
+        CREATE TABLE guild_data(
             guild_id INTEGER NOT NULL UNIQUE,
-              prefix TEXT NOT NULL);""")
+              prefix TEXT NOT NULL,
+              locale TEXT NOT NULL);""")
+    CURSOR.close()
+
+
+def database_guild_initialize(guild_id):
+    """
+    Add initial, default guild data to the database.
+
+    Args:
+        guild_id (int): ID of guild which will be initialized.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    CURSOR.execute("""
+        INSERT INTO guild_data (guild_id, prefix, locale)
+             VALUES (?, ?, ?);""", (guild_id, settings.BOT_DEFAULT_PREFIX,
+                                    settings.BOT_DEFAULT_LOCALE))
+    settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
 
@@ -190,7 +208,7 @@ def database_guild_prefix_get(_client, message):
     CURSOR = settings.DATABASE_CONNECTION.cursor()
     results = CURSOR.execute("""
         SELECT prefix
-          FROM guild_prefixes
+          FROM guild_data
          WHERE guild_id = ?;""", (message.guild.id,)).fetchone()
     CURSOR.close()
 
@@ -207,9 +225,46 @@ def database_guild_prefix_set(guild_id, prefix):
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
     CURSOR.execute("""
-        INSERT OR REPLACE
-                     INTO guild_prefixes (guild_id, prefix)
-                   VALUES (?, ?);""", (guild_id, prefix))
+        UPDATE guild_data
+           SET prefix = ?
+         WHERE guild_id = ?;""", (prefix, guild_id))
+    settings.DATABASE_CONNECTION.commit()
+    CURSOR.close()
+
+
+def database_guild_locale_get(guild_id):
+    """
+    Get a guild locale from the database.
+
+    Args:
+        guild_id (int): ID of guild which will have its locale queried.
+
+    Returns:
+        str: Guild locale.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    results = CURSOR.execute("""
+        SELECT locale
+          FROM guild_data
+         WHERE guild_id = ?;""", (guild_id,)).fetchone()
+    CURSOR.close()
+
+    return results[0]
+
+
+def database_guild_locale_set(guild_id, locale):
+    """
+    Set a locale for a guild on the database.
+
+    Args:
+        guild_id (int): ID of guild which will have its locale set.
+        locale (str): What to set guild locale to.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    CURSOR.execute("""
+        UPDATE guild_data
+           SET locale = ?
+         WHERE guild_id = ?;""", (locale, guild_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -229,7 +284,7 @@ def database_guild_purge(guild_id):
         DELETE FROM copypastas
               WHERE guild_id = ?;""", (guild_id,))
     CURSOR.execute("""
-        DELETE FROM guild_prefixes
+        DELETE FROM guild_data
               WHERE guild_id = ?;""", (guild_id,))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
@@ -404,3 +459,31 @@ def database_copypasta_delete(guild_id, copypasta_id):
                 AND id = ?;""", (guild_id, copypasta_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
+
+
+with open(settings.LOCALIZATION_FILE_NAME) as f:
+    LOCALIZED_MESSAGES = json.loads(f.read())
+
+
+def get_available_locales():
+    """
+    Get current available bot locales.
+
+    Returns:
+        List(str): A list of strings containing available bot locales.
+    """
+    return list(LOCALIZED_MESSAGES.keys())
+
+
+def get_localized_message(guild_id, message):
+    """
+    Get a localized message for a guild.
+
+    Args:
+        guild_id (int): ID of guild to get localized message for.
+        message (str): What message to get.
+
+    Returns:
+        str: Localized message.
+    """
+    return LOCALIZED_MESSAGES[database_guild_locale_get(guild_id)][message]

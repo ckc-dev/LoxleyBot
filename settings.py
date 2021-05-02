@@ -12,6 +12,8 @@ dotenv.load_dotenv()
 # Values to use when initializing bot.
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 BOT_DEFAULT_PREFIX = "./"
+BOT_DEFAULT_LOCALE = "en-US"
+LOCALIZATION_FILE_NAME = "localization.json"
 BOT_ACTIVITY = f"{BOT_DEFAULT_PREFIX}help"
 
 # Values to use when seting up logging.

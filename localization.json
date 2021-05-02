@@ -1,0 +1,48 @@
+{
+  "en-US": {
+    "MENTION_HELP": "Hello! Use `{}help` to get more information on what I can do. Did you know I can play Marco Polo?",
+    "MISSING_PERMISSIONS": "Sorry {}, you don't have the permissions required to use this command.",
+
+    "PING": "Pong! `{}ms`.",
+
+    "PURGE_INVALID_AMOUNT": "Please provide an amount of messages to delete, or use 'all' to purge the channel.",
+
+    "COUNT_BE_PATIENT": "Please be patient, this might take some time.",
+    "COUNT_THRESHOLD_1": "Seems like it's just getting started, welcome everyone!",
+    "COUNT_THRESHOLD_500": "Keep it up!",
+    "COUNT_THRESHOLD_1000": "Gaining traction!",
+    "COUNT_THRESHOLD_5000": "That's a lot!",
+    "COUNT_THRESHOLD_10000": "Whoa! That's A LOT!",
+    "COUNT_FOUND_MESSAGE": "I've found {} messages in {}. {}",
+    "COUNT_FOUND_REPLY": "I've found {} messages up to this message.",
+
+    "PREFIX_CHANGE": "Prefix changed from '{}' to '{}'!",
+
+    "LOCALE_CHANGE": "Locale changed from '{}' to '{}'!",
+    "LOCALE_UNAVAILABLE": "Invalid or unavailable locale. Available locales: {}",
+
+    "KICK_MESSAGE": "Kicked {}. Reason: `{}`.",
+    "KICK_MESSAGE_PRIVATE": "You have been kicked from `{}`. Reason: `{}`.",
+
+    "BAN_MESSAGE": "Banned {}. Reason: `{}`.",
+    "BAN_MESSAGE_PRIVATE": "You have been banned from `{}`. Reason: `{}`.",
+
+    "UNBAN_MESSAGE": "Unbanned {}#{}.",
+
+    "MASSKICK_MESSAGE": "Kicked in a mass kick. No specific reason provided.",
+    "MASSBAN_MESSAGE": "Banned in a mass ban. No specific reason provided.",
+
+    "COPYPASTA_ID": "ID",
+    "COPYPASTA_TITLE": "TITLE",
+    "COPYPASTA_CONTENTS": "CONTENTS",
+    "COPYPASTA_COUNT": "COUNT",
+    "COPYPASTA_NONE_FOUND": "No copypasta was found in `{}`.",
+    "COPYPASTA_NONE_FOUND_ID": "No copypasta with ID {} was found in `{}`.",
+    "COPYPASTA_NONE_FOUND_QUERY": "No copypasta matching the query '{}' was found in `{}`.",
+    "COPYPASTA_NONE_FOUND_TITLE": "No copypasta with '{}' in its title was found in `{}`.",
+    "COPYPASTA_ONE_FOUND_QUERY": "I have only found one copypasta when searching for '{}':",
+    "COPYPASTA_MULTIPLE_FOUND_TITLE": "I have found {} copypastas with '{}' in their title:",
+    "COPYPASTA_ADD": "'{}' added!",
+    "COPYPASTA_DELETE": "Copypasta with ID {} deleted!"
+  }
+}

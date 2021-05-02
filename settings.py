@@ -16,6 +16,9 @@ BOT_DEFAULT_LOCALE = "en-US"
 LOCALIZATION_FILE_NAME = "localization.json"
 BOT_ACTIVITY = f"{BOT_DEFAULT_PREFIX}help"
 
+# Names commonly used for "general" text channel.
+COMMON_GENERAL_TEXT_CHANNEL_NAMES = ["general", "geral", "chat", "common"]
+
 # Values to use when seting up logging.
 LOGGER = logging.getLogger("discord")
 HANDLER = logging.FileHandler(filename="bot.log", encoding="utf-8", mode="w")

@@ -1,6 +1,6 @@
 {
   "en-US": {
-    "BOT_GUILD_JOIN": "`{}` | Hi {}! Use `{}help` to get more information on what I can do. Use `{}locale` to change the locale.",
+    "BOT_GUILD_JOIN": "`{}` | Hi `{}`! Use `{}help` to get more information on what I can do. Use `{}locale` to change the locale.",
 
     "MENTION_HELP": "Hello! Use `{}help` to get more information on what I can do. Did you know I can play Marco Polo?",
     "MISSING_PERMISSIONS": "Sorry {}, you don't have the permissions required to use this command.",
@@ -18,9 +18,9 @@
     "COUNT_FOUND_MESSAGE": "I've found {} messages in {}. {}",
     "COUNT_FOUND_REPLY": "I've found {} messages up to this message.",
 
-    "PREFIX_CHANGE": "Prefix changed from '{}' to '{}'!",
+    "PREFIX_CHANGE": "Prefix changed from `{}` to `{}`!",
 
-    "LOCALE_CHANGE": "Locale changed from '{}' to '{}'!",
+    "LOCALE_CHANGE": "Locale changed from `{}` to `{}`!",
     "LOCALE_UNAVAILABLE": "Invalid or unavailable locale. Available locales: {}",
 
     "KICK_MESSAGE": "Kicked {}. Reason: `{}`.",
@@ -46,5 +46,53 @@
     "COPYPASTA_MULTIPLE_FOUND_TITLE": "I have found {} copypastas with '{}' in their title:",
     "COPYPASTA_ADD": "'{}' added!",
     "COPYPASTA_DELETE": "Copypasta with ID {} deleted!"
+  },
+  "pt-BR": {
+    "BOT_GUILD_JOIN": "`{}` | Olá `{}`! Use `{}help` para mais informações no que eu posso fazer. Use `{}locale` para alterar a localização.",
+
+    "MENTION_HELP": "Olá! Use `{}help` para mais informações no que eu posso fazer. Sabia que eu sei jogar Marco Polo?",
+    "MISSING_PERMISSIONS": "Desculpe {}, você não tem as permissões necessárias para utilizar este comando.",
+
+    "PING": "Pong! `{}ms`.",
+
+    "PURGE_INVALID_AMOUNT": "Por favor forneça uma quantidade de mensagens para excluir, ou use 'all' para limpar o canal.",
+
+    "COUNT_BE_PATIENT": "Aguarde, isso pode levar algum tempo.",
+    "COUNT_THRESHOLD_1": "Parece que está apenas começando. Sejam todos bem-vindos!",
+    "COUNT_THRESHOLD_500": "Continuem assim!",
+    "COUNT_THRESHOLD_1000": "Ganhando tração!",
+    "COUNT_THRESHOLD_5000": "Isso é muito!",
+    "COUNT_THRESHOLD_10000": "Uau! Isso é MUITO!",
+    "COUNT_FOUND_MESSAGE": "Eu encontrei {} mensagens em {}. {}",
+    "COUNT_FOUND_REPLY": "Eu encontrei {} mensagens até esta mensagem.",
+
+    "PREFIX_CHANGE": "Prefixo alterado de `{}` para `{}`!",
+
+    "LOCALE_CHANGE": "Localização alterada de `{}` para `{}`!",
+    "LOCALE_UNAVAILABLE": "Localização inválida ou indisponível. Localizações disponíveis: {}",
+
+    "KICK_MESSAGE": "{} expulso(a). Motivo: `{}`.",
+    "KICK_MESSAGE_PRIVATE": "Você foi expulso(a) de `{}`. Motivo: `{}`.",
+
+    "BAN_MESSAGE": "{} banido(a). Motivo: `{}`.",
+    "BAN_MESSAGE_PRIVATE": "Você foi banido(a) de `{}`. Motivo: `{}`.",
+
+    "UNBAN_MESSAGE": "{}#{} desbanido.",
+
+    "MASSKICK_MESSAGE": "Expulso(a) em uma expulsão em massa. Nenhum motivo específico fornecido.",
+    "MASSBAN_MESSAGE": "Banido(a) em um banimento em massa. Nenhum motivo específico fornecido.",
+
+    "COPYPASTA_ID": "ID",
+    "COPYPASTA_TITLE": "TÍTULO",
+    "COPYPASTA_CONTENTS": "CONTEÚDO",
+    "COPYPASTA_COUNT": "CONTAGEM",
+    "COPYPASTA_NONE_FOUND": "Nenhuma copypasta foi encontrada em `{}`.",
+    "COPYPASTA_NONE_FOUND_ID": "Nenhuma copypasta com o ID {} foi encontrada em `{}`.",
+    "COPYPASTA_NONE_FOUND_QUERY": "Nenhuma copypasta correspondente à consulta '{}' foi encontrada em `{}`.",
+    "COPYPASTA_NONE_FOUND_TITLE": "Nenhuma copypasta contendo '{}' em seu título foi encontrada em `{}`.",
+    "COPYPASTA_ONE_FOUND_QUERY": "Eu encontrei apenas uma copypasta ao procurar por '{}':",
+    "COPYPASTA_MULTIPLE_FOUND_TITLE": "Eu encontrei {} copypastas com '{}' nos seus títulos:",
+    "COPYPASTA_ADD": "'{}' adicionada!",
+    "COPYPASTA_DELETE": "Copypasta com o ID {} apagada!"
   }
 }

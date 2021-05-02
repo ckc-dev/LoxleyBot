@@ -108,7 +108,8 @@ class Utils(commands.Cog):
         count = await self.count_messages(ctx.channel, end_message_id)
 
         if not end_message_id:
-            functions.database_message_count_set(ctx.channel.id,
+            functions.database_message_count_set(ctx.guild.id,
+                                                 ctx.channel.id,
                                                  ctx.channel.last_message_id,
                                                  count)
 
@@ -181,7 +182,8 @@ class Utils(commands.Cog):
         for guild in self.bot.guilds:
             for channel in guild.text_channels:
                 count = await self.count_messages(channel)
-                functions.database_message_count_set(channel.id,
+                functions.database_message_count_set(guild.id,
+                                                     channel.id,
                                                      channel.last_message_id,
                                                      count)
 

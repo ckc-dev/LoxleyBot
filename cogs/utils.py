@@ -29,7 +29,8 @@ class Utils(commands.Cog):
         Args:
             ctx (discord.ext.commands.Context): Context passed to function.
         """
-        await ctx.send(f"Pong! `{round(self.bot.latency * 1000)}ms`")
+        await ctx.send(functions.get_localized_message(
+            ctx.guild.id, "PING").format(round(self.bot.latency * 1000)))
 
     @commands.command()
     @commands.has_permissions(manage_messages=True)
@@ -51,7 +52,8 @@ class Utils(commands.Cog):
 
             # If user does not specify a valid amount, ask for it.
             except (TypeError, ValueError):
-                await ctx.channel.send("Please provide an amount of messages to delete, or use 'all' to purge the channel.")
+                await ctx.send(functions.get_localized_message(
+                    ctx.guild.id, "PURGE_INVALID_AMOUNT"))
                 return
 
         async for message in ctx.channel.history(limit=limit):
@@ -100,7 +102,8 @@ class Utils(commands.Cog):
                 when reached. If not provided, will count total number of
                 messages sent to channel. Defaults to None.
         """
-        await ctx.channel.send("Please be patient, this might take some time.")
+        await ctx.send(functions.get_localized_message(
+            ctx.guild.id, "COUNT_BE_PATIENT"))
 
         count = await self.count_messages(ctx.channel, end_message_id)
 
@@ -110,11 +113,16 @@ class Utils(commands.Cog):
                                                  count)
 
             MESSAGES = {
-                1: "Seems like it's just getting started, welcome everyone!",
-                500: "Keep it up!",
-                1000: "Gaining traction!",
-                5000: "That's a lot!",
-                10000: "Whoa! That's A LOT!"
+                1: functions.get_localized_message(
+                    ctx.guild.id, "COUNT_THRESHOLD_1"),
+                500: functions.get_localized_message(
+                    ctx.guild.id, "COUNT_THRESHOLD_500"),
+                1000: functions.get_localized_message(
+                    ctx.guild.id, "COUNT_THRESHOLD_1000"),
+                5000: functions.get_localized_message(
+                    ctx.guild.id, "COUNT_THRESHOLD_5000"),
+                10000: functions.get_localized_message(
+                    ctx.guild.id, "COUNT_THRESHOLD_10000")
             }
 
             for threshold, string in MESSAGES.items():
@@ -123,23 +131,49 @@ class Utils(commands.Cog):
                 message = string
 
             # 1 is added to account for the message sent by the bot.
-            await ctx.channel.send(f"I've found {count + 1} messages in {ctx.channel.mention}. {message}")
+            await ctx.send(functions.get_localized_message(
+                ctx.guild.id, "COUNT_FOUND_MESSAGE").format(
+                    count + 1, ctx.channel.mention, message))
         else:
             end_message = await ctx.channel.fetch_message(end_message_id)
-            await end_message.reply(f"I've found {count + 1} messages up to this message.", mention_author=False)
+            await end_message.reply(
+                functions.get_localized_message(
+                    ctx.guild.id, "COUNT_FOUND_REPLY").format(count + 1),
+                mention_author=False)
 
     @commands.command()
-    async def prefix(self, ctx, new_prefix: str):
+    async def prefix(self, ctx, new: str):
         """
-        Change the command prefix for a guild.
+        Change the guild prefix.
 
         Args:
             ctx (discord.ext.commands.Context): Context passed to function.
-            new_prefix (str): Prefix to change to.
+            new (str): Prefix to change to.
         """
         current = functions.database_guild_prefix_get(self.bot, ctx)
-        functions.database_guild_prefix_set(ctx.guild.id, new_prefix)
-        await ctx.send(f"Prefix changed from '{current}' to '{new_prefix}'!")
+        functions.database_guild_prefix_set(ctx.guild.id, new)
+        await ctx.send(functions.get_localized_message(
+            ctx.guild.id, "PREFIX_CHANGE").format(current, new))
+
+    @commands.command()
+    async def locale(self, ctx, new: str):
+        """
+        Change guild locale.
+
+        Args:
+            ctx (discord.ext.commands.Context): Context passed to function.
+            new (str): Locale to change to.
+        """
+        current = functions.database_guild_locale_get(ctx.guild.id)
+        available = functions.get_available_locales()
+        if new.upper() in [i.upper() for i in available]:
+            new = available[[i.upper() for i in available].index(new.upper())]
+            functions.database_guild_locale_set(ctx.guild.id, new)
+            await ctx.send(functions.get_localized_message(
+                ctx.guild.id, "LOCALE_CHANGE").format(current, new))
+        else:
+            await ctx.send(functions.get_localized_message(
+                ctx.guild.id, "LOCALE_UNAVAILABLE").format(available))
 
     @tasks.loop(hours=24)
     async def database_message_count_auto_update(self):

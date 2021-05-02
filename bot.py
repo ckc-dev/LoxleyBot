@@ -39,7 +39,10 @@ async def on_message(message):
 
     # If message mentions bot, send a help message.
     if BOT.user in message.mentions:
-        await message.channel.send(f"Hello! Use {functions.database_guild_prefix_get(BOT, message)}help to get more information on what I can do. Did you know I can play Marco Polo?")
+        await message.channel.send(
+            functions.get_localized_message(
+                message.guild.id, "MENTION_HELP").format(
+                    functions.database_guild_prefix_get(BOT, message)))
 
 
 @BOT.event
@@ -53,7 +56,9 @@ async def on_command_error(ctx, error):
         command related errors.
     """
     if isinstance(error, commands.MissingPermissions):
-        await ctx.channel.send(f"""Sorry {ctx.message.author.mention}, you don't have the permissions required to use this command.""")
+        await ctx.send(functions.get_localized_message(
+            ctx.guild.id, "MISSING_PERMISSIONS").format(
+                ctx.message.author.mention))
 
 
 @BOT.event
@@ -64,7 +69,7 @@ async def on_guild_join(guild):
     Args:
         guild (discord.Guild): Guild bot has joined.
     """
-    functions.database_guild_prefix_set(guild.id, settings.BOT_DEFAULT_PREFIX)
+    functions.database_guild_initialize(guild.id)
 
 
 @BOT.event

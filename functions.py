@@ -478,15 +478,22 @@ def get_available_locales():
     return list(LOCALIZED_MESSAGES.keys())
 
 
-def get_localized_message(guild_id, message):
+def get_localized_message(guild_id, message, locale=None):
     """
     Get a localized message for a guild.
+
+    If no specific locale code is passed, guild locale will be used.
 
     Args:
         guild_id (int): ID of guild to get localized message for.
         message (str): What message to get.
+        locale (str, optional): Locale code used to get the message.
+            Defaults to none.
 
     Returns:
         str: Localized message.
     """
-    return LOCALIZED_MESSAGES[database_guild_locale_get(guild_id)][message]
+    if not locale:
+        locale = database_guild_locale_get(guild_id)
+
+    return LOCALIZED_MESSAGES[locale][message]

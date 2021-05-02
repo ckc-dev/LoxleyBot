@@ -1,5 +1,7 @@
 {
   "en-US": {
+    "BOT_GUILD_JOIN": "`{}` | Hi {}! Use `{}help` to get more information on what I can do. Use `{}locale` to change the locale.",
+
     "MENTION_HELP": "Hello! Use `{}help` to get more information on what I can do. Did you know I can play Marco Polo?",
     "MISSING_PERMISSIONS": "Sorry {}, you don't have the permissions required to use this command.",
 

@@ -4,6 +4,7 @@ import os
 
 import discord
 from discord.ext import commands
+from discord.utils import find
 
 import functions
 import settings
@@ -70,6 +71,23 @@ async def on_guild_join(guild):
         guild (discord.Guild): Guild bot has joined.
     """
     functions.database_guild_initialize(guild.id)
+
+    NAMES = settings.COMMON_GENERAL_TEXT_CHANNEL_NAMES
+    general = find(lambda c: any(name in c.name for name in NAMES),
+                   guild.text_channels)
+
+    if general and general.permissions_for(guild.me).send_messages:
+        message = ""
+
+        for locale in functions.get_available_locales():
+            message += functions.get_localized_message(
+                guild.id, "BOT_GUILD_JOIN", locale).format(
+                    locale,
+                    guild.name,
+                    settings.BOT_DEFAULT_PREFIX,
+                    settings.BOT_DEFAULT_PREFIX) + "\n"
+
+        await general.send(message)
 
 
 @BOT.event

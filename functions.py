@@ -159,6 +159,7 @@ def database_create():
     CURSOR = settings.DATABASE_CONNECTION.cursor()
     CURSOR.execute("""
         CREATE TABLE message_counts(
+                   guild_id INTEGER NOT NULL,
                  channel_id INTEGER NOT NULL UNIQUE,
             last_message_id INTEGER NOT NULL,
                       count INTEGER NOT NULL);""")
@@ -313,7 +314,7 @@ def database_message_count_get(channel_id):
     return results
 
 
-def database_message_count_set(channel_id, last_message_id, count):
+def database_message_count_set(guild_id, channel_id, last_message_id, count):
     """
     Set current message count for a channel on the database.
 
@@ -327,10 +328,12 @@ def database_message_count_set(channel_id, last_message_id, count):
     CURSOR.execute("""
         INSERT OR REPLACE
                      INTO message_counts (
+                          guild_id,
                           channel_id,
                           last_message_id,
                           count)
-                   VALUES (?, ?, ?);""", (channel_id, last_message_id, count))
+                   VALUES (?, ?, ?, ?);""", (guild_id, channel_id,
+                                             last_message_id, count))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 

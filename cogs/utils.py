@@ -181,11 +181,12 @@ class Utils(commands.Cog):
         """Update message count in database every 24 hours."""
         for guild in self.bot.guilds:
             for channel in guild.text_channels:
-                count = await self.count_messages(channel)
-                functions.database_message_count_set(guild.id,
-                                                     channel.id,
-                                                     channel.last_message_id,
-                                                     count)
+                if channel.permissions_for(guild.me).read_messages:
+                    count = await self.count_messages(channel)
+                    functions.database_message_count_set(guild.id,
+                                                         channel.id,
+                                                         channel.last_message_id,
+                                                         count)
 
     @database_message_count_auto_update.before_loop
     async def wait_until_ready(self):

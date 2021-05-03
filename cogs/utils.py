@@ -105,7 +105,7 @@ class Utils(commands.Cog):
             if message.id == end_message_id:
                 break
 
-    async def count_messages(self, channel, end_message_id: int = None):
+    async def count_messages(self, channel, end_message_id=None):
         """
         Count number of messages sent to a channel up to a specified message.
 
@@ -138,16 +138,50 @@ class Utils(commands.Cog):
         return count
 
     @commands.command()
-    async def count(self, ctx, end_message_id: int = None):
+    async def count(self, ctx, *, arguments=None):
         """
         Count number of messages sent to a channel up to a specified message.
 
         Args:
             ctx (discord.ext.commands.Context): Context passed to function.
-            end_message_id (int, optional): ID of a message to stop counting
-                when reached. If not provided, will count total number of
-                messages sent to channel. Defaults to None.
+            arguments (str, optional): Arguments passed to command.
+                Defaults to None.
+
+        Usage:
+            count {-i|--id} <message ID>
+            count [{-a|--all}]
+
+        Examples:
+            count -i 838498717459415081:
+                Count all messages up to message with ID "838498717459415081".
+            count:
+                Count all messages.
         """
+        REGEX_ID = re.compile(r"""
+            ^               # Match line start.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            (?:-i|--id)?    # Match either "-i" or "--id", either 0 or 1 times.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            (?P<id>\d+)     # CAPTURE GROUP (id) | Match between 1 and ∞ digits.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
+
+        REGEX_ALL = re.compile(r"""
+            ^               # Match line start.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            (?:-a|--all)    # Match either "-a" or "--all".
+            \s*             # Match between 0 and ∞ whitespace characters.
+            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
+
+        if not arguments or REGEX_ALL.match(arguments):
+            end_message_id = None
+        elif REGEX_ID.match(arguments):
+            end_message_id = int(REGEX_ID.match(arguments).group("id"))
+        else:
+            await ctx.send(functions.get_localized_message(
+                ctx.guild.id, "COUNT_INVALID_ARGUMENT"))
+            return
+
         await ctx.send(functions.get_localized_message(
             ctx.guild.id, "COUNT_BE_PATIENT"))
 

@@ -7,7 +7,7 @@
 
     "PING": "Pong! `{}ms`.",
 
-    "PURGE_INVALID_AMOUNT": "Please provide an amount of messages to delete, or use 'all' to purge the channel.",
+    "PURGE_INVALID_ARGUMENT": "Please provide an amount of messages to delete or use `-a` to purge the channel.",
 
     "COUNT_BE_PATIENT": "Please be patient, this might take some time.",
     "COUNT_THRESHOLD_1": "Seems like it's just getting started, welcome everyone!",
@@ -55,7 +55,7 @@
 
     "PING": "Pong! `{}ms`.",
 
-    "PURGE_INVALID_AMOUNT": "Por favor forneça uma quantidade de mensagens para excluir, ou use 'all' para limpar o canal.",
+    "PURGE_INVALID_ARGUMENT": "Por favor forneça uma quantidade de mensagens para excluir ou use `-a` para limpar o canal.",
 
     "COUNT_BE_PATIENT": "Aguarde, isso pode levar algum tempo.",
     "COUNT_THRESHOLD_1": "Parece que está apenas começando. Sejam todos bem-vindos!",

@@ -1,5 +1,7 @@
 """Contains cogs used for useful, often small and simple functions."""
 
+import re
+
 import functions
 from discord.ext import commands, tasks
 
@@ -34,30 +36,74 @@ class Utils(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(manage_messages=True)
-    async def purge(self, ctx, amount: str):
+    async def purge(self, ctx, *, arguments=None):
         """
         Delete an amount of messages from a channel.
 
         Args:
             ctx (discord.ext.commands.Context): Context passed to function.
-            amount (str, optional): Amount of messages to delete.
-                Either a number or "all".
-        """
-        if isinstance(amount, str) and amount.upper() == "ALL":
-            limit = None
-        else:
-            try:
-                # 1 is added to account for the message sent by the bot.
-                limit = int(amount) + 1
+            arguments (str, optional): Arguments passed to command.
+                Defaults to None.
 
-            # If user does not specify a valid amount, ask for it.
-            except (TypeError, ValueError):
-                await ctx.send(functions.get_localized_message(
-                    ctx.guild.id, "PURGE_INVALID_AMOUNT"))
-                return
+        Usage:
+            purge [{-l|--limit}] <limit>
+            purge {-i|--id} <message ID>
+            purge {-a|--all}
+
+        Examples:
+            purge 10:
+                Delete the last 10 messages.
+            purge -i 838498717459415081:
+                Delete all messages up to message with ID "838498717459415081".
+            purge -a:
+                Delete all messages.
+        """
+        REGEX_LIMIT = re.compile(r"""
+            ^               # Match line start.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            (?:-l|--limit)? # Match either "-c" or "--count", either 0 or 1 times.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            (?P<limit>\d+)  # CAPTURE GROUP (count) | Match between 1 and ∞ digits.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
+
+        REGEX_ID = re.compile(r"""
+            ^               # Match line start.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            (?:-i|--id)     # Match either "-i" or "--id".
+            \s*             # Match between 0 and ∞ whitespace characters.
+            (?P<id>\d+)     # CAPTURE GROUP (id) | Match between 1 and ∞ digits.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
+
+        REGEX_ALL = re.compile(r"""
+            ^               # Match line start.
+            \s*             # Match between 0 and ∞ whitespace characters.
+            (?:-a|--all)    # Match either "-a" or "--all".
+            \s*             # Match between 0 and ∞ whitespace characters.
+            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
+
+        if not arguments:
+            await ctx.send(functions.get_localized_message(
+                ctx.guild.id, "PURGE_INVALID_ARGUMENT"))
+            return
+
+        limit = None
+        end_message_id = None
+        if REGEX_LIMIT.match(arguments):
+            # 1 is added to account for the message sent by the bot.
+            limit = int(REGEX_LIMIT.match(arguments).group("limit")) + 1
+        elif REGEX_ID.match(arguments):
+            end_message_id = int(REGEX_ID.match(arguments).group("id"))
+        elif not REGEX_ALL.match(arguments):
+            await ctx.send(functions.get_localized_message(
+                ctx.guild.id, "PURGE_INVALID_ARGUMENT"))
+            return
 
         async for message in ctx.channel.history(limit=limit):
             await message.delete()
+            if message.id == end_message_id:
+                break
 
     async def count_messages(self, channel, end_message_id: int = None):
         """

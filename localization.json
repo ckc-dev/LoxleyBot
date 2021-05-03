@@ -19,10 +19,11 @@
     "COUNT_FOUND_MESSAGE": "I've found {} messages in {}. {}",
     "COUNT_FOUND_REPLY": "I've found {} messages up to this message.",
 
+    "PREFIX_REQUIRE": "Please provide a prefix.",
     "PREFIX_CHANGE": "Prefix changed from `{}` to `{}`!",
 
+    "LOCALE_REQUIRE": "Please provide a valid locale. Available locales: {}",
     "LOCALE_CHANGE": "Locale changed from `{}` to `{}`!",
-    "LOCALE_UNAVAILABLE": "Invalid or unavailable locale. Available locales: {}",
 
     "KICK_MESSAGE": "Kicked {}. Reason: `{}`.",
     "KICK_MESSAGE_PRIVATE": "You have been kicked from `{}`. Reason: `{}`.",
@@ -68,10 +69,11 @@
     "COUNT_FOUND_MESSAGE": "Eu encontrei {} mensagens em {}. {}",
     "COUNT_FOUND_REPLY": "Eu encontrei {} mensagens até esta mensagem.",
 
+    "PREFIX_REQUIRE": "Por favor forneça um prefixo.",
     "PREFIX_CHANGE": "Prefixo alterado de `{}` para `{}`!",
 
+    "LOCALE_REQUIRE": "Por favor forneça uma localização válida. Localizações disponíveis: {}",
     "LOCALE_CHANGE": "Localização alterada de `{}` para `{}`!",
-    "LOCALE_UNAVAILABLE": "Localização inválida ou indisponível. Localizações disponíveis: {}",
 
     "KICK_MESSAGE": "{} expulso(a). Motivo: `{}`.",
     "KICK_MESSAGE_PRIVATE": "Você foi expulso(a) de `{}`. Motivo: `{}`.",

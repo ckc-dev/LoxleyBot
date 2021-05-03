@@ -223,7 +223,7 @@ class Utils(commands.Cog):
                 mention_author=False)
 
     @commands.command()
-    async def prefix(self, ctx, new: str):
+    async def prefix(self, ctx, new=None):
         """
         Change the guild prefix.
 
@@ -232,12 +232,16 @@ class Utils(commands.Cog):
             new (str): Prefix to change to.
         """
         current = functions.database_guild_prefix_get(self.bot, ctx)
-        functions.database_guild_prefix_set(ctx.guild.id, new)
-        await ctx.send(functions.get_localized_message(
-            ctx.guild.id, "PREFIX_CHANGE").format(current, new))
+        if not new:
+            await ctx.send(functions.get_localized_message(
+                ctx.guild.id, "PREFIX_REQUIRE"))
+        else:
+            functions.database_guild_prefix_set(ctx.guild.id, new)
+            await ctx.send(functions.get_localized_message(
+                ctx.guild.id, "PREFIX_CHANGE").format(current, new))
 
     @commands.command()
-    async def locale(self, ctx, new: str):
+    async def locale(self, ctx, new=None):
         """
         Change guild locale.
 
@@ -247,14 +251,17 @@ class Utils(commands.Cog):
         """
         current = functions.database_guild_locale_get(ctx.guild.id)
         available = functions.get_available_locales()
-        if new.upper() in [i.upper() for i in available]:
+
+        if not new or not new.upper() in [i.upper() for i in available]:
+            await ctx.send(functions.get_localized_message(
+                ctx.guild.id, "LOCALE_REQUIRE").format(", ".join(
+                    f"`{i}`" for i in available
+                )))
+        else:
             new = available[[i.upper() for i in available].index(new.upper())]
             functions.database_guild_locale_set(ctx.guild.id, new)
             await ctx.send(functions.get_localized_message(
                 ctx.guild.id, "LOCALE_CHANGE").format(current, new))
-        else:
-            await ctx.send(functions.get_localized_message(
-                ctx.guild.id, "LOCALE_UNAVAILABLE").format(available))
 
     @tasks.loop(hours=24)
     async def database_message_count_auto_update(self):

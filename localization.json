@@ -9,6 +9,7 @@
 
     "PURGE_INVALID_ARGUMENT": "Please provide an amount of messages to delete or use `-a` to purge the channel.",
 
+    "COUNT_INVALID_ARGUMENT": "Please provide a message ID to stop counting when reached or use `-a` to count all messages.",
     "COUNT_BE_PATIENT": "Please be patient, this might take some time.",
     "COUNT_THRESHOLD_1": "Seems like it's just getting started, welcome everyone!",
     "COUNT_THRESHOLD_500": "Keep it up!",
@@ -57,6 +58,7 @@
 
     "PURGE_INVALID_ARGUMENT": "Por favor forneça uma quantidade de mensagens para excluir ou use `-a` para limpar o canal.",
 
+    "COUNT_INVALID_ARGUMENT": "Por favor forneça um ID de para parar a contagem quando alcançada ou use `-a` para contar todas as mensagens.",
     "COUNT_BE_PATIENT": "Aguarde, isso pode levar algum tempo.",
     "COUNT_THRESHOLD_1": "Parece que está apenas começando. Sejam todos bem-vindos!",
     "COUNT_THRESHOLD_500": "Continuem assim!",

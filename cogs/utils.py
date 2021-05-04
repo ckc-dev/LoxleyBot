@@ -35,7 +35,7 @@ class Utils(commands.Cog):
             ping:
                 Get bot latency.
         """
-        await ctx.send(functions.get_localized_message(
+        await ctx.send(functions.get_localized_object(
             ctx.guild.id, "PING").format(round(self.bot.latency * 1000)))
 
     @commands.command()
@@ -86,7 +86,7 @@ class Utils(commands.Cog):
             $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
 
         if not arguments:
-            await ctx.send(functions.get_localized_message(
+            await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "PURGE_INVALID_ARGUMENT"))
             return
 
@@ -98,7 +98,7 @@ class Utils(commands.Cog):
         elif REGEX_ID.match(arguments):
             end_message_id = int(REGEX_ID.match(arguments).group("id"))
         elif not REGEX_ALL.match(arguments):
-            await ctx.send(functions.get_localized_message(
+            await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "PURGE_INVALID_ARGUMENT"))
             return
 
@@ -181,11 +181,11 @@ class Utils(commands.Cog):
         elif REGEX_ID.match(arguments):
             end_message_id = int(REGEX_ID.match(arguments).group("id"))
         else:
-            await ctx.send(functions.get_localized_message(
+            await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "COUNT_INVALID_ARGUMENT"))
             return
 
-        await ctx.send(functions.get_localized_message(
+        await ctx.send(functions.get_localized_object(
             ctx.guild.id, "COUNT_BE_PATIENT"))
 
         count = await self.count_messages(ctx.channel, end_message_id)
@@ -196,32 +196,22 @@ class Utils(commands.Cog):
                                                  ctx.channel.last_message_id,
                                                  count)
 
-            MESSAGES = {
-                1: functions.get_localized_message(
-                    ctx.guild.id, "COUNT_THRESHOLD_1"),
-                500: functions.get_localized_message(
-                    ctx.guild.id, "COUNT_THRESHOLD_500"),
-                1000: functions.get_localized_message(
-                    ctx.guild.id, "COUNT_THRESHOLD_1000"),
-                5000: functions.get_localized_message(
-                    ctx.guild.id, "COUNT_THRESHOLD_5000"),
-                10000: functions.get_localized_message(
-                    ctx.guild.id, "COUNT_THRESHOLD_10000")
-            }
+            message_dict = functions.get_localized_object(
+                ctx.guild.id, "COUNT_THRESHOLD_DICT")
 
-            for threshold, string in MESSAGES.items():
+            for string, threshold in message_dict.items():
                 if count < threshold:
                     break
                 message = string
 
             # 1 is added to account for the message sent by the bot.
-            await ctx.send(functions.get_localized_message(
+            await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "COUNT_FOUND_MESSAGE").format(
                     count + 1, ctx.channel.mention, message))
         else:
             end_message = await ctx.channel.fetch_message(end_message_id)
             await end_message.reply(
-                functions.get_localized_message(
+                functions.get_localized_object(
                     ctx.guild.id, "COUNT_FOUND_REPLY").format(count + 1),
                 mention_author=False)
 
@@ -244,11 +234,11 @@ class Utils(commands.Cog):
         """
         current = functions.database_guild_prefix_get(self.bot, ctx)
         if not new:
-            await ctx.send(functions.get_localized_message(
+            await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "PREFIX_REQUIRE"))
         else:
             functions.database_guild_prefix_set(ctx.guild.id, new)
-            await ctx.send(functions.get_localized_message(
+            await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "PREFIX_CHANGE").format(current, new))
 
     @commands.command()
@@ -272,14 +262,14 @@ class Utils(commands.Cog):
         available = functions.get_available_locales()
 
         if not new or not new.upper() in [i.upper() for i in available]:
-            await ctx.send(functions.get_localized_message(
+            await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "LOCALE_REQUIRE").format(", ".join(
                     f"`{i}`" for i in available
                 )))
         else:
             new = available[[i.upper() for i in available].index(new.upper())]
             functions.database_guild_locale_set(ctx.guild.id, new)
-            await ctx.send(functions.get_localized_message(
+            await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "LOCALE_CHANGE").format(current, new))
 
     @tasks.loop(hours=24)

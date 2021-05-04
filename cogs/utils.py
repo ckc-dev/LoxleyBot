@@ -28,8 +28,12 @@ class Utils(commands.Cog):
         """
         Get bot latency.
 
-        Args:
-            ctx (discord.ext.commands.Context): Context passed to function.
+        Usage:
+            ping
+
+        Examples:
+            ping:
+                Get bot latency.
         """
         await ctx.send(functions.get_localized_message(
             ctx.guild.id, "PING").format(round(self.bot.latency * 1000)))
@@ -41,9 +45,7 @@ class Utils(commands.Cog):
         Delete an amount of messages from a channel.
 
         Args:
-            ctx (discord.ext.commands.Context): Context passed to function.
-            arguments (str, optional): Arguments passed to command.
-                Defaults to None.
+            arguments (str): Arguments passed to command.
 
         Usage:
             purge [{-l|--limit}] <limit>
@@ -142,20 +144,21 @@ class Utils(commands.Cog):
         """
         Count number of messages sent to a channel up to a specified message.
 
+        If no end message ID is specified, all messages will be counted.
+
         Args:
-            ctx (discord.ext.commands.Context): Context passed to function.
             arguments (str, optional): Arguments passed to command.
                 Defaults to None.
 
         Usage:
-            count {-i|--id} <message ID>
             count [{-a|--all}]
+            count [{-i|--id}] <message ID>
 
         Examples:
-            count -i 838498717459415081:
-                Count all messages up to message with ID "838498717459415081".
             count:
                 Count all messages.
+            count 838498717459415081:
+                Count all messages up to message with ID "838498717459415081".
         """
         REGEX_ID = re.compile(r"""
             ^               # Match line start.
@@ -228,8 +231,16 @@ class Utils(commands.Cog):
         Change the guild prefix.
 
         Args:
-            ctx (discord.ext.commands.Context): Context passed to function.
             new (str): Prefix to change to.
+
+        Usage:
+            prefix <new prefix>
+
+        Examples:
+            prefix >>:
+                Change prefix to ">>".
+            prefix ./:
+                Change prefix to "./".
         """
         current = functions.database_guild_prefix_get(self.bot, ctx)
         if not new:
@@ -246,8 +257,16 @@ class Utils(commands.Cog):
         Change guild locale.
 
         Args:
-            ctx (discord.ext.commands.Context): Context passed to function.
             new (str): Locale to change to.
+
+        Usage:
+            locale <new locale>
+
+        Examples:
+            locale en-US:
+                Change locale to "en-US".
+            locale pt-BR:
+                Change locale to "pt-BR".
         """
         current = functions.database_guild_locale_get(ctx.guild.id)
         available = functions.get_available_locales()

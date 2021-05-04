@@ -19,36 +19,15 @@ class Management(commands.Cog):
         """
         self.bot = bot
 
-    @commands.command()
-    @commands.has_permissions(kick_members=True)
-    async def kick(self, ctx, *, arguments=None):
+    async def kick_members(self, ctx, arguments, ban=False):
         """
-        Kick one or more users from the guild.
-
-        If no reason is specified, a default reason is provided. Reason must be
-        between either single (') or double (") quotes. Users must be separated
-        by spaces and if a user name contains spaces, it must also be between
-        either single (') or double (") quotes.
+        Kick or ban one or more members from guild.
 
         Args:
-            arguments (str, optional): Arguments passed to command.
-                Defaults to None.
-
-        Usage:
-            kick [{-r|--reason} "<reason>"] <members>
-
-        Examples:
-            kick @example_user:
-                Kick "example_user" by mention, providing a default reason.
-            kick "Example User":
-                Kick a user with spaces in their name, "Example user",
-                providing a default reason.
-            kick -r "For having a long username." example_user#1234:
-                Kick a user by name#discriminator,
-                providing the reason "For having a long username."
-            kick @user1 "User 2" user#0003:
-                Kick three users by mention, name, and name#discriminator,
-                providing a default reason.
+            ctx (discord.ext.commands.Context): Context passed to function.
+            arguments (str): Arguments passed to either kick or ban commands.
+            ban (bool, optional): Whether or not to ban members, instead of
+                just kicking them. Defaults to False.
         """
         REGEX_REASON = re.compile(r"""
             (?:-r|--reason) # Match either "-r" or "--reason".
@@ -73,13 +52,21 @@ class Management(commands.Cog):
             \s*         # Match between 0 and ∞ whitespace characters.""",
                                    flags=re.IGNORECASE | re.VERBOSE)
 
-        if not arguments:
-            await ctx.send(functions.get_localized_message(
-                ctx.guild.id, "KICK_INVALID_ARGUMENT"))
-            return
+        if ban:
+            reason = functions.get_localized_message(
+                ctx.guild.id, "BAN_DEFAULT_REASON")
+            message = functions.get_localized_message(
+                ctx.guild.id, "BAN_MESSAGE")
+            private_message = functions.get_localized_message(
+                ctx.guild.id, "BAN_MESSAGE_PRIVATE")
+        else:
+            reason = functions.get_localized_message(
+                ctx.guild.id, "KICK_DEFAULT_REASON")
+            message = functions.get_localized_message(
+                ctx.guild.id, "KICK_MESSAGE")
+            private_message = functions.get_localized_message(
+                ctx.guild.id, "KICK_MESSAGE_PRIVATE")
 
-        reason = functions.get_localized_message(
-            ctx.guild.id, "KICK_DEFAULT_REASON")
         match_reason = REGEX_REASON.search(arguments)
 
         if match_reason:
@@ -92,33 +79,87 @@ class Management(commands.Cog):
             try:
                 member = await commands.MemberConverter().convert(ctx, member)
 
-                await member.kick(reason=reason)
-                await ctx.send(functions.get_localized_message(
-                    ctx.guild.id, "KICK_MESSAGE").format(member.mention,
-                                                         reason))
-                await member.send(functions.get_localized_message(
-                    ctx.guild.id, "KICK_MESSAGE_PRIVATE").format(ctx.guild,
-                                                                 reason))
+                if ban:
+                    await member.ban(reason=reason)
+                else:
+                    await member.kick(reason=reason)
+
+                await ctx.send(message.format(member.mention, reason))
+                await member.send(private_message.format(ctx.guild, reason))
             except commands.MemberNotFound:
                 pass
 
     @commands.command()
-    @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx, member: discord.Member, *, reason=None):
+    @commands.has_permissions(kick_members=True)
+    async def kick(self, ctx, *, arguments=None):
         """
-        Ban a user from the guild.
+        Kick one or more users from the guild.
+
+        If no reason is specified, a default reason is provided. Reason must be
+        between either single (') or double (") quotes. Users must be separated
+        by spaces and if a user name contains spaces, it must also be between
+        either single (') or double (") quotes.
 
         Args:
-            ctx (discord.ext.commands.Context): Context passed to function.
-            member (discord.Member): Discord user to be banned from guild.
-            reason (str, optional): Reason why the user is being banned.
-                Defaults to None.
+            arguments (str): Arguments passed to command.
+
+        Usage:
+            kick [{-r|--reason} "<reason>"] <members>
+
+        Examples:
+            kick @example_user:
+                Kick "example_user" by mention, providing a default reason.
+            kick "Example User":
+                Kick a user with spaces in their name, "Example user",
+                providing a default reason.
+            kick -r "For having a long username." example_user#1234:
+                Kick a user by name#discriminator,
+                providing the reason "For having a long username."
+            kick @user1 "User 2" user#0003:
+                Kick three users by mention, name, and name#discriminator,
+                providing a default reason.
         """
-        await member.ban(reason=reason)
-        await ctx.send(functions.get_localized_message(
-            ctx.guild.id, "BAN_MESSAGE").format(member.mention, reason))
-        await member.send(functions.get_localized_message(
-            ctx.guild.id, "BAN_MESSAGE_PRIVATE").format(ctx.guild, reason))
+        if not arguments:
+            await ctx.send(functions.get_localized_message(
+                ctx.guild.id, "KICK_INVALID_ARGUMENT"))
+        else:
+            await self.kick_members(ctx, arguments)
+
+    @commands.command()
+    @commands.has_permissions(ban_members=True)
+    async def ban(self, ctx, *, arguments=None):
+        """
+        Ban one or more users from the guild.
+
+        If no reason is specified, a default reason is provided. Reason must be
+        between either single (') or double (") quotes. Users must be separated
+        by spaces and if a user name contains spaces, it must also be between
+        either single (') or double (") quotes.
+
+        Args:
+            arguments (str): Arguments passed to command.
+
+        Usage:
+            ban [{-r|--reason} "<reason>"] <members>
+
+        Examples:
+            ban @example_user:
+                ban "example_user" by mention, providing a default reason.
+            ban "Example User":
+                ban a user with spaces in their name, "Example user",
+                providing a default reason.
+            ban -r "For having a long username." example_user#1234:
+                ban a user by name#discriminator,
+                providing the reason "For having a long username."
+            ban @user1 "User 2" user#0003:
+                ban three users by mention, name, and name#discriminator,
+                providing a default reason.
+        """
+        if not arguments:
+            await ctx.send(functions.get_localized_message(
+                ctx.guild.id, "BAN_INVALID_ARGUMENT"))
+        else:
+            await self.kick_members(ctx, arguments, True)
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
@@ -140,56 +181,6 @@ class Management(commands.Cog):
                 break
 
 
-class MassManagement(commands.Cog, name="Mass Management"):
-    """Mass management cog. Contains functions used in guild management."""
-
-    def __init__(self, bot):
-        """
-        Initialize cog.
-
-        Args:
-            bot (discord.ext.commands.Bot): Bot to use with cog.
-        """
-        self.bot = bot
-        self.management = self.bot.get_cog("Management")
-
-    @commands.command()
-    @commands.has_permissions(kick_members=True)
-    async def masskick(self, ctx, *members: discord.Member):
-        """
-        Kick multiple users at once.
-
-        Does not take a reason as an argument, and a default message is sent.
-
-        Args:
-            ctx (discord.ext.commands.Context): Context passed to function.
-            members (List[discord.Member]): Members to kick from guild.
-        """
-        for member in members:
-            await self.management.kick(ctx,
-                                       member,
-                                       reason=functions.get_localized_message(
-                                           ctx.guild.id, "MASSKICK_MESSAGE"))
-
-    @commands.command()
-    @commands.has_permissions(ban_members=True)
-    async def massban(self, ctx, *members: discord.Member):
-        """
-        Ban multiple users at once.
-
-        Does not take a reason as an argument, and a default message is sent.
-
-        Args:
-            ctx (discord.ext.commands.Context): Context passed to function.
-            members (List[discord.Member]): Members to ban from guild.
-        """
-        for member in members:
-            await self.management.ban(ctx,
-                                      member,
-                                      reason=functions.get_localized_message(
-                                          ctx.guild.id, "MASSBAN_MESSAGE"))
-
-
 def setup(bot):
     """
     Bind cogs to the bot.
@@ -198,4 +189,3 @@ def setup(bot):
         bot (discord.ext.commands.Bot): Bot to bind cogs to.
     """
     bot.add_cog(Management(bot))
-    bot.add_cog(MassManagement(bot))

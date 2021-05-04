@@ -30,13 +30,12 @@
     "KICK_MESSAGE": "Kicked {}. Reason: `{}`.",
     "KICK_MESSAGE_PRIVATE": "You have been kicked from `{}`. Reason: `{}`.",
 
+    "BAN_INVALID_ARGUMENT": "Please provide one or more guild members. Optionally, also provide a reason.",
+    "BAN_DEFAULT_REASON": "No reason provided.",
     "BAN_MESSAGE": "Banned {}. Reason: `{}`.",
     "BAN_MESSAGE_PRIVATE": "You have been banned from `{}`. Reason: `{}`.",
 
     "UNBAN_MESSAGE": "Unbanned {}#{}.",
-
-    "MASSKICK_MESSAGE": "Kicked in a mass kick. No specific reason provided.",
-    "MASSBAN_MESSAGE": "Banned in a mass ban. No specific reason provided.",
 
     "COPYPASTA_ID": "ID",
     "COPYPASTA_TITLE": "TITLE",
@@ -82,13 +81,12 @@
     "KICK_MESSAGE": "{} expulso(a). Motivo: `{}`.",
     "KICK_MESSAGE_PRIVATE": "Você foi expulso(a) de `{}`. Motivo: `{}`.",
 
+    "BAN_INVALID_ARGUMENT": "Por favor forneça um ou mais membros da guilda. Opcionalmente, forneça também um motivo.",
+    "BAN_DEFAULT_REASON": "Nenhum motivo especificado.",
     "BAN_MESSAGE": "{} banido(a). Motivo: `{}`.",
     "BAN_MESSAGE_PRIVATE": "Você foi banido(a) de `{}`. Motivo: `{}`.",
 
     "UNBAN_MESSAGE": "{}#{} desbanido.",
-
-    "MASSKICK_MESSAGE": "Expulso(a) em uma expulsão em massa. Nenhum motivo específico fornecido.",
-    "MASSBAN_MESSAGE": "Banido(a) em um banimento em massa. Nenhum motivo específico fornecido.",
 
     "COPYPASTA_ID": "ID",
     "COPYPASTA_TITLE": "TÍTULO",

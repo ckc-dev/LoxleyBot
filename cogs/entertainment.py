@@ -28,10 +28,47 @@ class Entertainment(commands.Cog):
         """
         Manage and send copypastas.
 
+        When sending a copypasta by its title, if more than one copypasta is
+        found, a list containing those is sent instead.
+
+        When searching for copypastas, if only one copypasta matches search
+        query, it is sent instead.
+
+        When listing copypastas, by default, results are sorted by usage count,
+        in descending order. If a field is specified, but not an order, will
+        use ascending order by default.
+
         Args:
-            ctx (discord.ext.commands.Context): Context passed to function.
             arguments (str, optional): Arguments passed to command.
                 Defaults to None.
+
+        Usage:
+            copypasta
+            copypasta [{-i|--id}] <copypasta ID>
+            copypasta [{-t|--title}] <copypasta title>
+            copypasta {-s|--search} <search query>
+            copypasta {-a|--add} "<copypasta title>" "<copypasta contents>"
+            copypasta {-d|--delete} <copypasta ID>
+            copypasta {-l|--list} [{-a|--ascending|-d|--descending}]
+                                  [{-i|--id|-t|--title|-c|--contents|--count}]
+
+        Examples:
+            copypasta:
+                Send a random copypasta.
+            copypasta 10:
+                Send copypasta with ID 10.
+            copypasta example:
+                Send copypasta which contains "example" in its title.
+            copypasta -s example query:
+                Search for "example query" in copypastas title and contents.
+            copypasta -a "Title" "Contents":
+                Add "Contents" as a copypasta titled "Title".
+            copypasta -d 8:
+                Delete copypasta with ID 8.
+            copypasta -l:
+                List all copypastas.
+            copypasta -l -t -a:
+                List all copypastas, sorted by title, in ascending order.
         """
         def format_copypasta(copypasta):
             """
@@ -249,13 +286,13 @@ class Entertainment(commands.Cog):
             \s*                 # Match between 0 and ∞ whitespace characters.
             (?:-a|--add)        # Match either "-a" or "--add".
             \s*                 # Match between 0 and ∞ whitespace characters.
-            [\"']               # Match either '"' or "'".
+            ['\"]               # Match either "'" or '"'.
             (?P<title>.+)       # CAPTURE GROUP (title) | Match any character between 1 and ∞ times.
-            [\"']               # Match either '"' or "'".
+            ['\"]               # Match either "'" or '"'.
             \s*                 # Match between 0 and ∞ whitespace characters.
-            [\"']               # Match either '"' or "'".
+            ['\"]               # Match either "'" or '"'.
             (?P<contents>.+)    # CAPTURE GROUP (contents) | Match any character between 1 and ∞ times.
-            [\"']               # Match either '"' or "'".
+            ['\"]               # Match either "'" or '"'.
             \s*                 # Match between 0 and ∞ whitespace characters.
             $                   # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
 

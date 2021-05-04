@@ -2,7 +2,6 @@
 
 import re
 
-import discord
 import functions
 from discord.ext import commands
 
@@ -93,12 +92,12 @@ class Management(commands.Cog):
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, *, arguments=None):
         """
-        Kick one or more users from the guild.
+        Kick one or more members from the guild.
 
         If no reason is specified, a default reason is provided. Reason must be
-        between either single (') or double (") quotes. Users must be separated
-        by spaces and if a user name contains spaces, it must also be between
-        either single (') or double (") quotes.
+        between either single (') or double (") quotes. Members must be
+        separated by spaces and if a member name contains spaces, it must also
+        be between either single (') or double (") quotes.
 
         Args:
             arguments (str): Arguments passed to command.
@@ -107,16 +106,16 @@ class Management(commands.Cog):
             kick [{-r|--reason} "<reason>"] <members>
 
         Examples:
-            kick @example_user:
-                Kick "example_user" by mention, providing a default reason.
-            kick "Example User":
-                Kick a user with spaces in their name, "Example user",
+            kick @example_member:
+                Kick "example_member" by mention, providing a default reason.
+            kick "Example Member":
+                Kick a member with spaces in their name, "Example member",
                 providing a default reason.
-            kick -r "For having a long username." example_user#1234:
-                Kick a user by name#discriminator,
+            kick -r "For having a long username." example_member#1234:
+                Kick a member by name#discriminator,
                 providing the reason "For having a long username."
-            kick @user1 "User 2" user#0003:
-                Kick three users by mention, name, and name#discriminator,
+            kick @member1 "Member 2" member#0003:
+                Kick three members by mention, name, and name#discriminator,
                 providing a default reason.
         """
         if not arguments:
@@ -129,12 +128,12 @@ class Management(commands.Cog):
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, *, arguments=None):
         """
-        Ban one or more users from the guild.
+        Ban one or more members from the guild.
 
         If no reason is specified, a default reason is provided. Reason must be
-        between either single (') or double (") quotes. Users must be separated
-        by spaces and if a user name contains spaces, it must also be between
-        either single (') or double (") quotes.
+        between either single (') or double (") quotes. Members must be
+        separated by spaces and if a member name contains spaces, it must also
+        be between either single (') or double (") quotes.
 
         Args:
             arguments (str): Arguments passed to command.
@@ -143,16 +142,16 @@ class Management(commands.Cog):
             ban [{-r|--reason} "<reason>"] <members>
 
         Examples:
-            ban @example_user:
-                ban "example_user" by mention, providing a default reason.
-            ban "Example User":
-                ban a user with spaces in their name, "Example user",
+            ban @example_member:
+                Ban "example_member" by mention, providing a default reason.
+            ban "Example Member":
+                Ban a member with spaces in their name, "Example member",
                 providing a default reason.
-            ban -r "For having a long username." example_user#1234:
-                ban a user by name#discriminator,
+            ban -r "For having a long username." example_member#1234:
+                Ban a member by name#discriminator,
                 providing the reason "For having a long username."
-            ban @user1 "User 2" user#0003:
-                ban three users by mention, name, and name#discriminator,
+            ban @member1 "Member 2" member#0003:
+                Ban three members by mention, name, and name#discriminator,
                 providing a default reason.
         """
         if not arguments:

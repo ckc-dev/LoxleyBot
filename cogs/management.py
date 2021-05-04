@@ -163,22 +163,49 @@ class Management(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
-    async def unban(self, ctx, *, member):
+    async def unban(self, ctx, *, users):
         """
-        Remove a user from the guild banlist.
+        Remove one or more users from the guild banlist.
+
+        Users must be formatted as "username#discriminator". Users must be
+        separated by spaces and if a user name contains spaces, it must be
+        between either single (') or double (") quotes.
 
         Args:
-            ctx (discord.ext.commands.Context): Context passed to function.
-            member (str): Discord user to be kicked from guild. Must be
-                a name and discriminator. E.g.: "User#1234"
+            users (str): String containing users to remove from guild banlist.
+
+        Usage:
+            unban <users>
+
+        Examples:
+            unban example_user#1234:
+                Unban "example_user".
+            unban "Example User#1234":
+                Unban a user with spaces in their name, "Example user".
+            unban user#0001 "Example User#0002" user#0003:
+                Unban three users.
         """
+        REGEX_USERS = re.compile(r"""
+            \s*         # Match between 0 and ∞ whitespace characters.
+            (?:         # Open non-capturing group.
+                ['\"]   # Match either "'" or '"'.
+                (.+?\#\d+)
+                ['\"]   # Match either "'" or '"'.
+                |       # OR
+                (\S+\#\d+)
+            )           # Close non-capturing group
+            \s*         # Match between 0 and ∞ whitespace characters.""",
+                                 flags=re.IGNORECASE | re.VERBOSE)
+
+        users = [i[0] + i[1] for i in REGEX_USERS.findall(users)]
+
         for ban in await ctx.guild.bans():
-            if [ban.user.name, ban.user.discriminator] == member.split("#"):
-                await ctx.guild.unban(ban.user)
-                await ctx.send(functions.get_localized_message(
-                    ctx.guild.id, "UNBAN_MESSAGE").format(
-                        ban.user.name, ban.user.discriminator))
-                break
+            for user in users:
+                if [ban.user.name, ban.user.discriminator] == user.split("#"):
+                    await ctx.guild.unban(ban.user)
+                    await ctx.send(functions.get_localized_message(
+                        ctx.guild.id, "UNBAN_MESSAGE").format(
+                            ban.user.name, ban.user.discriminator))
 
 
 def setup(bot):

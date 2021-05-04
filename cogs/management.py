@@ -52,18 +52,18 @@ class Management(commands.Cog):
                                    flags=re.IGNORECASE | re.VERBOSE)
 
         if ban:
-            reason = functions.get_localized_message(
+            reason = functions.get_localized_object(
                 ctx.guild.id, "BAN_DEFAULT_REASON")
-            message = functions.get_localized_message(
+            message = functions.get_localized_object(
                 ctx.guild.id, "BAN_MESSAGE")
-            private_message = functions.get_localized_message(
+            private_message = functions.get_localized_object(
                 ctx.guild.id, "BAN_MESSAGE_PRIVATE")
         else:
-            reason = functions.get_localized_message(
+            reason = functions.get_localized_object(
                 ctx.guild.id, "KICK_DEFAULT_REASON")
-            message = functions.get_localized_message(
+            message = functions.get_localized_object(
                 ctx.guild.id, "KICK_MESSAGE")
-            private_message = functions.get_localized_message(
+            private_message = functions.get_localized_object(
                 ctx.guild.id, "KICK_MESSAGE_PRIVATE")
 
         match_reason = REGEX_REASON.search(arguments)
@@ -119,7 +119,7 @@ class Management(commands.Cog):
                 providing a default reason.
         """
         if not arguments:
-            await ctx.send(functions.get_localized_message(
+            await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "KICK_INVALID_ARGUMENT"))
         else:
             await self.kick_members(ctx, arguments)
@@ -155,7 +155,7 @@ class Management(commands.Cog):
                 providing a default reason.
         """
         if not arguments:
-            await ctx.send(functions.get_localized_message(
+            await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "BAN_INVALID_ARGUMENT"))
         else:
             await self.kick_members(ctx, arguments, True)
@@ -202,7 +202,7 @@ class Management(commands.Cog):
             for user in users:
                 if [ban.user.name, ban.user.discriminator] == user.split("#"):
                     await ctx.guild.unban(ban.user)
-                    await ctx.send(functions.get_localized_message(
+                    await ctx.send(functions.get_localized_object(
                         ctx.guild.id, "UNBAN_MESSAGE").format(
                             ban.user.name, ban.user.discriminator))
 

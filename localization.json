@@ -11,11 +11,13 @@
 
     "COUNT_INVALID_ARGUMENT": "Please provide a message ID to stop counting when reached or use `-a` to count all messages.",
     "COUNT_BE_PATIENT": "Please be patient, this might take some time.",
-    "COUNT_THRESHOLD_1": "Seems like it's just getting started, welcome everyone!",
-    "COUNT_THRESHOLD_500": "Keep it up!",
-    "COUNT_THRESHOLD_1000": "Gaining traction!",
-    "COUNT_THRESHOLD_5000": "That's a lot!",
-    "COUNT_THRESHOLD_10000": "Whoa! That's A LOT!",
+    "COUNT_THRESHOLD_DICT": {
+      "Seems like it's just getting started, welcome everyone!": 1,
+      "Keep it up!": 500,
+      "Gaining traction!": 1000,
+      "That's a lot!": 5000,
+      "Whoa! That's A LOT!": 10000
+    },
     "COUNT_FOUND_MESSAGE": "I've found {} messages in {}. {}",
     "COUNT_FOUND_REPLY": "I've found {} messages up to this message.",
 
@@ -62,11 +64,13 @@
 
     "COUNT_INVALID_ARGUMENT": "Por favor forneça um ID de para parar a contagem quando alcançada ou use `-a` para contar todas as mensagens.",
     "COUNT_BE_PATIENT": "Aguarde, isso pode levar algum tempo.",
-    "COUNT_THRESHOLD_1": "Parece que está apenas começando. Sejam todos bem-vindos!",
-    "COUNT_THRESHOLD_500": "Continuem assim!",
-    "COUNT_THRESHOLD_1000": "Ganhando tração!",
-    "COUNT_THRESHOLD_5000": "Isso é muito!",
-    "COUNT_THRESHOLD_10000": "Uau! Isso é MUITO!",
+    "COUNT_THRESHOLD_DICT": {
+      "Parece que está apenas começando. Sejam todos bem-vindos!": 1,
+      "Continuem assim!": 500,
+      "Ganhando tração!": 1000,
+      "Isso é bastante!": 5000,
+      "Uau! Isso é MUITO!": 10000
+    },
     "COUNT_FOUND_MESSAGE": "Eu encontrei {} mensagens em {}. {}",
     "COUNT_FOUND_REPLY": "Eu encontrei {} mensagens até esta mensagem.",
 

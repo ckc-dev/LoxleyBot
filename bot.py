@@ -27,21 +27,17 @@ async def on_message(message):
     Args:
         message (discord.Message): Received message.
     """
-    # If message was sent by the bot, just return.
     if message.author == BOT.user:
         return
 
-    # First, try processing message as a command.
     await BOT.process_commands(message)
 
-    # If message matches some form of "Marco", play Marco Polo.
     if functions.REGEX_MARCO.match(message.content):
         await message.channel.send(functions.marco_polo(message.content))
 
-    # If message mentions bot, send a help message.
     if BOT.user in message.mentions:
         await message.channel.send(
-            functions.get_localized_message(
+            functions.get_localized_object(
                 message.guild.id, "MENTION_HELP").format(
                     functions.database_guild_prefix_get(BOT, message)))
 
@@ -57,7 +53,7 @@ async def on_command_error(ctx, error):
         command related errors.
     """
     if isinstance(error, commands.MissingPermissions):
-        await ctx.send(functions.get_localized_message(
+        await ctx.send(functions.get_localized_object(
             ctx.guild.id, "MISSING_PERMISSIONS").format(
                 ctx.message.author.mention))
 
@@ -80,7 +76,7 @@ async def on_guild_join(guild):
         message = ""
 
         for locale in functions.get_available_locales():
-            message += functions.get_localized_message(
+            message += functions.get_localized_object(
                 guild.id, "BOT_GUILD_JOIN", locale).format(
                     locale,
                     guild.name,

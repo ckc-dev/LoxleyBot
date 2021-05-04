@@ -1,5 +1,7 @@
 """Contains cogs used in guild management."""
 
+import re
+
 import discord
 import functions
 from discord.ext import commands
@@ -19,21 +21,86 @@ class Management(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(kick_members=True)
-    async def kick(self, ctx, member: discord.Member, *, reason=None):
+    async def kick(self, ctx, *, arguments=None):
         """
-        Kick a user from the guild.
+        Kick one or more users from the guild.
+
+        If no reason is specified, a default reason is provided. Reason must be
+        between either single (') or double (") quotes. Users must be separated
+        by spaces and if a user name contains spaces, it must also be between
+        either single (') or double (") quotes.
 
         Args:
-            ctx (discord.ext.commands.Context): Context passed to function.
-            member (discord.Member): Discord user to be kicked from guild.
-            reason (str, optional): Reason why the user is being kicked.
+            arguments (str, optional): Arguments passed to command.
                 Defaults to None.
+
+        Usage:
+            kick [{-r|--reason} "<reason>"] <members>
+
+        Examples:
+            kick @example_user:
+                Kick "example_user" by mention, providing a default reason.
+            kick "Example User":
+                Kick a user with spaces in their name, "Example user",
+                providing a default reason.
+            kick -r "For having a long username." example_user#1234:
+                Kick a user by name#discriminator,
+                providing the reason "For having a long username."
+            kick @user1 "User 2" user#0003:
+                Kick three users by mention, name, and name#discriminator,
+                providing a default reason.
         """
-        await member.kick(reason=reason)
-        await ctx.send(functions.get_localized_message(
-            ctx.guild.id, "KICK_MESSAGE").format(member.mention, reason))
-        await member.send(functions.get_localized_message(
-            ctx.guild.id, "KICK_MESSAGE_PRIVATE").format(ctx.guild, reason))
+        REGEX_REASON = re.compile(r"""
+            (?:-r|--reason) # Match either "-r" or "--reason".
+            \s*             # Match between 0 and ∞ whitespace characters.
+            ['\"]           # Match either "'" or '"'.
+            (?P<reason>.+?) # CAPTURE GROUP (reason) | Match any character
+                            # between 1 and ∞ times, as few times as possible.
+            ['\"]           # Match either "'" or '"'.""",
+                                  flags=re.IGNORECASE | re.VERBOSE)
+
+        REGEX_MEMBERS = re.compile(r"""
+            \s*         # Match between 0 and ∞ whitespace characters.
+            (?:         # Open non-capturing group.
+                ['\"]   # Match either "'" or '"'.
+                (.+?)   # CAPTURE GROUP | Match any character between 1 and ∞
+                        # times, as few times as possible.
+                ['\"]   # Match either "'" or '"'.
+                |       # OR
+                (\S+)   # CAPTURE GROUP | Match any non-whitespace character
+                        # between 1 and ∞ times, as few times as possible.
+            )           # Close non-capturing group
+            \s*         # Match between 0 and ∞ whitespace characters.""",
+                                   flags=re.IGNORECASE | re.VERBOSE)
+
+        if not arguments:
+            await ctx.send(functions.get_localized_message(
+                ctx.guild.id, "KICK_INVALID_ARGUMENT"))
+            return
+
+        reason = functions.get_localized_message(
+            ctx.guild.id, "KICK_DEFAULT_REASON")
+        match_reason = REGEX_REASON.search(arguments)
+
+        if match_reason:
+            reason = match_reason.group("reason")
+            arguments = REGEX_REASON.sub("", arguments)
+
+        members = [i[0] + i[1] for i in REGEX_MEMBERS.findall(arguments)]
+
+        for member in members:
+            try:
+                member = await commands.MemberConverter().convert(ctx, member)
+
+                await member.kick(reason=reason)
+                await ctx.send(functions.get_localized_message(
+                    ctx.guild.id, "KICK_MESSAGE").format(member.mention,
+                                                         reason))
+                await member.send(functions.get_localized_message(
+                    ctx.guild.id, "KICK_MESSAGE_PRIVATE").format(ctx.guild,
+                                                                 reason))
+            except commands.MemberNotFound:
+                pass
 
     @commands.command()
     @commands.has_permissions(ban_members=True)

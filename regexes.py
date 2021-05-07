@@ -17,10 +17,13 @@ import re
 ADD = re.compile(r"""
     (?:-a|--add)        # Match either "-a" or "--add".
     \s*                 # Match between 0 and ∞ whitespace characters.
-    ['\"]               # Match either "'" or '"'.
-    (?P<title>.+)       # CAPTURE GROUP (title) | Match any character
+    (?:                 # Open non-capturing group.
+        ['\"]           # Match either "'" or '"'.
+        (?P<title>.+)   # CAPTURE GROUP (title) | Match any character
                         # between 1 and ∞ times.
-    ['\"]               # Match either "'" or '"'.
+        ['\"]           # Match either "'" or '"'.
+    )?                  # Close-non-capturing group. Match it either
+                        # 0 or 1 times.
     \s*                 # Match between 0 and ∞ whitespace characters.
     ['\"]               # Match either "'" or '"'.
     (?P<contents>.+)    # CAPTURE GROUP (contents) | Match any character
@@ -131,6 +134,21 @@ DISCORD_USER = re.compile(r"""
         )                   # Close capture group (2).
     )                       # Close non-capturing group.""",
                           flags=re.IGNORECASE | re.VERBOSE)
+
+FIRST_FEW_WORDS = re.compile(r"""
+    (               # CAPTURE GROUP (1) | Open capture group.
+        \S          # Match any non-whitespace character.
+        .{4,64}?    # Match any character between 4 and 64 times,
+                    # as few times as possible.
+        \.          # Match ".".
+        |           # OR
+        \S          # Match any non-whitespace character.
+        .{4,64}     # Match any character between 4 and 64 times,
+                    # as few times as possible.
+        \S          # Match any non-whitespace character.
+        \b          # Match a word boundary.
+    )               # Close capture group (1).""",
+                             flags=re.IGNORECASE | re.VERBOSE)
 
 MARCO = re.compile(r"""
     (?P<m>m+)               # CAPTURE GROUP (m) | Match between 1 and ∞ "m".

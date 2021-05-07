@@ -299,6 +299,8 @@ class Entertainment(commands.Cog):
             exists = functions.database_copypasta_search(
                 ctx.guild.id, contents, exact_match=True)
             if not exists:
+                if not title:
+                    title = regexes.FIRST_FEW_WORDS.match(contents).group(1)
                 functions.database_copypasta_add(ctx.guild.id, title, contents)
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_ADD").format(title))

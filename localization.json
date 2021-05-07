@@ -50,6 +50,7 @@
     "COPYPASTA_ONE_FOUND_QUERY": "I have only found one copypasta when searching for '{}':",
     "COPYPASTA_MULTIPLE_FOUND_TITLE": "I have found {} copypastas with '{}' in their title:",
     "COPYPASTA_ADD": "'{}' added!",
+    "COPYPASTA_ALREADY_EXISTS_ADD": "It looks like this copypasta has already been added!",
     "COPYPASTA_DELETE": "Copypasta with ID {} deleted!"
   },
   "pt-BR": {
@@ -103,6 +104,7 @@
     "COPYPASTA_ONE_FOUND_QUERY": "Eu encontrei apenas uma copypasta ao procurar por '{}':",
     "COPYPASTA_MULTIPLE_FOUND_TITLE": "Eu encontrei {} copypastas com '{}' nos seus títulos:",
     "COPYPASTA_ADD": "'{}' adicionada!",
+    "COPYPASTA_ALREADY_EXISTS_ADD": "Parece que esta copypasta já foi adicionada!",
     "COPYPASTA_DELETE": "Copypasta com o ID {} apagada!"
   }
 }

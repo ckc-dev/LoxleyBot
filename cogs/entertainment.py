@@ -69,19 +69,19 @@ class Entertainment(commands.Cog):
             copypasta -l -t -a:
                 List all copypastas, sorted by title, in ascending order.
         """
-        def format_copypasta(copypasta):
+        def format_copypasta_header(copypasta):
             """
-            Return a string containing copypasta data formatted as a message.
+            Return a string containing a header generated from copypasta data.
 
             Args:
                 copypasta (Tuple[int, str, str, int]): Tuple containing
                     copypasta ID, title, contents and count, respectively.
 
             Returns:
-                str: Formatted copypasta.
+                str: Copypasta header.
             """
-            return "{}: {} | **'{}'**\n{}".format(
-                functions.get_localized_object(ctx.guild.id, "COPYPASTA_ID"),
+            return "{}: {} | **{}**".format(
+                functions.get_localized_object(ctx.guild.id, 'COPYPASTA_ID'),
                 *copypasta)
 
         def format_copypasta_list(copypasta_list, emphasis=None):
@@ -261,6 +261,18 @@ class Entertainment(commands.Cog):
 
             return table_list
 
+        async def send_copypasta(ctx, copypasta):
+            """
+            Send a copypasta to a channel.
+
+            Args:
+                ctx (discord.ext.commands.Context): Context passed to function.
+                copypasta (Tuple[int, str, str, int]): Tuple containing
+                    copypasta ID, title, contents and count, respectively.
+            """
+            await ctx.send(format_copypasta_header(copypasta))
+            await ctx.send(copypasta[2])
+
         # Send a random copypasta.
         if arguments is None:
             copypasta = functions.database_copypasta_get(ctx.guild.id)
@@ -268,7 +280,7 @@ class Entertainment(commands.Cog):
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_NONE_FOUND").format(ctx.guild))
             else:
-                await ctx.send(format_copypasta(copypasta))
+                await send_copypasta(ctx, copypasta)
 
         # Send a specific copypasta by ID.
         elif regexes.ID_OPTIONAL.fullmatch(arguments):
@@ -279,7 +291,7 @@ class Entertainment(commands.Cog):
                     ctx.guild.id, "COPYPASTA_NONE_FOUND_ID").format(
                         id_, ctx.guild))
             else:
-                await ctx.send(format_copypasta(copypasta))
+                await send_copypasta(ctx, copypasta)
 
         # Add a copypasta to the database.
         elif regexes.ADD.fullmatch(arguments):
@@ -291,11 +303,14 @@ class Entertainment(commands.Cog):
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_ADD").format(title))
             else:
+                # Query the database instead of grabbing copypasta
+                # directly if it exists, so that the number of times
+                # it was sent is updated.
                 copypasta = functions.database_copypasta_get(ctx.guild.id,
                                                              exists[0][0])
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_ALREADY_EXISTS_ADD"))
-                await ctx.send(format_copypasta(copypasta))
+                await send_copypasta(ctx, copypasta)
 
         # Delete a copypasta from the database.
         elif regexes.DELETE.fullmatch(arguments):
@@ -325,7 +340,7 @@ class Entertainment(commands.Cog):
                     await ctx.send(functions.get_localized_object(
                         ctx.guild.id, "COPYPASTA_ONE_FOUND_QUERY").format(
                             query))
-                    await ctx.send(format_copypasta(copypasta))
+                    await send_copypasta(ctx, copypasta)
 
         # List all available copypastas.
         elif regexes.LIST.match(arguments):
@@ -398,7 +413,7 @@ class Entertainment(commands.Cog):
                     # it was sent is updated.
                     copypasta = functions.database_copypasta_get(ctx.guild.id,
                                                                  results[0][0])
-                    await ctx.send(format_copypasta(copypasta))
+                    await send_copypasta(ctx, copypasta)
 
 
 def setup(bot):

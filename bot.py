@@ -7,6 +7,7 @@ from discord.ext import commands
 from discord.utils import find
 
 import functions
+import regexes
 import settings
 
 if not settings.BOT_TOKEN:
@@ -32,7 +33,7 @@ async def on_message(message):
 
     await BOT.process_commands(message)
 
-    if functions.REGEX_MARCO.match(message.content):
+    if regexes.MARCO.fullmatch(message.content):
         await message.channel.send(functions.marco_polo(message.content))
 
     if BOT.user in message.mentions:

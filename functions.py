@@ -2,21 +2,9 @@
 
 import json
 import random
-import re
 
+import regexes
 import settings
-
-REGEX_MARCO = re.compile(r"""
-    ^                           # Match line start.
-    \s*                         # Match between 0 and ∞ whitespace characters.
-    (?P<m>m+)                   # CAPTURE GROUP ("m" character) | Match between 1 and ∞ "m".
-    (?P<a>a+)                   # CAPTURE GROUP ("a" character) | Match between 1 and ∞ "a".
-    (?P<r>r+)                   # CAPTURE GROUP ("r" character) | Match between 1 and ∞ "r".
-    (?P<c>c+)                   # CAPTURE GROUP ("c" character) | Match between 1 and ∞ "c".
-    (?P<o>o+)                   # CAPTURE GROUP ("o" character) | Match between 1 and ∞ "o".
-    (?P<punctuation>[.…?!\s]*)  # CAPTURE GROUP (punctuation) | Match between 0 and ∞ of ".",
-                                # "…", "?", "!", or any whitespace character.
-    $                           # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
 
 
 def marco_polo(string):
@@ -110,7 +98,7 @@ def marco_polo(string):
         return s
 
     s = ""
-    match = REGEX_MARCO.match(string)
+    match = regexes.MARCO.fullmatch(string)
     character_dicts = [
         {"P": [match.group("m")]},
         {"O": [match.group("a")]},

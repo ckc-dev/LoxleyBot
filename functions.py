@@ -367,7 +367,8 @@ def database_copypasta_get(guild_id, copypasta_id=None):
 
 
 def database_copypasta_search(guild_id, query=None, by_title=False,
-                              field="count", arrangement="DESC"):
+                              exact_match=False, field="count",
+                              arrangement="DESC"):
     """
     Search for one or more copypastas on the database.
 
@@ -378,6 +379,8 @@ def database_copypasta_search(guild_id, query=None, by_title=False,
             belong to this guild will be returned. Defaults to None.
         by_title (bool, optional): Whether or not to search only by
             title and not by contents. Defaults to False.
+        exact_match (bool, optional): Whether or not to search for an exact
+            match. Defaults to False.
         field (str, optional): Which field results will be ordered by.
             Defaults to "count".
         arrangement (str, optional): Which arrangement results will follow.
@@ -388,7 +391,8 @@ def database_copypasta_search(guild_id, query=None, by_title=False,
             copypasta ID, title, contents and count, respectively.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    params = {"guild_id": guild_id, "query": f"%{query or ''}%"}
+    params = {"guild_id": guild_id,
+              "query": f"{'%' if not exact_match else ''}{query or ''}{'%' if not exact_match else ''}"}
     results = CURSOR.execute(f"""
           SELECT id,
                  title,

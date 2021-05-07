@@ -284,9 +284,18 @@ class Entertainment(commands.Cog):
         # Add a copypasta to the database.
         elif regexes.ADD.fullmatch(arguments):
             title, contents = regexes.ADD.fullmatch(arguments).groups()
-            functions.database_copypasta_add(ctx.guild.id, title, contents)
-            await ctx.send(functions.get_localized_object(
-                ctx.guild.id, "COPYPASTA_ADD").format(title))
+            exists = functions.database_copypasta_search(
+                ctx.guild.id, contents, exact_match=True)
+            if not exists:
+                functions.database_copypasta_add(ctx.guild.id, title, contents)
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "COPYPASTA_ADD").format(title))
+            else:
+                copypasta = functions.database_copypasta_get(ctx.guild.id,
+                                                             exists[0][0])
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "COPYPASTA_ALREADY_EXISTS_ADD"))
+                await ctx.send(format_copypasta(copypasta))
 
         # Delete a copypasta from the database.
         elif regexes.DELETE.fullmatch(arguments):

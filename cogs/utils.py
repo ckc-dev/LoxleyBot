@@ -1,8 +1,7 @@
 """Contains cogs used for useful, often small and simple functions."""
 
-import re
-
 import functions
+import regexes
 from discord.ext import commands, tasks
 
 
@@ -60,31 +59,6 @@ class Utils(commands.Cog):
             purge -a:
                 Delete all messages.
         """
-        REGEX_LIMIT = re.compile(r"""
-            ^               # Match line start.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?:-l|--limit)? # Match either "-c" or "--count", either 0 or 1 times.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?P<limit>\d+)  # CAPTURE GROUP (count) | Match between 1 and ∞ digits.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
-
-        REGEX_ID = re.compile(r"""
-            ^               # Match line start.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?:-i|--id)     # Match either "-i" or "--id".
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?P<id>\d+)     # CAPTURE GROUP (id) | Match between 1 and ∞ digits.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
-
-        REGEX_ALL = re.compile(r"""
-            ^               # Match line start.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?:-a|--all)    # Match either "-a" or "--all".
-            \s*             # Match between 0 and ∞ whitespace characters.
-            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
-
         if not arguments:
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "PURGE_INVALID_ARGUMENT"))
@@ -92,12 +66,13 @@ class Utils(commands.Cog):
 
         limit = None
         end_message_id = None
-        if REGEX_LIMIT.match(arguments):
+        if regexes.LIMIT_OPTIONAL.fullmatch(arguments):
             # 1 is added to account for the message sent by the bot.
-            limit = int(REGEX_LIMIT.match(arguments).group("limit")) + 1
-        elif REGEX_ID.match(arguments):
-            end_message_id = int(REGEX_ID.match(arguments).group("id"))
-        elif not REGEX_ALL.match(arguments):
+            limit = int(regexes.LIMIT_OPTIONAL.fullmatch(
+                arguments).group("limit")) + 1
+        elif regexes.ID.fullmatch(arguments):
+            end_message_id = int(regexes.ID.fullmatch(arguments).group("id"))
+        elif not regexes.ALL.fullmatch(arguments):
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "PURGE_INVALID_ARGUMENT"))
             return
@@ -160,26 +135,11 @@ class Utils(commands.Cog):
             count 838498717459415081:
                 Count all messages up to message with ID "838498717459415081".
         """
-        REGEX_ID = re.compile(r"""
-            ^               # Match line start.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?:-i|--id)?    # Match either "-i" or "--id", either 0 or 1 times.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?P<id>\d+)     # CAPTURE GROUP (id) | Match between 1 and ∞ digits.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
-
-        REGEX_ALL = re.compile(r"""
-            ^               # Match line start.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?:-a|--all)    # Match either "-a" or "--all".
-            \s*             # Match between 0 and ∞ whitespace characters.
-            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
-
-        if not arguments or REGEX_ALL.match(arguments):
+        if not arguments or regexes.ALL.fullmatch(arguments):
             end_message_id = None
-        elif REGEX_ID.match(arguments):
-            end_message_id = int(REGEX_ID.match(arguments).group("id"))
+        elif regexes.ID_OPTIONAL.fullmatch(arguments):
+            end_message_id = int(
+                regexes.ID_OPTIONAL.fullmatch(arguments).group("id"))
         else:
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "COUNT_INVALID_ARGUMENT"))
@@ -279,10 +239,8 @@ class Utils(commands.Cog):
             for channel in guild.text_channels:
                 if channel.permissions_for(guild.me).read_messages:
                     count = await self.count_messages(channel)
-                    functions.database_message_count_set(guild.id,
-                                                         channel.id,
-                                                         channel.last_message_id,
-                                                         count)
+                    functions.database_message_count_set(
+                        guild.id, channel.id, channel.last_message_id, count)
 
     @database_message_count_auto_update.before_loop
     async def wait_until_ready(self):

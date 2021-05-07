@@ -1,8 +1,7 @@
 """Contains cogs used in guild management."""
 
-import re
-
 import functions
+import regexes
 from discord.ext import commands
 
 
@@ -28,29 +27,6 @@ class Management(commands.Cog):
             ban (bool, optional): Whether or not to ban members, instead of
                 just kicking them. Defaults to False.
         """
-        REGEX_REASON = re.compile(r"""
-            (?:-r|--reason) # Match either "-r" or "--reason".
-            \s*             # Match between 0 and ∞ whitespace characters.
-            ['\"]           # Match either "'" or '"'.
-            (?P<reason>.+?) # CAPTURE GROUP (reason) | Match any character
-                            # between 1 and ∞ times, as few times as possible.
-            ['\"]           # Match either "'" or '"'.""",
-                                  flags=re.IGNORECASE | re.VERBOSE)
-
-        REGEX_MEMBERS = re.compile(r"""
-            \s*         # Match between 0 and ∞ whitespace characters.
-            (?:         # Open non-capturing group.
-                ['\"]   # Match either "'" or '"'.
-                (.+?)   # CAPTURE GROUP | Match any character between 1 and ∞
-                        # times, as few times as possible.
-                ['\"]   # Match either "'" or '"'.
-                |       # OR
-                (\S+)   # CAPTURE GROUP | Match any non-whitespace character
-                        # between 1 and ∞ times, as few times as possible.
-            )           # Close non-capturing group
-            \s*         # Match between 0 and ∞ whitespace characters.""",
-                                   flags=re.IGNORECASE | re.VERBOSE)
-
         if ban:
             reason = functions.get_localized_object(
                 ctx.guild.id, "BAN_DEFAULT_REASON")
@@ -66,13 +42,14 @@ class Management(commands.Cog):
             private_message = functions.get_localized_object(
                 ctx.guild.id, "KICK_MESSAGE_PRIVATE")
 
-        match_reason = REGEX_REASON.search(arguments)
+        match_reason = regexes.REASON.search(arguments)
 
         if match_reason:
             reason = match_reason.group("reason")
-            arguments = REGEX_REASON.sub("", arguments)
+            arguments = regexes.REASON.sub("", arguments)
 
-        members = [i[0] + i[1] for i in REGEX_MEMBERS.findall(arguments)]
+        members = [i[0] + i[1]
+                   for i in regexes.STRINGS_BETWEEN_SPACES.findall(arguments)]
 
         for member in members:
             try:
@@ -184,19 +161,7 @@ class Management(commands.Cog):
             unban user#0001 "Example User#0002" user#0003:
                 Unban three users.
         """
-        REGEX_USERS = re.compile(r"""
-            \s*         # Match between 0 and ∞ whitespace characters.
-            (?:         # Open non-capturing group.
-                ['\"]   # Match either "'" or '"'.
-                (.+?\#\d+)
-                ['\"]   # Match either "'" or '"'.
-                |       # OR
-                (\S+\#\d+)
-            )           # Close non-capturing group
-            \s*         # Match between 0 and ∞ whitespace characters.""",
-                                 flags=re.IGNORECASE | re.VERBOSE)
-
-        users = [i[0] + i[1] for i in REGEX_USERS.findall(users)]
+        users = [i[0] + i[1] for i in regexes.DISCORD_USER.findall(users)]
 
         for ban in await ctx.guild.bans():
             for user in users:

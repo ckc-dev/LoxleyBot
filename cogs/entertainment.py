@@ -1,8 +1,7 @@
 """Contains cogs used for functions related to fun and entertainment."""
 
-import re
-
 import functions
+import regexes
 import settings
 from discord.ext import commands
 
@@ -262,85 +261,6 @@ class Entertainment(commands.Cog):
 
             return table_list
 
-        # Initialize RegExes for each argument.
-        REGEX_ID = re.compile(r"""
-            ^               # Match line start.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?:-i|--id)?    # Match either "-i" or "--id", either 0 or 1 times.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?P<id>\d+)     # CAPTURE GROUP (id) | Match between 1 and ∞ digits.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
-
-        REGEX_TITLE = re.compile(r"""
-            ^               # Match line start.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?:-t|--title)? # Match either "-t" or "--title", either 0 or 1 times.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?P<title>.+)   # CAPTURE GROUP (title) | Match between 1 and ∞ characters.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
-
-        REGEX_ADD = re.compile(r"""
-            ^                   # Match line start.
-            \s*                 # Match between 0 and ∞ whitespace characters.
-            (?:-a|--add)        # Match either "-a" or "--add".
-            \s*                 # Match between 0 and ∞ whitespace characters.
-            ['\"]               # Match either "'" or '"'.
-            (?P<title>.+)       # CAPTURE GROUP (title) | Match any character between 1 and ∞ times.
-            ['\"]               # Match either "'" or '"'.
-            \s*                 # Match between 0 and ∞ whitespace characters.
-            ['\"]               # Match either "'" or '"'.
-            (?P<contents>.+)    # CAPTURE GROUP (contents) | Match any character between 1 and ∞ times.
-            ['\"]               # Match either "'" or '"'.
-            \s*                 # Match between 0 and ∞ whitespace characters.
-            $                   # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
-
-        REGEX_DELETE = re.compile(r"""
-            ^               # Match line start.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?:-d|--delete) # Match either "-d" or "--delete".
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?P<id>\d+)     # CAPTURE GROUP (id) | Match between 1 and ∞ digits.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
-
-        REGEX_SEARCH = re.compile(r"""
-            ^               # Match line start.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?:-s|--search) # Match either "-s" or "--search".
-            \s*             # Match between 0 and ∞ whitespace characters.
-            (?P<query>.+)   # CAPTURE GROUP (query) | Match any character between 1 and ∞ times.
-            \s*             # Match between 0 and ∞ whitespace characters.
-            $               # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
-
-        REGEX_LIST = re.compile(r"""
-            ^                                           # Match line start.
-            \s*                                         # Match between 0 and ∞ whitespace characters.
-            (?:-l|--list)                               # Match either "-l" or "--list".
-            \s*                                         # Match between 0 and ∞ whitespace characters.
-            (-i|--id|-t|--title|-c|--contents|--count)? # CAPTURE GROUP (1 - value) Match one of "-i",
-                                                        # "--id", "-t", "--title", "-c", "--contents",
-                                                        # or "--count" either 1 or 0 times.
-            \s*                                         # Match between 0 and ∞ whitespace characters.
-            (-a|--ascending|-d|--descending)?           # CAPTURE GROUP (2 - arrangement) Match one of ["-a",
-                                                        # "--ascending", "-d", "--descending"] either 0 or 1 times.
-            \s*                                         # Match between 0 and ∞ whitespace characters.
-            $                                           # Match line end.
-            |                                           # OR (same as above but with parameters switched.)
-            ^                                           # Match line start.
-            \s*                                         # Match between 0 and ∞ whitespace characters.
-            (?:-l|--list)                               # Match either "-l" or "--list".
-            \s*                                         # Match between 0 and ∞ whitespace characters.
-            (-a|--ascending|-d|--descending)?           # CAPTURE GROUP (3 - arrangement) Match one of ["-a",
-                                                        # "--ascending", "-d", "--descending"] either 0 or 1 times.
-            \s*                                         # Match between 0 and ∞ whitespace characters.
-            (-i|--id|-t|--title|-c|--contents|--count)? # CAPTURE GROUP (4 - value) Match one of "-i",
-                                                        # "--id", "-t", "--title", "-c", "--contents",
-                                                        # or "--count" either 1 or 0 times.
-            \s*                                         # Match between 0 and ∞ whitespace characters.
-            $                                           # Match line end.""", flags=re.IGNORECASE | re.VERBOSE)
-
         # Send a random copypasta.
         if arguments is None:
             copypasta = functions.database_copypasta_get(ctx.guild.id)
@@ -351,8 +271,8 @@ class Entertainment(commands.Cog):
                 await ctx.send(format_copypasta(copypasta))
 
         # Send a specific copypasta by ID.
-        elif REGEX_ID.match(arguments):
-            id_ = REGEX_ID.match(arguments).group("id")
+        elif regexes.ID_OPTIONAL.fullmatch(arguments):
+            id_ = regexes.ID_OPTIONAL.fullmatch(arguments).group("id")
             copypasta = functions.database_copypasta_get(ctx.guild.id, id_)
             if not copypasta:
                 await ctx.send(functions.get_localized_object(
@@ -362,22 +282,22 @@ class Entertainment(commands.Cog):
                 await ctx.send(format_copypasta(copypasta))
 
         # Add a copypasta to the database.
-        elif REGEX_ADD.match(arguments):
-            title, contents = REGEX_ADD.match(arguments).groups()
+        elif regexes.ADD.fullmatch(arguments):
+            title, contents = regexes.ADD.fullmatch(arguments).groups()
             functions.database_copypasta_add(ctx.guild.id, title, contents)
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "COPYPASTA_ADD").format(title))
 
         # Delete a copypasta from the database.
-        elif REGEX_DELETE.match(arguments):
-            id_ = REGEX_DELETE.match(arguments).group("id")
+        elif regexes.DELETE.fullmatch(arguments):
+            id_ = regexes.DELETE.fullmatch(arguments).group("id")
             functions.database_copypasta_delete(ctx.guild.id, id_)
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "COPYPASTA_DELETE").format(id_))
 
         # Search for one or more copypastas.
-        elif REGEX_SEARCH.match(arguments):
-            query = REGEX_SEARCH.match(arguments).group("query")
+        elif regexes.SEARCH.fullmatch(arguments):
+            query = regexes.SEARCH.fullmatch(arguments).group("query")
             results = functions.database_copypasta_search(ctx.guild.id, query)
             if not results:
                 await ctx.send(functions.get_localized_object(
@@ -399,7 +319,7 @@ class Entertainment(commands.Cog):
                     await ctx.send(format_copypasta(copypasta))
 
         # List all available copypastas.
-        elif REGEX_LIST.match(arguments):
+        elif regexes.LIST.match(arguments):
             # Initialize dictionaries containing possible arrangements
             # and fields by which results will be ordered by.
             FIELDS = {
@@ -420,15 +340,18 @@ class Entertainment(commands.Cog):
                 "--DESCENDING": "DESC",
             }
 
-            # Get arrangement and field arguments passed to the command.
-            match = REGEX_LIST.match(arguments)
-            field = ((match.group(1) or "")
-                     + (match.group(4) or "")).upper()
-            arrangement = ((match.group(2) or "")
-                           + (match.group(3) or "")).upper()
+            # Decide field and arrangement which results will be ordered by.
+            field = ""
+            arrangement = ""
 
-            # Decide which field results will be ordered by,
-            # and its arrangement.
+            if regexes.DATABASE_FIELD.search(arguments):
+                field = regexes.DATABASE_FIELD.search(
+                    arguments).group("field").upper()
+
+            if regexes.ARRANGEMENT.search(arguments):
+                arrangement = regexes.ARRANGEMENT.search(
+                    arguments).group("arrangement").upper()
+
             order_field = FIELDS[field]
             order_arrangement = (
                 "ASC" if field and not arrangement else ARRANGEMENTS[arrangement])
@@ -445,8 +368,8 @@ class Entertainment(commands.Cog):
 
         # Send either a specific copypasta by title or a list
         # of copypastas containing user query in their title.
-        elif REGEX_TITLE.match(arguments):
-            title = REGEX_TITLE.match(arguments).group("title")
+        elif regexes.TITLE_OPTIONAL.fullmatch(arguments):
+            title = regexes.TITLE_OPTIONAL.fullmatch(arguments).group("title")
             results = functions.database_copypasta_search(
                 ctx.guild.id, title, by_title=True)
             if not results:

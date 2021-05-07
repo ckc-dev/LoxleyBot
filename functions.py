@@ -346,7 +346,8 @@ def database_copypasta_get(guild_id, copypasta_id=None):
     results = CURSOR.execute(f"""
         SELECT id,
                title,
-               contents
+               contents,
+               count
           FROM copypastas
          WHERE guild_id = :guild_id
          {'AND id = :id'

@@ -5,31 +5,25 @@ import re
 # PARAMETERS:
 # RegExes used to match parameters (or flags) passed to bot commands.
 # "Optional" parameters should be used when a flag can be omitted when passing
-# the parameter. E.g.: using an optional ID parameter should yield the same
-# results in all the following cases:
+# the parameter. E.g.: Using an optional --id parameter should yield the same
+# results in the following cases:
 #   command 10
 #   command -i 10
 #   command --id 10
-
-# A non-optional ID parameter, however, will only match when the flag {-i|--id}
-# is passed.
+# A non-optional --id parameter, however, will only match when the flag
+# {-i|--id} is passed.
+#
+# "Optional value" parameters should be used when the flag is required, but a
+# default value is used if no value is specified. E.g.: Using an optional value
+# set-channel parameter should yield the same results in the following cases:
+#   command --set-channel
+#   command --set-channel default_channel
 
 ADD = re.compile(r"""
-    (?:-a|--add)        # Match either "-a" or "--add".
-    \s*                 # Match between 0 and ∞ whitespace characters.
-    (?:                 # Open non-capturing group.
-        ['\"]           # Match either "'" or '"'.
-        (?P<title>.+)   # CAPTURE GROUP (title) | Match any character
-                        # between 1 and ∞ times.
-        ['\"]           # Match either "'" or '"'.
-    )?                  # Close-non-capturing group. Match it either
-                        # 0 or 1 times.
-    \s*                 # Match between 0 and ∞ whitespace characters.
-    ['\"]               # Match either "'" or '"'.
-    (?P<contents>.+)    # CAPTURE GROUP (contents) | Match any character
-                        # between 1 and ∞ times.
-    ['\"]               # Match either "'" or '"'.""",
-                 flags=re.IGNORECASE | re.VERBOSE)
+    (?:-a|--add)    # Match either "-a" or "--add".
+    \s*             # Match word boundary.
+    (.+)""",
+                 flags=re.IGNORECASE | re.VERBOSE | re.DOTALL)
 
 ALL = re.compile(r"""
     (?:-a|--all)    # Match either "-a" or "--all".
@@ -87,6 +81,11 @@ LIST = re.compile(r"""
     \b              # Match word boundary.""",
                   flags=re.IGNORECASE | re.VERBOSE)
 
+NONE = re.compile(r"""
+    (?:-n|--none)   # Match either "-n" or "--none".
+    \b              # Match word boundary.""",
+                  flags=re.IGNORECASE | re.VERBOSE)
+
 REASON = re.compile(r"""
     (?:-r|--reason) # Match either "-r" or "--reason".
     \s*             # Match between 0 and ∞ whitespace characters.
@@ -102,6 +101,33 @@ SEARCH = re.compile(r"""
     (?P<query>.+)   # CAPTURE GROUP (query) | Match any character
                     # between 1 and ∞ times.""",
                     flags=re.IGNORECASE | re.VERBOSE)
+
+SET_CHANNEL_OPTIONAL_VALUE = re.compile(r"""
+    --set-channel       # Match "--set-channel".
+    \s*                 # Match between 0 and ∞ whitespace characters.
+    (?P<channel>.+)?    # CAPTURE GROUP (channel) | Match any character
+                        # between 1 and ∞ times.""",
+                                        flags=re.IGNORECASE | re.VERBOSE)
+
+TITLE_CONTENTS = re.compile(r"""
+    (?:                     # Open non-capturing group.
+        (?:                 # Open non-capturing group.
+            ['\"]           # Match either "'" or '"'.
+            (?P<title>.+)   # CAPTURE GROUP (title) | Match any character
+                            # between 1 and ∞ times.
+            ['\"]           # Match either "'" or '"'.
+        )?                  # Close-non-capturing group. Match it either
+                            # 0 or 1 times.
+        \s*                 # Match between 0 and ∞ whitespace characters.
+        ['\"]               # Match either "'" or '"'.
+        (?P<contents>.+)    # CAPTURE GROUP (contents) | Match any character
+                            # between 1 and ∞ times.
+        ['\"]               # Match either "'" or '"'.
+    )                       # Close-non-capturing group.
+    |                       # OR
+    (?P<contents_2>.+)      # CAPTURE GROUP (contents_2) | Match any character
+                            # between 1 and ∞ times.""",
+                            flags=re.IGNORECASE | re.VERBOSE | re.DOTALL)
 
 TITLE_OPTIONAL = re.compile(r"""
     (?:-t|--title)? # Match either "-t" or "--title", either 0 or 1 times.

@@ -295,7 +295,11 @@ class Entertainment(commands.Cog):
 
         # Add a copypasta to the database.
         elif regexes.ADD.fullmatch(arguments):
-            title, contents = regexes.ADD.fullmatch(arguments).groups()
+            remaining = regexes.ADD.fullmatch(arguments).group(1).strip()
+            match = regexes.TITLE_CONTENTS.fullmatch(remaining)
+            title = match.group("title")
+            contents = (match.group("contents") or ""
+                        + match.group("contents_2") or "")
             exists = functions.database_copypasta_search(
                 ctx.guild.id, contents, exact_match=True)
             if not exists:
@@ -391,6 +395,33 @@ class Entertainment(commands.Cog):
             else:
                 for row in format_copypasta_list(results):
                     await ctx.send(row)
+
+        # Set a channel where all messsages will be saved as copypastas.
+        elif regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(arguments):
+            if regexes.NONE.search(arguments):
+                functions.database_copypasta_channel_set(ctx.guild.id, None)
+
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "COPYPASTA_SET_CHANNEL_NONE"))
+                return
+
+            channel_name = regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(
+                arguments).group("channel") or ctx.channel.name
+
+            try:
+                channel = await commands.TextChannelConverter().convert(
+                    ctx, channel_name)
+
+                functions.database_copypasta_channel_set(
+                    ctx.guild.id, channel.id)
+
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "COPYPASTA_SET_CHANNEL").format(
+                        channel.mention))
+            except commands.ChannelNotFound:
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "COPYPASTA_SET_CHANNEL_NOT_FOUND").format(
+                        channel_name, ctx.guild))
 
         # Send either a specific copypasta by title or a list
         # of copypastas containing user query in their title.

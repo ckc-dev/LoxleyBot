@@ -31,16 +31,29 @@ async def on_message(message):
     if message.author == BOT.user:
         return
 
-    await BOT.process_commands(message)
+    ctx = await BOT.get_context(message)
 
-    if regexes.MARCO.fullmatch(message.content):
-        await message.channel.send(functions.marco_polo(message.content))
+    # Check whether or not message invokes Bot (i.e., it is a command).
+    if ctx.valid:
+        await BOT.process_commands(message)
+    else:
+        if regexes.MARCO.fullmatch(message.content):
+            await ctx.send(functions.marco_polo(message.content))
+            return
 
-    if BOT.user in message.mentions:
-        await message.channel.send(
-            functions.get_localized_object(
-                message.guild.id, "MENTION_HELP").format(
-                    functions.database_guild_prefix_get(BOT, message)))
+        guild_prefix = functions.database_guild_prefix_get(BOT, message)
+
+        if BOT.user in message.mentions:
+            await ctx.send(functions.get_localized_object(
+                message.guild.id, "MENTION_HELP").format(guild_prefix))
+            return
+
+        copypasta_channel = functions.database_copypasta_channel_get(
+            ctx.guild.id)
+
+        if copypasta_channel and copypasta_channel == message.channel.id:
+            message.content = f"{guild_prefix}copypasta -a {message.content}"
+            await BOT.process_commands(message)
 
 
 @BOT.event

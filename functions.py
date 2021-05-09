@@ -160,9 +160,10 @@ def database_create():
                count INTEGER DEFAULT 0);""")
     CURSOR.execute("""
         CREATE TABLE guild_data(
-            guild_id INTEGER NOT NULL UNIQUE,
-              prefix TEXT NOT NULL,
-              locale TEXT NOT NULL);""")
+                        guild_id INTEGER NOT NULL UNIQUE,
+                          prefix TEXT NOT NULL,
+                          locale TEXT NOT NULL,
+            copypasta_channel_id INTEGER UNIQUE);""")
     CURSOR.close()
 
 
@@ -453,6 +454,45 @@ def database_copypasta_delete(guild_id, copypasta_id):
         DELETE FROM copypastas
               WHERE guild_id = ?
                 AND id = ?;""", (guild_id, copypasta_id))
+    settings.DATABASE_CONNECTION.commit()
+    CURSOR.close()
+
+
+def database_copypasta_channel_get(guild_id):
+    """
+    Get the ID for a guild's copypasta channel from the database.
+
+    Args:
+        guild_id (int): ID of guild which will have its copypasta
+            channel ID queried.
+
+    Returns:
+        int: Guild's copypasta channel ID.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    results = CURSOR.execute("""
+        SELECT copypasta_channel_id
+          FROM guild_data
+         WHERE guild_id = ?;""", (guild_id,)).fetchone()
+    CURSOR.close()
+
+    return results[0]
+
+
+def database_copypasta_channel_set(guild_id, channel_id):
+    """
+    Set the ID for a guild's copypasta channel on the database.
+
+    Args:
+        guild_id (int): ID of guild which will have its copypasta
+            channel ID set.
+        channel_id (int): What to set guild's copypasta channel ID to.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    CURSOR.execute("""
+        UPDATE guild_data
+           SET copypasta_channel_id = ?
+         WHERE guild_id = ?;""", (channel_id, guild_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 

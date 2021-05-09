@@ -171,8 +171,10 @@ class Entertainment(commands.Cog):
                                    count=section_count)
 
             for copypasta in copypasta_list:
-                # Separate copypasta data into variables.
+                # Separate copypasta data into variables and remove newlines
+                # from contents.
                 id_, title, contents, count = copypasta
+                contents = contents.replace("\n", "")
 
                 # Initialize ID, title and count sections.
                 section_id = str(id_).rjust(max_len_id)

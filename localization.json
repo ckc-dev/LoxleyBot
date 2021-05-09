@@ -51,7 +51,10 @@
     "COPYPASTA_MULTIPLE_FOUND_TITLE": "I have found {} copypastas with '{}' in their title:",
     "COPYPASTA_ADD": "'{}' added!",
     "COPYPASTA_ALREADY_EXISTS_ADD": "It looks like this copypasta has already been added!",
-    "COPYPASTA_DELETE": "Copypasta with ID {} deleted!"
+    "COPYPASTA_DELETE": "Copypasta with ID {} deleted!",
+    "COPYPASTA_SET_CHANNEL": "Done! All messages sent to {} will be automatically saved as copypastas.",
+    "COPYPASTA_SET_CHANNEL_NONE": "Done! No channel will have its messages automatically saved as copypastas.",
+    "COPYPASTA_SET_CHANNEL_NOT_FOUND": "No text channel named '{}' was found in `{}`."
   },
   "pt-BR": {
     "BOT_GUILD_JOIN": "`{}` | Olá `{}`! Use `{}help` para mais informações no que eu posso fazer. Use `{}locale` para alterar a localização.",
@@ -105,6 +108,9 @@
     "COPYPASTA_MULTIPLE_FOUND_TITLE": "Eu encontrei {} copypastas com '{}' nos seus títulos:",
     "COPYPASTA_ADD": "'{}' adicionada!",
     "COPYPASTA_ALREADY_EXISTS_ADD": "Parece que esta copypasta já foi adicionada!",
-    "COPYPASTA_DELETE": "Copypasta com o ID {} apagada!"
+    "COPYPASTA_DELETE": "Copypasta com o ID {} apagada!",
+    "COPYPASTA_SET_CHANNEL": "Feito! Todas as mensagens enviadas para {} serão automaticamente salvas como copypastas.",
+    "COPYPASTA_SET_CHANNEL_NONE": "Feito! Nenhum canal terá suas mensagens automaticamente salvas como copypastas.",
+    "COPYPASTA_SET_CHANNEL_NOT_FOUND": "Nenhum canal de texto chamado '{}' foi encontrado em `{}`."
   }
 }

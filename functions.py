@@ -497,7 +497,7 @@ def database_copypasta_channel_set(guild_id, channel_id):
     CURSOR.close()
 
 
-with open(settings.LOCALIZATION_FILE_NAME) as f:
+with open(settings.LOCALIZATION_FILE_NAME, encoding="utf8") as f:
     LOCALIZED_MESSAGES = json.loads(f.read())
 
 

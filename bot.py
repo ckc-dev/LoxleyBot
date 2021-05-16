@@ -28,7 +28,7 @@ async def on_message(message):
     Args:
         message (discord.Message): Received message.
     """
-    if message.author == BOT.user:
+    if message.author == BOT.user or message.attachments:
         return
 
     ctx = await BOT.get_context(message)

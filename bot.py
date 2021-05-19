@@ -1,5 +1,6 @@
 """Main bot file."""
 
+import datetime
 import os
 
 import discord
@@ -54,6 +55,59 @@ async def on_message(message):
         if copypasta_channel and copypasta_channel == message.channel.id:
             message.content = f"{guild_prefix}copypasta -a {message.content}"
             await BOT.process_commands(message)
+
+
+@BOT.event
+async def on_raw_message_delete(payload):
+    """
+    Will run every time a message is deleted, whether it is cached or not.
+
+    Args:
+        payload (discord.RawMessageDeleteEvent): Raw event payload data.
+    """
+    guild_id = payload.guild_id
+    logging_channel = BOT.get_channel(
+        functions.database_logging_channel_get(guild_id))
+
+    if logging_channel:
+        message = payload.cached_message
+        id_ = payload.message_id
+        date = discord.utils.snowflake_time(id_)
+        channel = BOT.get_channel(payload.channel_id)
+        embed = discord.Embed(color=settings.EMBED_COLOR)
+
+        if message:
+            author = message.author
+            contents = message.content
+
+            embed.set_thumbnail(url=author.avatar_url)
+            embed.add_field(name=functions.get_localized_object(guild_id, "LOGGING_MESSAGE_DELETED_FIELD_HEADER_NAME"),
+                            value=functions.get_localized_object(
+                                guild_id, "LOGGING_MESSAGE_DELETED_FIELD_HEADER_VALUE").format(channel.mention, author.mention),
+                            inline=False)
+            embed.add_field(name=functions.get_localized_object(guild_id, "LOGGING_MESSAGE_DELETED_FIELD_CONTENTS_NAME"),
+                            # `or None` is used just in case message was an
+                            # embed and therefore has no contents. This
+                            # prevents an exception from being raised due to an
+                            # embed field with an empty value.
+                            value=contents or None,
+                            inline=False)
+        else:
+            embed.add_field(name=functions.get_localized_object(guild_id, "LOGGING_MESSAGE_DELETED_FIELD_HEADER_NAME"),
+                            value=functions.get_localized_object(
+                                guild_id, "LOGGING_MESSAGE_DELETED_FIELD_HEADER_VALUE_NO_CACHE").format(channel.mention),
+                            inline=False)
+
+        embed.add_field(name=functions.get_localized_object(guild_id, "LOGGING_MESSAGE_DELETED_FIELD_CREATION_TIME_NAME"),
+                        value=date.strftime(settings.STRFTIME_FORMAT),
+                        inline=False)
+        embed.add_field(name=functions.get_localized_object(guild_id, "LOGGING_MESSAGE_DELETED_FIELD_ID_NAME"),
+                        value=f"`{id_}`",
+                        inline=False)
+        embed.set_footer(
+            text=functions.get_localized_object(guild_id, "LOGGING_MESSAGE_DELETED_FOOTER").format(datetime.datetime.utcnow().strftime(settings.STRFTIME_FORMAT)))
+
+        await logging_channel.send(embed=embed)
 
 
 @BOT.event

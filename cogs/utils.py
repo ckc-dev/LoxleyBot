@@ -232,6 +232,55 @@ class Utils(commands.Cog):
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "LOCALE_CHANGE").format(current, new))
 
+    @commands.command()
+    async def logging(self, ctx, *, arguments=None):
+        """
+        Set a text channel for logging deleted messages.
+
+        Args:
+            arguments (str, optional): Arguments passed to command.
+                Defaults to None.
+
+        Usage:
+            logging --set-channel <channel>
+
+        Examples:
+            logging --set-channel:
+                Set logging channel to channel on which command was used.
+            logging --set-channel #log:
+                Set logging channel to #log.
+        """
+        if not arguments or not regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(
+                arguments):
+            await ctx.send(functions.get_localized_object(
+                ctx.guild.id, "LOGGING_INVALID_ARGUMENT"))
+            return
+
+        if regexes.NONE.search(arguments):
+            functions.database_logging_channel_set(ctx.guild.id, None)
+
+            await ctx.send(functions.get_localized_object(
+                ctx.guild.id, "LOGGING_SET_CHANNEL_NONE"))
+            return
+
+        channel_name = regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(
+            arguments).group("channel") or ctx.channel.name
+
+        try:
+            channel = await commands.TextChannelConverter().convert(
+                ctx, channel_name)
+
+            functions.database_logging_channel_set(
+                ctx.guild.id, channel.id)
+
+            await ctx.send(functions.get_localized_object(
+                ctx.guild.id, "LOGGING_SET_CHANNEL").format(
+                    channel.mention))
+        except commands.ChannelNotFound:
+            await ctx.send(functions.get_localized_object(
+                ctx.guild.id, "LOGGING_SET_CHANNEL_NOT_FOUND").format(
+                    channel_name, ctx.guild))
+
     @tasks.loop(hours=24)
     async def database_message_count_auto_update(self):
         """Update message count in database every 24 hours."""

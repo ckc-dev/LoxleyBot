@@ -84,7 +84,7 @@ class Entertainment(commands.Cog):
             id_, title, contents, count = copypasta
             embed = Embed(title=title,
                           description=contents,
-                          color=settings.COPYPASTA_EMBED_COLOR)
+                          color=settings.EMBED_COLOR)
             embed.set_footer(text="{}: {} | {}: {}".format(
                 functions.get_localized_object(
                     ctx.guild.id, 'COPYPASTA_ID'),

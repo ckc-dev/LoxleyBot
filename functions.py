@@ -163,7 +163,8 @@ def database_create():
                         guild_id INTEGER NOT NULL UNIQUE,
                           prefix TEXT NOT NULL,
                           locale TEXT NOT NULL,
-            copypasta_channel_id INTEGER UNIQUE);""")
+            copypasta_channel_id INTEGER UNIQUE,
+              logging_channel_id INTEGER UNIQUE);""")
     CURSOR.close()
 
 
@@ -492,6 +493,44 @@ def database_copypasta_channel_set(guild_id, channel_id):
     CURSOR.execute("""
         UPDATE guild_data
            SET copypasta_channel_id = ?
+         WHERE guild_id = ?;""", (channel_id, guild_id))
+    settings.DATABASE_CONNECTION.commit()
+    CURSOR.close()
+
+
+def database_logging_channel_get(guild_id):
+    """
+    Get the ID for a guild's logging channel from the database.
+
+    Args:
+        guild_id (int): ID of guild which will have its logging channel ID
+            queried.
+
+    Returns:
+        int: Guild's logging channel ID.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    results = CURSOR.execute("""
+        SELECT logging_channel_id
+          FROM guild_data
+         WHERE guild_id = ?;""", (guild_id,)).fetchone()
+    CURSOR.close()
+
+    return results[0]
+
+
+def database_logging_channel_set(guild_id, channel_id):
+    """
+    Set the ID for a guild's logging channel on the database.
+
+    Args:
+        guild_id (int): ID of guild which will have its logging channel ID set.
+        channel_id (int): What to set guild's logging channel ID to.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    CURSOR.execute("""
+        UPDATE guild_data
+           SET logging_channel_id = ?
          WHERE guild_id = ?;""", (channel_id, guild_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()

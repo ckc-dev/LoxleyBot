@@ -54,7 +54,19 @@
     "COPYPASTA_DELETE": "Copypasta with ID {} deleted!",
     "COPYPASTA_SET_CHANNEL": "Done! All messages sent to {} will be automatically saved as copypastas.",
     "COPYPASTA_SET_CHANNEL_NONE": "Done! No channel will have its messages automatically saved as copypastas.",
-    "COPYPASTA_SET_CHANNEL_NOT_FOUND": "No text channel named '{}' was found in `{}`."
+    "COPYPASTA_SET_CHANNEL_NOT_FOUND": "No text channel named '{}' was found in `{}`.",
+
+    "LOGGING_INVALID_ARGUMENT": "Please provide a valid argument.",
+    "LOGGING_MESSAGE_DELETED_FIELD_HEADER_NAME": "A message was deleted!",
+    "LOGGING_MESSAGE_DELETED_FIELD_HEADER_VALUE": "A message sent to {} by {} was deleted!",
+    "LOGGING_MESSAGE_DELETED_FIELD_HEADER_VALUE_NO_CACHE": "A message sent to {} was deleted! Unfortunately, it was not cached, so I could not find its author or contents.",
+    "LOGGING_MESSAGE_DELETED_FIELD_CONTENTS_NAME": "Contents",
+    "LOGGING_MESSAGE_DELETED_FIELD_CREATION_TIME_NAME": "UTC Creation Time",
+    "LOGGING_MESSAGE_DELETED_FIELD_ID_NAME": "ID",
+    "LOGGING_MESSAGE_DELETED_FOOTER": "Logged on UTC {}",
+    "LOGGING_SET_CHANNEL": "Done! Deleted messages will be logged in {}.",
+    "LOGGING_SET_CHANNEL_NONE": "Done! No channel will be used for logging deleted messages.",
+    "LOGGING_SET_CHANNEL_NOT_FOUND": "No text channel named '{}' was found in `{}`."
   },
   "pt-BR": {
     "BOT_GUILD_JOIN": "`{}` | Olá `{}`! Use `{}help` para mais informações no que eu posso fazer. Use `{}locale` para alterar a localização.",
@@ -111,6 +123,18 @@
     "COPYPASTA_DELETE": "Copypasta com o ID {} apagada!",
     "COPYPASTA_SET_CHANNEL": "Feito! Todas as mensagens enviadas para {} serão automaticamente salvas como copypastas.",
     "COPYPASTA_SET_CHANNEL_NONE": "Feito! Nenhum canal terá suas mensagens automaticamente salvas como copypastas.",
-    "COPYPASTA_SET_CHANNEL_NOT_FOUND": "Nenhum canal de texto chamado '{}' foi encontrado em `{}`."
+    "COPYPASTA_SET_CHANNEL_NOT_FOUND": "Nenhum canal de texto chamado '{}' foi encontrado em `{}`.",
+
+    "LOGGING_INVALID_ARGUMENT": "Por favor forneça um argumento válido.",
+    "LOGGING_MESSAGE_DELETED_FIELD_HEADER_NAME": "Uma mensagem foi apagada!",
+    "LOGGING_MESSAGE_DELETED_FIELD_HEADER_VALUE": "Uma mensagem enviada para {} por {} foi apagada!",
+    "LOGGING_MESSAGE_DELETED_FIELD_HEADER_VALUE_NO_CACHE": "Uma mensagem enviada para {} foi apagada! Infelizmente, ela não estava armazenada em cache, portanto, não consegui encontrar seu autor ou conteúdo.",
+    "LOGGING_MESSAGE_DELETED_FIELD_CONTENTS_NAME": "Conteúdo",
+    "LOGGING_MESSAGE_DELETED_FIELD_CREATION_TIME_NAME": "Hora de Criação em UTC",
+    "LOGGING_MESSAGE_DELETED_FIELD_ID_NAME": "ID",
+    "LOGGING_MESSAGE_DELETED_FOOTER": "Registrado em UTC {}",
+    "LOGGING_SET_CHANNEL": "Feito! As mensagens excluídas serão registradas em {}.",
+    "LOGGING_SET_CHANNEL_NONE": "Feito! Nenhum canal será utilizado para registrar mensagens excluídas.",
+    "LOGGING_SET_CHANNEL_NOT_FOUND": "Nenhum canal de texto chamado '{}' foi encontrado em `{}`."
   }
 }

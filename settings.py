@@ -31,8 +31,12 @@ LOGGER.addHandler(HANDLER)
 DATABASE_NAME = "sqlite.db"
 DATABASE_CONNECTION = sqlite3.connect(DATABASE_NAME)
 
-
 # Values to use when generating a list of copypastas.
 DISCORD_CHARACTER_LIMIT = 2000
 COPYPASTA_LIST_CHARACTERS_PER_ROW = 80
-COPYPASTA_EMBED_COLOR = 0x1794be
+
+# Color to use in embeds.
+EMBED_COLOR = 0x1794be
+
+# How dates should be represented when using strftime().
+STRFTIME_FORMAT = "%Y-%m-%d | %H:%M:%S"

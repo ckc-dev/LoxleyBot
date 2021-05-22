@@ -1,5 +1,6 @@
 """Contains cogs used for useful, often small and simple functions."""
 
+import discord
 import functions
 import regexes
 from discord.ext import commands, tasks
@@ -136,14 +137,21 @@ class Utils(commands.Cog):
         Usage:
             count [{-a|--all}]
             count [{-i|--id}] <message ID>
+            count (referencing/replying a message)
 
         Examples:
             count:
                 Count all messages.
             count 838498717459415081:
                 Count all messages up to message with ID "838498717459415081".
+            count (referencing/replying a message):
+                Count all messages up to referenced message.
         """
-        if not arguments or regexes.ALL.fullmatch(arguments):
+        message_reference = ctx.message.reference
+
+        if message_reference:
+            end_message_id = message_reference.message_id
+        elif not arguments or regexes.ALL.fullmatch(arguments):
             end_message_id = None
         elif regexes.ID_OPTIONAL.fullmatch(arguments):
             end_message_id = int(
@@ -158,30 +166,33 @@ class Utils(commands.Cog):
 
         count = await self.count_messages(ctx.channel, end_message_id)
 
-        if not end_message_id:
-            functions.database_message_count_set(ctx.guild.id,
-                                                 ctx.channel.id,
-                                                 ctx.channel.last_message_id,
-                                                 count)
+        if end_message_id:
+            try:
+                end_message = await ctx.channel.fetch_message(end_message_id)
 
-            message_dict = functions.get_localized_object(
-                ctx.guild.id, "COUNT_THRESHOLD_DICT")
+                await end_message.reply(
+                    functions.get_localized_object(
+                        ctx.guild.id, "COUNT_FOUND_REPLY").format(count + 1),
+                    mention_author=False)
+                return
+            except discord.NotFound:
+                pass
 
-            for string, threshold in message_dict.items():
-                if count < threshold:
-                    break
-                message = string
+        functions.database_message_count_set(
+            ctx.guild.id, ctx.channel.id, ctx.channel.last_message_id, count)
 
-            # 1 is added to account for the message sent by the bot.
-            await ctx.send(functions.get_localized_object(
-                ctx.guild.id, "COUNT_FOUND_MESSAGE").format(
-                    count + 1, ctx.channel.mention, message))
-        else:
-            end_message = await ctx.channel.fetch_message(end_message_id)
-            await end_message.reply(
-                functions.get_localized_object(
-                    ctx.guild.id, "COUNT_FOUND_REPLY").format(count + 1),
-                mention_author=False)
+        message_dict = functions.get_localized_object(
+            ctx.guild.id, "COUNT_THRESHOLD_DICT")
+
+        for string, threshold in message_dict.items():
+            if count < threshold:
+                break
+            message = string
+
+        # 1 is added to account for the message sent by the bot.
+        await ctx.send(functions.get_localized_object(
+            ctx.guild.id, "COUNT_FOUND_MESSAGE").format(
+                count + 1, ctx.channel.mention, message))
 
     @commands.command()
     async def prefix(self, ctx, new=None):

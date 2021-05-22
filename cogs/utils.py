@@ -50,6 +50,7 @@ class Utils(commands.Cog):
             purge [{-l|--limit}] <limit>
             purge {-i|--id} <message ID>
             purge {-a|--all}
+            purge (referencing/replying a message)
 
         Examples:
             purge 10:
@@ -58,15 +59,22 @@ class Utils(commands.Cog):
                 Delete all messages up to message with ID "838498717459415081".
             purge -a:
                 Delete all messages.
+            purge (referencing/replying a message):
+                Delete all messages up to referenced message.
         """
-        if not arguments:
+        message_reference = ctx.message.reference
+
+        if not arguments and not message_reference:
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "PURGE_INVALID_ARGUMENT"))
             return
 
         limit = None
         end_message_id = None
-        if regexes.LIMIT_OPTIONAL.fullmatch(arguments):
+
+        if message_reference:
+            end_message_id = message_reference.message_id
+        elif regexes.LIMIT_OPTIONAL.fullmatch(arguments):
             # 1 is added to account for the message sent by the bot.
             limit = int(regexes.LIMIT_OPTIONAL.fullmatch(
                 arguments).group("limit")) + 1

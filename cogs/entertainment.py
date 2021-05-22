@@ -82,16 +82,22 @@ class Entertainment(commands.Cog):
                 discord.Embed: Copypasta.
             """
             id_, title, contents, count = copypasta
+
             embed = Embed(title=title,
                           description=contents,
                           color=settings.EMBED_COLOR)
+
+            # 1 is added to `count` to account for the fact that the data is
+            # queried before it is updated. So if a copypasta is sent for the
+            # first time, it shows a count of "1" instead of "0", and so on.
             embed.set_footer(text="{}: {} | {}: {}".format(
                 functions.get_localized_object(
                     ctx.guild.id, 'COPYPASTA_ID'),
                 id_,
                 functions.get_localized_object(
                     ctx.guild.id, 'COPYPASTA_COUNT'),
-                count))
+                count + 1))
+
             return embed
 
         def format_copypasta_list(copypasta_list, emphasis=None):

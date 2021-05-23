@@ -19,11 +19,11 @@ import re
 #   command --set-channel
 #   command --set-channel default_channel
 
-ADD = re.compile(r"""
+ADD_OPTIONAL_VALUE = re.compile(r"""
     (?:-a|--add)    # Match either "-a" or "--add".
     \s*             # Match word boundary.
-    (.+)""",
-                 flags=re.IGNORECASE | re.VERBOSE | re.DOTALL)
+    (.+)?""",
+                                flags=re.IGNORECASE | re.VERBOSE | re.DOTALL)
 
 ALL = re.compile(r"""
     (?:-a|--all)    # Match either "-a" or "--all".

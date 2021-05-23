@@ -300,12 +300,26 @@ class Entertainment(commands.Cog):
                 await ctx.send(embed=format_copypasta(copypasta))
 
         # Add a copypasta to the database.
-        elif regexes.ADD.fullmatch(arguments):
-            remaining = regexes.ADD.fullmatch(arguments).group(1).strip()
-            match = regexes.TITLE_CONTENTS.fullmatch(remaining)
-            title = match.group("title")
-            contents = (match.group("contents") or ""
-                        + match.group("contents_2") or "")
+        elif regexes.ADD_OPTIONAL_VALUE.fullmatch(arguments):
+            message_reference = ctx.message.reference
+            remaining = regexes.ADD_OPTIONAL_VALUE.fullmatch(
+                arguments).group(1)
+            title = None
+            if not remaining and not message_reference:
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "COPYPASTA_INVALID_USAGE").format(
+                        functions.database_guild_prefix_get(self.bot, ctx)))
+                return
+            if remaining:
+                match = regexes.TITLE_CONTENTS.fullmatch(remaining.strip())
+                title = match.group("title")
+                contents = (match.group("contents") or ""
+                            + match.group("contents_2") or "")
+                if message_reference:
+                    title = contents if not title else title
+                    contents = message_reference.resolved.content
+            else:
+                contents = message_reference.resolved.content
             exists = functions.database_copypasta_search(
                 ctx.guild.id, contents, exact_match=True)
             if not exists:

@@ -37,6 +37,7 @@
     "BAN_MESSAGE": "Banned {}. Reason: `{}`.",
     "BAN_MESSAGE_DIRECT": "You have been banned from `{}`. Reason: `{}`.",
 
+    "UNBAN_INVALID_ARGUMENT": "Please provide one or more users banned from the guild.",
     "UNBAN_MESSAGE": "Unbanned {}#{}.",
 
     "COPYPASTA_ID": "ID",
@@ -107,6 +108,7 @@
     "BAN_MESSAGE": "{} banido(a). Motivo: `{}`.",
     "BAN_MESSAGE_DIRECT": "Você foi banido(a) de `{}`. Motivo: `{}`.",
 
+    "UNBAN_INVALID_ARGUMENT": "Por favor forneça um ou mais usuários banidos da guilda.",
     "UNBAN_MESSAGE": "{}#{} desbanido.",
 
     "COPYPASTA_ID": "ID",

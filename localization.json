@@ -30,12 +30,12 @@
     "KICK_INVALID_ARGUMENT": "Please provide one or more guild members. Optionally, also provide a reason.",
     "KICK_DEFAULT_REASON": "No reason provided.",
     "KICK_MESSAGE": "Kicked {}. Reason: `{}`.",
-    "KICK_MESSAGE_PRIVATE": "You have been kicked from `{}`. Reason: `{}`.",
+    "KICK_MESSAGE_DIRECT": "You have been kicked from `{}`. Reason: `{}`.",
 
     "BAN_INVALID_ARGUMENT": "Please provide one or more guild members. Optionally, also provide a reason.",
     "BAN_DEFAULT_REASON": "No reason provided.",
     "BAN_MESSAGE": "Banned {}. Reason: `{}`.",
-    "BAN_MESSAGE_PRIVATE": "You have been banned from `{}`. Reason: `{}`.",
+    "BAN_MESSAGE_DIRECT": "You have been banned from `{}`. Reason: `{}`.",
 
     "UNBAN_MESSAGE": "Unbanned {}#{}.",
 
@@ -97,15 +97,15 @@
     "LOCALE_REQUIRE": "Por favor forneça uma localização válida. Localizações disponíveis: {}",
     "LOCALE_CHANGE": "Localização alterada de `{}` para `{}`!",
 
-    "KICK_INVALID ARGUMENT": "Por favor forneça um ou mais membros da guilda. Opcionalmente, forneça também um motivo.",
+    "KICK_INVALID_ARGUMENT": "Por favor forneça um ou mais membros da guilda. Opcionalmente, forneça também um motivo.",
     "KICK_DEFAULT_REASON": "Nenhum motivo especificado.",
     "KICK_MESSAGE": "{} expulso(a). Motivo: `{}`.",
-    "KICK_MESSAGE_PRIVATE": "Você foi expulso(a) de `{}`. Motivo: `{}`.",
+    "KICK_MESSAGE_DIRECT": "Você foi expulso(a) de `{}`. Motivo: `{}`.",
 
     "BAN_INVALID_ARGUMENT": "Por favor forneça um ou mais membros da guilda. Opcionalmente, forneça também um motivo.",
     "BAN_DEFAULT_REASON": "Nenhum motivo especificado.",
     "BAN_MESSAGE": "{} banido(a). Motivo: `{}`.",
-    "BAN_MESSAGE_PRIVATE": "Você foi banido(a) de `{}`. Motivo: `{}`.",
+    "BAN_MESSAGE_DIRECT": "Você foi banido(a) de `{}`. Motivo: `{}`.",
 
     "UNBAN_MESSAGE": "{}#{} desbanido.",
 

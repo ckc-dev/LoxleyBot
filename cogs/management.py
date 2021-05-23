@@ -1,5 +1,6 @@
 """Contains cogs used in guild management."""
 
+import discord
 import functions
 import regexes
 from discord.ext import commands
@@ -23,33 +24,42 @@ class Management(commands.Cog):
 
         Args:
             ctx (discord.ext.commands.Context): Context passed to function.
-            arguments (str): Arguments passed to either kick or ban commands.
+            arguments (str): Arguments passed to function.
             ban (bool, optional): Whether or not to ban members, instead of
                 just kicking them. Defaults to False.
         """
-        if ban:
-            reason = functions.get_localized_object(
-                ctx.guild.id, "BAN_DEFAULT_REASON")
-            message = functions.get_localized_object(
-                ctx.guild.id, "BAN_MESSAGE")
-            private_message = functions.get_localized_object(
-                ctx.guild.id, "BAN_MESSAGE_PRIVATE")
-        else:
-            reason = functions.get_localized_object(
-                ctx.guild.id, "KICK_DEFAULT_REASON")
-            message = functions.get_localized_object(
-                ctx.guild.id, "KICK_MESSAGE")
-            private_message = functions.get_localized_object(
-                ctx.guild.id, "KICK_MESSAGE_PRIVATE")
+        message_reference = ctx.message.reference
 
-        match_reason = regexes.REASON.search(arguments)
+        if not arguments and not message_reference:
+            await ctx.send(functions.get_localized_object(
+                ctx.guild.id, "BAN_INVALID_ARGUMENT"
+                              if ban else "KICK_INVALID_ARGUMENT"))
+            return
 
-        if match_reason:
-            reason = match_reason.group("reason")
-            arguments = regexes.REASON.sub("", arguments)
+        members = []
+        reason = functions.get_localized_object(
+            ctx.guild.id, "BAN_DEFAULT_REASON"
+                          if ban else "KICK_DEFAULT_REASON")
+        message = functions.get_localized_object(
+            ctx.guild.id, "BAN_MESSAGE"
+                          if ban else "KICK_MESSAGE")
+        direct_message = functions.get_localized_object(
+            ctx.guild.id, "BAN_MESSAGE_DIRECT"
+                          if ban else "KICK_MESSAGE_DIRECT")
 
-        members = [i[0] + i[1]
-                   for i in regexes.STRINGS_BETWEEN_SPACES.findall(arguments)]
+        if arguments:
+            match_reason = regexes.REASON.search(arguments)
+
+            if match_reason:
+                reason = match_reason.group("reason")
+                arguments = regexes.REASON.sub("", arguments)
+
+            members.extend(
+                i[0] + i[1]
+                for i in regexes.STRINGS_BETWEEN_SPACES.findall(arguments))
+
+        if message_reference:
+            members.append(str(message_reference.resolved.author.id))
 
         for member in members:
             try:
@@ -61,7 +71,12 @@ class Management(commands.Cog):
                     await member.kick(reason=reason)
 
                 await ctx.send(message.format(member.mention, reason))
-                await member.send(private_message.format(ctx.guild, reason))
+
+                # Catch exception in case member has disabled non-friend DMs.
+                try:
+                    await member.send(direct_message.format(ctx.guild, reason))
+                except discord.HTTPException:
+                    pass
             except commands.MemberNotFound:
                 pass
 
@@ -77,10 +92,12 @@ class Management(commands.Cog):
         be between either single (') or double (") quotes.
 
         Args:
-            arguments (str): Arguments passed to command.
+            arguments (str): Arguments passed to command. Defaults to None.
 
         Usage:
             kick [{-r|--reason} "<reason>"] <members>
+            kick (referencing/replying a message) [{-r|--reason} "<reason>"]
+                                                  [<members>]
 
         Examples:
             kick @example_member:
@@ -94,12 +111,14 @@ class Management(commands.Cog):
             kick @member1 "Member 2" member#0003:
                 Kick three members by mention, name, and name#discriminator,
                 providing a default reason.
+            kick (referencing/replying a message):
+                Kick the author of the referenced message,
+                providing a default reason.
+            kick @member1 "Member 2" (referencing/replying a message):
+                Kick the author of the referenced message and two more members,
+                providing a default reason.
         """
-        if not arguments:
-            await ctx.send(functions.get_localized_object(
-                ctx.guild.id, "KICK_INVALID_ARGUMENT"))
-        else:
-            await self.kick_members(ctx, arguments)
+        await self.kick_members(ctx, arguments)
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
@@ -113,10 +132,12 @@ class Management(commands.Cog):
         be between either single (') or double (") quotes.
 
         Args:
-            arguments (str): Arguments passed to command.
+            arguments (str): Arguments passed to command. Defaults to None.
 
         Usage:
             ban [{-r|--reason} "<reason>"] <members>
+            ban (referencing/replying a message) [{-r|--reason} "<reason>"]
+                                                 [<members>]
 
         Examples:
             ban @example_member:
@@ -130,12 +151,14 @@ class Management(commands.Cog):
             ban @member1 "Member 2" member#0003:
                 Ban three members by mention, name, and name#discriminator,
                 providing a default reason.
+            ban (referencing/replying a message):
+                Ban the author of the referenced message,
+                providing a default reason.
+            ban @member1 "Member 2" (referencing/replying a message):
+                Ban the author of referenced message and two more members,
+                providing a default reason.
         """
-        if not arguments:
-            await ctx.send(functions.get_localized_object(
-                ctx.guild.id, "BAN_INVALID_ARGUMENT"))
-        else:
-            await self.kick_members(ctx, arguments, True)
+        await self.kick_members(ctx, arguments, True)
 
     @commands.command()
     @commands.has_permissions(ban_members=True)

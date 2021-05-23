@@ -162,7 +162,7 @@ class Management(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
-    async def unban(self, ctx, *, users):
+    async def unban(self, ctx, *, users=None):
         """
         Remove one or more users from the guild banlist.
 
@@ -172,9 +172,11 @@ class Management(commands.Cog):
 
         Args:
             users (str): String containing users to remove from guild banlist.
+                Defaults to None.
 
         Usage:
             unban <users>
+            unban (referencing/replying a message) [<users>]
 
         Examples:
             unban example_user#1234:
@@ -183,11 +185,25 @@ class Management(commands.Cog):
                 Unban a user with spaces in their name, "Example user".
             unban user#0001 "Example User#0002" user#0003:
                 Unban three users.
+            unban (referencing/replying a message) user#0001 user#0003
+                Unban the author of referenced message and two more users.
         """
-        users = [i[0] + i[1] for i in regexes.DISCORD_USER.findall(users)]
+        message_reference = ctx.message.reference
+
+        if not users and not message_reference:
+            await ctx.send(functions.get_localized_object(
+                ctx.guild.id, "UNBAN_INVALID_ARGUMENT"))
+            return
+
+        user_list = [] if not users else [
+            i[0] + i[1] for i in regexes.DISCORD_USER.findall(users)]
+
+        if message_reference:
+            author = message_reference.resolved.author
+            user_list.append(f"{author.name}#{author.discriminator}")
 
         for ban in await ctx.guild.bans():
-            for user in users:
+            for user in user_list:
                 if [ban.user.name, ban.user.discriminator] == user.split("#"):
                     await ctx.guild.unban(ban.user)
                     await ctx.send(functions.get_localized_object(

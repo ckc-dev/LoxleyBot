@@ -29,7 +29,7 @@ async def on_message(message):
     Args:
         message (discord.Message): Received message.
     """
-    if message.author == BOT.user or message.attachments:
+    if message.author == BOT.user:
         return
 
     ctx = await BOT.get_context(message)
@@ -53,7 +53,9 @@ async def on_message(message):
             ctx.guild.id)
 
         if copypasta_channel and copypasta_channel == message.channel.id:
-            message.content = f"{guild_prefix}copypasta -a {message.content}"
+            flag = "import" if message.attachments else "add"
+            message.content = (
+                f"{guild_prefix}copypasta --{flag} {message.content}")
             await BOT.process_commands(message)
 
 

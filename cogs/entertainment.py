@@ -1,5 +1,6 @@
 """Contains cogs used for functions related to fun and entertainment."""
 
+import discord
 import functions
 import regexes
 import settings
@@ -442,6 +443,53 @@ class Entertainment(commands.Cog):
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_SET_CHANNEL_NOT_FOUND").format(
                         channel_name, ctx.guild))
+
+        # Export copypastas to a JSON file.
+        elif regexes.EXPORT.fullmatch(arguments):
+            await ctx.send(functions.get_localized_object(
+                ctx.guild.id, "COPYPASTA_BE_PATIENT"))
+
+            buffer = functions.copypasta_export_json(ctx.guild.id)
+
+            await ctx.send(file=discord.File(buffer, "export.json"))
+
+        # Import copypastas from a JSON file.
+        elif regexes.IMPORT.match(arguments) and ctx.message.attachments:
+            await ctx.send(functions.get_localized_object(
+                ctx.guild.id, "COPYPASTA_BE_PATIENT"))
+
+            attachment = ctx.message.attachments[0]
+            data = await attachment.read()
+            results = functions.copypasta_import_json(data, ctx.guild.id)
+
+            if not results:
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "COPYPASTA_IMPORT_INVALID_FILE"))
+                return
+
+            parsed, imported, ignored, invalid = results
+            parsed_count = len(parsed)
+
+            if not parsed:
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "COPYPASTA_IMPORT_NONE_PARSED"))
+                return
+
+            if imported:
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "COPYPASTA_IMPORT_IMPORTED").format(
+                        f"({len(imported)}/{parsed_count})"))
+
+            if ignored:
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "COPYPASTA_IMPORT_IGNORED").format(
+                        f"({len(ignored)}/{parsed_count})"))
+
+            if invalid:
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "COPYPASTA_IMPORT_INVALID").format(
+                        f"({len(invalid)}/{parsed_count})",
+                        "\n".join(str(dict) for dict in invalid)))
 
         # Send either a specific copypasta by title or a list
         # of copypastas containing user query in their title.

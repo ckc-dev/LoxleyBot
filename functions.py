@@ -1,5 +1,6 @@
 """Contains general use functions used in other parts of the bot."""
 
+import io
 import json
 import random
 
@@ -534,6 +535,76 @@ def database_logging_channel_set(guild_id, channel_id):
          WHERE guild_id = ?;""", (channel_id, guild_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
+
+
+def copypasta_export_json(guild_id):
+    """
+    Return a memory buffer containing all guild copypastas, formatted as JSON.
+
+    Args:
+        guild_id (int): ID of guild which will have its copypastas exported.
+
+    Returns:
+        io.BytesIO: Memory buffer containing copypastas, formatted as JSON.
+    """
+    copypastas = database_copypasta_search(
+        guild_id, field="id", arrangement="ASC")
+    keys = ("id", "title", "contents", "count")
+    dicts = [dict(zip(keys, copypasta)) for copypasta in copypastas]
+    formatted = json.dumps(dicts, indent=2, ensure_ascii=False)
+
+    return io.BytesIO(formatted.encode("utf-8"))
+
+
+def copypasta_import_json(data, guild_id):
+    """
+    Load copypastas from a JSON file and import them to the database.
+
+    After data is saved, operation results are returned.
+
+    Args:
+        data (str, bytes): Data to be loaded as JSON.
+        guild_id (int): ID of guild which will have copypastas imported to.
+
+    Returns:
+        Tuple[List, List, List, List]: A tuple which contains lists containing
+            data for copypastas parsed from JSON, imported to the database,
+            ignored (already on the database), and invalid (due to invalid
+            keys), respectively.
+    """
+    try:
+        parsed = json.loads(data)
+    except json.JSONDecodeError:
+        return
+
+    imported = []
+    ignored = []
+    invalid = []
+
+    for copypasta in parsed:
+        try:
+            title = copypasta["title"]
+            contents = copypasta["contents"]
+            exists = database_copypasta_search(
+                guild_id, contents, exact_match=True)
+
+            if not exists:
+                if not title:
+                    title = regexes.FIRST_FEW_WORDS.match(contents).group(1)
+
+                database_copypasta_add(guild_id, title, contents)
+                imported.append(copypasta)
+            else:
+                ignored.append(copypasta)
+
+        # Catch exceptions in case user has modified exported files manually.
+        # KeyError: Raised due to invalid key values.
+        # TypeError: Raised due to invalid nesting level, which would result in
+        # code using "title" as a positional index to a string.
+        except (KeyError, TypeError):
+            invalid.append(copypasta)
+
+    return (parsed, imported, ignored, invalid)
 
 
 with open(settings.LOCALIZATION_FILE_NAME, encoding="utf8") as f:

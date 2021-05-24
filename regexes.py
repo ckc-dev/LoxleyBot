@@ -30,6 +30,16 @@ ALL = re.compile(r"""
     \b              # Match word boundary.""",
                  flags=re.IGNORECASE | re.VERBOSE)
 
+EXPORT = re.compile(r"""
+    (?:-e|--export) # Match either "-e" or "--export".
+    \b              # Match word boundary.""",
+                    flags=re.IGNORECASE | re.VERBOSE)
+
+IMPORT = re.compile(r"""
+    --import    # Match "--import".
+    \b          # Match word boundary.""",
+                    flags=re.IGNORECASE | re.VERBOSE)
+
 ARRANGEMENT = re.compile(r"""
     (?P<arrangement>    # CAPTURE GROUP (arrangement) | Open capture group.
         -a|--ascending  # Match either "-a" or "--ascending".

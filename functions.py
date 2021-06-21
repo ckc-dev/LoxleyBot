@@ -539,21 +539,65 @@ def database_logging_channel_set(guild_id, channel_id):
 
 def copypasta_export_json(guild_id):
     """
-    Return a memory buffer containing all guild copypastas, formatted as JSON.
+    Return memory buffers containing all guild copypastas, formatted as JSON.
 
     Args:
         guild_id (int): ID of guild which will have its copypastas exported.
 
     Returns:
-        io.BytesIO: Memory buffer containing copypastas, formatted as JSON.
+        List(io.BytesIO): A list of memory buffers containing copypastas,
+            formatted as JSON.
     """
+    # A number of bytes (or characters) is removed from Discord's file size
+    # limit to calculate a maximum file size. This is done to account for a
+    # margin of error on individual copypasta sizes due to JSON indentation and
+    # commas. Otherwise, the final file size could be larger than the limit,
+    # after converting it to JSON.
+    MAX_FILE_SIZE = settings.DISCORD_FILE_BYTE_LIMIT - 65536
     copypastas = database_copypasta_search(
         guild_id, field="id", arrangement="ASC")
     keys = ("id", "title", "contents", "count")
-    dicts = [dict(zip(keys, copypasta)) for copypasta in copypastas]
-    formatted = json.dumps(dicts, indent=2, ensure_ascii=False)
+    copypasta_dicts = [dict(zip(keys, copypasta)) for copypasta in copypastas]
+    cur_file_size = 0
+    copypastas_within_limit = []
+    copypasta_lists = []
 
-    return io.BytesIO(formatted.encode("utf-8"))
+    for dict_ in copypasta_dicts:
+        formatted = json.dumps(
+            dict_,
+            indent=settings.COPYPASTA_JSON_INDENT_AMOUNT,
+            ensure_ascii=False)
+        size = io.BytesIO(formatted.encode("utf-8")).getbuffer().nbytes
+
+        if cur_file_size + size > MAX_FILE_SIZE and copypastas_within_limit:
+            copypasta_lists.append(copypastas_within_limit)
+            copypastas_within_limit = []
+
+        if size > MAX_FILE_SIZE:
+            continue
+
+        copypastas_within_limit.append(dict_)
+
+        if dict_ == copypasta_dicts[-1]:
+            copypasta_lists.append(copypastas_within_limit)
+
+        formatted_file = json.dumps(
+            copypastas_within_limit,
+            indent=settings.COPYPASTA_JSON_INDENT_AMOUNT,
+            ensure_ascii=False)
+        cur_file_size = io.BytesIO(
+            formatted_file.encode("utf-8")).getbuffer().nbytes
+
+    buffers = []
+
+    for list_ in copypasta_lists:
+        formatted = json.dumps(
+            list_,
+            indent=settings.COPYPASTA_JSON_INDENT_AMOUNT,
+            ensure_ascii=False)
+        buffers.append(io.BytesIO(formatted.encode("utf-8")))
+
+    return buffers
 
 
 def copypasta_import_json(data, guild_id):

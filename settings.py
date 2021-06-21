@@ -35,6 +35,10 @@ DATABASE_CONNECTION = sqlite3.connect(DATABASE_NAME)
 DISCORD_CHARACTER_LIMIT = 2000
 COPYPASTA_LIST_CHARACTERS_PER_ROW = 80
 
+# Values to use when generating a copypasta JSON file to be exported.
+DISCORD_FILE_BYTE_LIMIT = 8388608
+COPYPASTA_JSON_INDENT_AMOUNT = 2
+
 # Color to use in embeds.
 EMBED_COLOR = 0x1794be
 

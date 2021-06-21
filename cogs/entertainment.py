@@ -449,9 +449,11 @@ class Entertainment(commands.Cog):
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "COPYPASTA_BE_PATIENT"))
 
-            buffer = functions.copypasta_export_json(ctx.guild.id)
+            buffers = functions.copypasta_export_json(ctx.guild.id)
 
-            await ctx.send(file=discord.File(buffer, "export.json"))
+            for i, buffer in enumerate(buffers, start=1):
+                name = f"export{'_' + str(i) if len(buffers) > 1 else ''}.json"
+                await ctx.send(file=discord.File(buffer, name))
 
         # Import copypastas from a JSON file.
         elif regexes.IMPORT.match(arguments) and ctx.message.attachments:

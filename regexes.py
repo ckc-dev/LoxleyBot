@@ -183,6 +183,8 @@ FIRST_FEW_WORDS = re.compile(r"""
                     # as few times as possible.
         \S          # Match any non-whitespace character.
         \b          # Match a word boundary.
+        |           # OR
+        \S+         # Match any non-whitespace character between 1 and ∞ times.
     )               # Close capture group (1).""",
                              flags=re.IGNORECASE | re.VERBOSE)
 

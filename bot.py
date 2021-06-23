@@ -75,6 +75,7 @@ async def on_raw_message_delete(payload):
         message = payload.cached_message
         id_ = payload.message_id
         date = discord.utils.snowflake_time(id_)
+        strftime_format = functions.get_localized_object(guild_id, "STRFTIME")
         channel = BOT.get_channel(payload.channel_id)
         embed = discord.Embed(color=settings.EMBED_COLOR)
 
@@ -101,13 +102,13 @@ async def on_raw_message_delete(payload):
                             inline=False)
 
         embed.add_field(name=functions.get_localized_object(guild_id, "LOGGING_MESSAGE_DELETED_FIELD_CREATION_TIME_NAME"),
-                        value=date.strftime(settings.STRFTIME_FORMAT),
+                        value=date.strftime(strftime_format),
                         inline=False)
         embed.add_field(name=functions.get_localized_object(guild_id, "LOGGING_MESSAGE_DELETED_FIELD_ID_NAME"),
                         value=f"`{id_}`",
                         inline=False)
         embed.set_footer(
-            text=functions.get_localized_object(guild_id, "LOGGING_MESSAGE_DELETED_FOOTER").format(datetime.datetime.utcnow().strftime(settings.STRFTIME_FORMAT)))
+            text=functions.get_localized_object(guild_id, "LOGGING_MESSAGE_DELETED_FOOTER").format(datetime.datetime.utcnow().strftime(strftime_format)))
 
         await logging_channel.send(embed=embed)
 

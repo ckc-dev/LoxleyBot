@@ -43,6 +43,3 @@ COPYPASTA_LIST_CHARACTERS_PER_ROW = 80
 # Values to use when generating a copypasta JSON file to be exported.
 DISCORD_FILE_BYTE_LIMIT = 8388608
 COPYPASTA_JSON_INDENT_AMOUNT = 2
-
-# How dates should be represented when using strftime().
-STRFTIME_FORMAT = "%Y-%m-%d | %H:%M:%S"

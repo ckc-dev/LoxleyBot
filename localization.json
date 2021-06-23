@@ -52,6 +52,7 @@
     "COPYPASTA_MULTIPLE_FOUND_TITLE": "I have found {} copypastas with '{}' in their title:",
     "COPYPASTA_ADD": "'{}' added!",
     "COPYPASTA_ALREADY_EXISTS_ADD": "It looks like this copypasta has already been added!",
+    "COPYPASTA_CHARACTER_LIMIT": "Due to Discord's limitations, copypasta title must be no greater than 256 characters, and contents no greater than 2048 characters.",
     "COPYPASTA_DELETE": "Copypasta with ID {} deleted!",
     "COPYPASTA_SET_CHANNEL": "Done! All messages sent to {} will be automatically saved as copypastas.",
     "COPYPASTA_SET_CHANNEL_NONE": "Done! No channel will have its messages automatically saved as copypastas.",
@@ -62,7 +63,7 @@
     "COPYPASTA_IMPORT_NONE_PARSED": "No copypasta could be parsed from the file. Make sure this file isn't empty and is using valid syntax.",
     "COPYPASTA_IMPORT_IMPORTED": "`{}` copypastas imported.",
     "COPYPASTA_IMPORT_IGNORED": "`{}` copypastas ignored, as these are already saved on the database.",
-    "COPYPASTA_IMPORT_INVALID": "`{}` invalid copypastas:\n`{}`",
+    "COPYPASTA_IMPORT_INVALID": "`{}` invalid copypastas:",
 
     "LOGGING_INVALID_ARGUMENT": "Please provide a valid argument.",
     "LOGGING_MESSAGE_DELETED_FIELD_HEADER_NAME": "A message was deleted!",
@@ -129,6 +130,7 @@
     "COPYPASTA_MULTIPLE_FOUND_TITLE": "Eu encontrei {} copypastas com '{}' nos seus títulos:",
     "COPYPASTA_ADD": "'{}' adicionada!",
     "COPYPASTA_ALREADY_EXISTS_ADD": "Parece que esta copypasta já foi adicionada!",
+    "COPYPASTA_CHARACTER_LIMIT": "Devido às limitações do Discord, o título da copypasta não deve ter mais que 256 caracteres, e o conteúdo não deve ter mais que 2048 caracteres.",
     "COPYPASTA_DELETE": "Copypasta com o ID {} apagada!",
     "COPYPASTA_SET_CHANNEL": "Feito! Todas as mensagens enviadas para {} serão automaticamente salvas como copypastas.",
     "COPYPASTA_SET_CHANNEL_NONE": "Feito! Nenhum canal terá suas mensagens automaticamente salvas como copypastas.",
@@ -139,7 +141,7 @@
     "COPYPASTA_IMPORT_NONE_PARSED": "Nenhuma copypasta encontrada no arquivo. Certifique-se de que este arquivo não esteja vazio e possua uma sintaxe válida.",
     "COPYPASTA_IMPORT_IMPORTED": "`{}` copypastas importadas.",
     "COPYPASTA_IMPORT_IGNORED": "`{}` copypastas ignoradas, por já estarem salvas no banco de dados.",
-    "COPYPASTA_IMPORT_INVALID": "`{}` copypastas inválidas:\n`{}`",
+    "COPYPASTA_IMPORT_INVALID": "`{}` copypastas inválidas:",
 
     "LOGGING_INVALID_ARGUMENT": "Por favor forneça um argumento válido.",
     "LOGGING_MESSAGE_DELETED_FIELD_HEADER_NAME": "Uma mensagem foi apagada!",

@@ -636,6 +636,11 @@ def copypasta_import_json(data, guild_id):
                 if not title:
                     title = regexes.FIRST_FEW_WORDS.match(contents).group(1)
 
+                if (len(contents) > settings.DISCORD_EMBED_DESCRIPTION_LIMIT
+                        or len(title) > settings.DISCORD_EMBED_TITLE_LIMIT):
+                    invalid.append(copypasta)
+                    continue
+
                 database_copypasta_add(guild_id, title, contents)
                 imported.append(copypasta)
             else:

@@ -326,6 +326,14 @@ class Entertainment(commands.Cog):
             if not exists:
                 if not title:
                     title = regexes.FIRST_FEW_WORDS.match(contents).group(1)
+
+                if (len(contents) > settings.DISCORD_EMBED_DESCRIPTION_LIMIT
+                        or len(title) > settings.DISCORD_EMBED_TITLE_LIMIT):
+                    await ctx.send(functions.get_localized_object(
+                        ctx.guild.id, "COPYPASTA_CHARACTER_LIMIT").format(
+                        functions.database_guild_prefix_get(self.bot, ctx)))
+                    return
+
                 functions.database_copypasta_add(ctx.guild.id, title, contents)
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_ADD").format(title))
@@ -490,8 +498,13 @@ class Entertainment(commands.Cog):
             if invalid:
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_IMPORT_INVALID").format(
-                        f"({len(invalid)}/{parsed_count})",
-                        "\n".join(str(dict) for dict in invalid)))
+                        f"({len(invalid)}/{parsed_count})"))
+
+                for i in invalid:
+                    # 6 is removed from Discord's character limit when limiting
+                    # string length to account for Markdown code block used.
+                    await ctx.send("```{}```".format(
+                        str(i)[:settings.DISCORD_CHARACTER_LIMIT - 6]))
 
         # Send either a specific copypasta by title or a list
         # of copypastas containing user query in their title.

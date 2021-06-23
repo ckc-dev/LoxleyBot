@@ -670,7 +670,7 @@ def get_available_locales():
     return list(LOCALIZED_MESSAGES.keys())
 
 
-def get_localized_object(guild_id, message, locale=None):
+def get_localized_object(guild_id, message, locale=None, as_list=False):
     """
     Get a localized object from the localization file for a guild.
 
@@ -693,4 +693,9 @@ def get_localized_object(guild_id, message, locale=None):
     if not locale:
         locale = database_guild_locale_get(guild_id)
 
-    return LOCALIZED_MESSAGES[locale][message]
+    obj = LOCALIZED_MESSAGES[locale][message]
+
+    if isinstance(obj, list) and as_list:
+        return random.choice(obj)
+
+    return obj

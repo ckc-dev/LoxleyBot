@@ -1,5 +1,7 @@
 {
   "en-US": {
+    "STRFTIME": "%m-%d-%Y | %H:%M:%S",
+
     "BOT_GUILD_JOIN": "`{}` | Hi `{}`! Use `{}help` to get more information on what I can do. Use `{}locale` to change the locale.",
 
     "MENTION_HELP": "Hello! Use `{}help` to get more information on what I can do. Did you know I can play Marco Polo?",
@@ -78,6 +80,8 @@
     "LOGGING_SET_CHANNEL_NOT_FOUND": "No text channel named '{}' was found in `{}`."
   },
   "pt-BR": {
+    "STRFTIME": "%d-%m-%Y | %H:%M:%S",
+
     "BOT_GUILD_JOIN": "`{}` | Olá `{}`! Use `{}help` para mais informações no que eu posso fazer. Use `{}locale` para alterar a localização.",
 
     "MENTION_HELP": "Olá! Use `{}help` para mais informações no que eu posso fazer. Sabia que eu sei jogar Marco Polo?",

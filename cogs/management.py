@@ -29,23 +29,20 @@ class Management(commands.Cog):
                 just kicking them. Defaults to False.
         """
         message_reference = ctx.message.reference
+        kick_type = "BAN" if ban else "KICK"
 
         if not arguments and not message_reference:
             await ctx.send(functions.get_localized_object(
-                ctx.guild.id, "BAN_INVALID_ARGUMENT"
-                              if ban else "KICK_INVALID_ARGUMENT"))
+                ctx.guild.id, f"{kick_type}_INVALID_ARGUMENT"))
             return
 
         members = []
         reason = functions.get_localized_object(
-            ctx.guild.id, "BAN_DEFAULT_REASON"
-                          if ban else "KICK_DEFAULT_REASON")
+            ctx.guild.id, f"{kick_type}_DEFAULT_REASON")
         message = functions.get_localized_object(
-            ctx.guild.id, "BAN_MESSAGE"
-                          if ban else "KICK_MESSAGE")
+            ctx.guild.id, f"{kick_type}_MESSAGE")
         direct_message = functions.get_localized_object(
-            ctx.guild.id, "BAN_MESSAGE_DIRECT"
-                          if ban else "KICK_MESSAGE_DIRECT")
+            ctx.guild.id, f"{kick_type}_MESSAGE_DIRECT")
 
         if arguments:
             match_reason = regexes.REASON.search(arguments)

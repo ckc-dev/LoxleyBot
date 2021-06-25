@@ -5,7 +5,6 @@ import os
 
 import discord
 from discord.ext import commands
-from discord.utils import find
 
 import functions
 import regexes
@@ -26,6 +25,8 @@ async def on_message(message):
     """
     Will run every time a message is received.
 
+    Only runs on channels bot has permission to access and read messages on.
+
     Args:
         message (discord.Message): Received message.
     """
@@ -34,35 +35,37 @@ async def on_message(message):
 
     ctx = await BOT.get_context(message)
 
-    # Check whether or not message invokes Bot (i.e., it is a command).
+    # Check whether or not message invokes bot (i.e., it is a command).
     if ctx.valid:
         await BOT.process_commands(message)
-    else:
-        if regexes.MARCO.fullmatch(message.content):
-            await ctx.send(functions.marco_polo(message.content))
-            return
+        return
 
-        guild_prefix = functions.database_guild_prefix_get(BOT, message)
+    if regexes.MARCO.fullmatch(message.content):
+        await ctx.send(functions.marco_polo(message.content))
+        return
 
-        if BOT.user in message.mentions:
-            await ctx.send(functions.get_localized_object(
-                message.guild.id, "MENTION_HELP").format(guild_prefix))
-            return
+    guild_prefix = functions.database_guild_prefix_get(BOT, message)
 
-        copypasta_channel = functions.database_copypasta_channel_get(
-            ctx.guild.id)
+    if BOT.user in message.mentions:
+        await ctx.send(functions.get_localized_object(
+            message.guild.id, "MENTION_HELP").format(guild_prefix))
+        return
 
-        if copypasta_channel and copypasta_channel == message.channel.id:
-            flag = "import" if message.attachments else "add"
-            message.content = (
-                f"{guild_prefix}copypasta --{flag} {message.content}")
-            await BOT.process_commands(message)
+    copypasta_channel = functions.database_copypasta_channel_get(ctx.guild.id)
+
+    if copypasta_channel and message.channel.id == copypasta_channel:
+        flag = "import" if message.attachments else "add"
+        message.content = (
+            f"{guild_prefix}copypasta --{flag} {message.content}")
+        await BOT.process_commands(message)
 
 
 @BOT.event
 async def on_raw_message_delete(payload):
     """
     Will run every time a message is deleted, whether it is cached or not.
+
+    Only runs on channels bot has permission to access and read messages on.
 
     Args:
         payload (discord.RawMessageDeleteEvent): Raw event payload data.
@@ -80,35 +83,47 @@ async def on_raw_message_delete(payload):
         embed = discord.Embed(color=settings.EMBED_COLOR)
 
         if message:
-            author = message.author
-            contents = message.content
-
-            embed.set_thumbnail(url=author.avatar_url)
-            embed.add_field(name=functions.get_localized_object(guild_id, "LOGGING_MESSAGE_DELETED_FIELD_HEADER_NAME"),
-                            value=functions.get_localized_object(
-                                guild_id, "LOGGING_MESSAGE_DELETED_FIELD_HEADER_VALUE").format(channel.mention, author.mention),
-                            inline=False)
-            embed.add_field(name=functions.get_localized_object(guild_id, "LOGGING_MESSAGE_DELETED_FIELD_CONTENTS_NAME"),
-                            # `or None` is used just in case message was an
-                            # embed and therefore has no contents. This
-                            # prevents an exception from being raised due to an
-                            # embed field with an empty value.
-                            value=contents or None,
-                            inline=False)
+            embed.set_thumbnail(url=message.author.avatar_url)
+            embed.add_field(
+                name=functions.get_localized_object(
+                    guild_id, "LOGGING_MESSAGE_DELETED_FIELD_HEADER_NAME"),
+                value=functions.get_localized_object(
+                    guild_id,
+                    "LOGGING_MESSAGE_DELETED_FIELD_HEADER_VALUE").format(
+                        channel.mention, message.author.mention),
+                inline=False)
+            embed.add_field(
+                name=functions.get_localized_object(
+                    guild_id, "LOGGING_MESSAGE_DELETED_FIELD_CONTENT_NAME"),
+                # `or None` is used just in case message was an embed and
+                # therefore has no content. This prevents an exception from
+                # being raised due to an embed field with an empty value.
+                value=message.content or None,
+                inline=False)
         else:
-            embed.add_field(name=functions.get_localized_object(guild_id, "LOGGING_MESSAGE_DELETED_FIELD_HEADER_NAME"),
-                            value=functions.get_localized_object(
-                                guild_id, "LOGGING_MESSAGE_DELETED_FIELD_HEADER_VALUE_NO_CACHE").format(channel.mention),
-                            inline=False)
+            embed.add_field(
+                name=functions.get_localized_object(
+                    guild_id, "LOGGING_MESSAGE_DELETED_FIELD_HEADER_NAME"),
+                value=functions.get_localized_object(
+                    guild_id,
+                    "LOGGING_MESSAGE_DELETED_FIELD_HEADER_VALUE_NO_CACHE").format(
+                        channel.mention),
+                inline=False)
 
-        embed.add_field(name=functions.get_localized_object(guild_id, "LOGGING_MESSAGE_DELETED_FIELD_CREATION_TIME_NAME"),
-                        value=date.strftime(strftime_format),
-                        inline=False)
-        embed.add_field(name=functions.get_localized_object(guild_id, "LOGGING_MESSAGE_DELETED_FIELD_ID_NAME"),
-                        value=f"`{id_}`",
-                        inline=False)
+        embed.add_field(
+            name=functions.get_localized_object(
+                guild_id, "LOGGING_MESSAGE_DELETED_FIELD_CREATION_TIME_NAME"),
+            value=date.strftime(strftime_format),
+            inline=False)
+        embed.add_field(
+            name=functions.get_localized_object(
+                guild_id, "LOGGING_MESSAGE_DELETED_FIELD_ID_NAME"),
+            value=f"`{id_}`",
+            inline=False)
         embed.set_footer(
-            text=functions.get_localized_object(guild_id, "LOGGING_MESSAGE_DELETED_FOOTER").format(datetime.datetime.utcnow().strftime(strftime_format)))
+            text=functions.get_localized_object(
+                guild_id, "LOGGING_MESSAGE_DELETED_FOOTER").format(
+                    datetime.datetime.utcnow().strftime(strftime_format)))
 
         await logging_channel.send(embed=embed)
 
@@ -139,9 +154,9 @@ async def on_guild_join(guild):
     """
     functions.database_guild_initialize(guild.id)
 
-    NAMES = settings.COMMON_GENERAL_TEXT_CHANNEL_NAMES
-    general = find(lambda c: any(name in c.name for name in NAMES),
-                   guild.text_channels)
+    general = discord.utils.find(lambda c: any(
+        name in c.name for name in settings.COMMON_GENERAL_TEXT_CHANNEL_NAMES),
+        guild.text_channels)
 
     if general and general.permissions_for(guild.me).send_messages:
         message = ""

@@ -45,8 +45,8 @@ def marco_polo(string):
         Generate a string of characters based on user input.
 
         Args:
-            strings (List[str]): A list containing strings used to
-                generate results from.
+            strings (List[str]): A list containing strings used to generate
+                results from.
             sub (str): String or character to substitute strings with.
 
         Returns:
@@ -54,15 +54,15 @@ def marco_polo(string):
         """
         s = ""
 
-        # Get the chance any character has of being uppercase,
-        # by dividing the number of uppercase characters by
-        # the total number of characters in all strings.
+        # Get the chance any character has of being uppercase, by dividing the
+        # number of uppercase characters by the total number of characters in
+        # all strings.
         uppercase_chance = sum(
             1 for c in "".join(strings) if c.isupper()) / len("".join(strings))
 
-        # Decide whether current character will be uppercase or not,
-        # and add it to string. Do this a number of times equal to
-        # the average number of characters in all strings:
+        # Decide whether current character will be uppercase or not and add it
+        # to string. Do this a number of times equal to the average number of
+        # characters in all strings.
         for _ in range(sum(gen_char_amount(s) for s in strings) // len(strings)):
             s += "".join(random.choices(
                 [sub.lower(), sub.upper()],
@@ -76,8 +76,8 @@ def marco_polo(string):
         Generate a string of punctuation, based on user input.
 
         Args:
-            string (str): A group of punctuation characters
-                to generate string from.
+            string (str): A group of punctuation characters used to generate
+                string.
 
         Returns:
             str: Generated string.
@@ -85,14 +85,14 @@ def marco_polo(string):
         s = ""
         d = {}
 
-        # Populate dictionary with each unique character and
-        # the amount of times it appears in input string.
+        # Populate dictionary with each unique character and the amount of
+        # times it appears in input string.
         for c in set([c for c in string]):
             d[c] = string.count(c)
 
-        # Pick a random character based on how many times that
-        # character appears, then add it to main, to-be-returned string.
-        # Do this a number of times generated using input string.
+        # Pick a random character based on how many times that character
+        # appears, then add it to main, to-be-returned string. Do this a number
+        # of times generated using input string.
         for _ in range(gen_char_amount(string)):
             s += "".join(random.choices([*d], weights=[*d.values()]))
 
@@ -157,7 +157,7 @@ def database_create():
                   id INTEGER NOT NULL,
             guild_id INTEGER NOT NULL,
                title TEXT NOT NULL,
-            contents TEXT NOT NULL,
+             content TEXT NOT NULL,
                count INTEGER DEFAULT 0);""")
     CURSOR.execute("""
         CREATE TABLE guild_data(
@@ -185,14 +185,14 @@ def database_guild_initialize(guild_id):
     CURSOR.close()
 
 
-def database_guild_prefix_get(_client, message):
+def database_guild_prefix_get(client, message):
     """
     Get a guild prefix from the database.
 
     Args:
         client (discord.Client): Client to which guild prefix will be queried.
-        message (discord.Message): Message coming from guild which prefix
-            will be queried.
+        message (discord.Message): Message coming from guild which prefix will
+            be queried.
 
     Returns:
         str: Guild prefix.
@@ -341,7 +341,7 @@ def database_copypasta_get(guild_id, copypasta_id=None):
 
     Returns:
         Tuple[int, str, str, int]: Tuple containing copypasta ID, title,
-            contents and count, respectively.
+            content and count, respectively.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
 
@@ -349,7 +349,7 @@ def database_copypasta_get(guild_id, copypasta_id=None):
     results = CURSOR.execute(f"""
         SELECT id,
                title,
-               contents,
+               content,
                count
           FROM copypastas
          WHERE guild_id = :guild_id
@@ -379,10 +379,10 @@ def database_copypasta_search(guild_id, query=None, by_title=False,
     Args:
         guild_id (int): ID of guild to which copypastas belong.
         query (str, optional): What to search for in copypasta title or
-            contents. If query is None, all copypastas that
+            content. If query is None, all copypastas that
             belong to this guild will be returned. Defaults to None.
         by_title (bool, optional): Whether or not to search only by
-            title and not by contents. Defaults to False.
+            title and not by content. Defaults to False.
         exact_match (bool, optional): Whether or not to search for an exact
             match. Defaults to False.
         field (str, optional): Which field results will be ordered by.
@@ -392,7 +392,7 @@ def database_copypasta_search(guild_id, query=None, by_title=False,
 
     Returns:
         List[Tuple[int, str, str, int]]: A list of tuples containing
-            copypasta ID, title, contents and count, respectively.
+            copypasta ID, title, content and count, respectively.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
     params = {"guild_id": guild_id,
@@ -400,26 +400,26 @@ def database_copypasta_search(guild_id, query=None, by_title=False,
     results = CURSOR.execute(f"""
           SELECT id,
                  title,
-                 contents,
+                 content,
                  count
             FROM copypastas
            WHERE guild_id = :guild_id
              AND(title LIKE :query
-            {'OR contents LIKE :query' if not by_title else ''})
+            {'OR content LIKE :query' if not by_title else ''})
         ORDER BY {field} {arrangement};""", params).fetchall()
     CURSOR.close()
 
     return results
 
 
-def database_copypasta_add(guild_id, title, contents):
+def database_copypasta_add(guild_id, title, content):
     """
     Add a copypasta to the database.
 
     Args:
         guild_id (int): ID of guild to which copypasta will belong.
         title (str): Title of the copypasta.
-        contents (str): Contents of the copypasta.
+        content (str): Contents of the copypasta.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
     CURSOR.execute("""
@@ -427,7 +427,7 @@ def database_copypasta_add(guild_id, title, contents):
             id,
             guild_id,
             title,
-            contents
+            content
         )
         VALUES(
             COALESCE(
@@ -438,7 +438,7 @@ def database_copypasta_add(guild_id, title, contents):
                    LIMIT 1) + 1,
                 1
             ), ?, ?, ?
-        );""", (guild_id, guild_id, title, contents))
+        );""", (guild_id, guild_id, title, content))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -556,7 +556,7 @@ def copypasta_export_json(guild_id):
     MAX_FILE_SIZE = settings.DISCORD_FILE_BYTE_LIMIT - 65536
     copypastas = database_copypasta_search(
         guild_id, field="id", arrangement="ASC")
-    keys = ("id", "title", "contents", "count")
+    keys = ("id", "title", "content", "count")
     copypasta_dicts = [dict(zip(keys, copypasta)) for copypasta in copypastas]
     cur_file_size = 0
     copypastas_within_limit = []
@@ -628,20 +628,20 @@ def copypasta_import_json(data, guild_id):
     for copypasta in parsed:
         try:
             title = copypasta["title"]
-            contents = copypasta["contents"]
+            content = copypasta["content"]
             exists = database_copypasta_search(
-                guild_id, contents, exact_match=True)
+                guild_id, content, exact_match=True)
 
             if not exists:
                 if not title:
-                    title = regexes.FIRST_FEW_WORDS.match(contents).group(1)
+                    title = regexes.FIRST_FEW_WORDS.match(content).group(1)
 
-                if (len(contents) > settings.DISCORD_EMBED_DESCRIPTION_LIMIT
+                if (len(content) > settings.DISCORD_EMBED_DESCRIPTION_LIMIT
                         or len(title) > settings.DISCORD_EMBED_TITLE_LIMIT):
                     invalid.append(copypasta)
                     continue
 
-                database_copypasta_add(guild_id, title, contents)
+                database_copypasta_add(guild_id, title, content)
                 imported.append(copypasta)
             else:
                 ignored.append(copypasta)
@@ -657,7 +657,7 @@ def copypasta_import_json(data, guild_id):
 
 
 with open(settings.LOCALIZATION_FILE_NAME, encoding="utf8") as f:
-    LOCALIZED_MESSAGES = json.loads(f.read())
+    LOCALIZATION = json.load(f)
 
 
 def get_available_locales():
@@ -667,35 +667,38 @@ def get_available_locales():
     Returns:
         List(str): A list of strings containing available bot locales.
     """
-    return list(LOCALIZED_MESSAGES.keys())
+    return list(LOCALIZATION.keys())
 
 
-def get_localized_object(guild_id, message, locale=None, as_list=False):
+def get_localized_object(guild_id, reference, locale=None, as_list=False):
     """
     Get a localized object from the localization file for a guild.
 
-    This object may be a string, list of strings, or dictionary.
+    This object may be a string, list of objects, or dictionary.
     If no specific locale code is passed, guild locale will be used.
 
     Args:
-        guild_id (int): ID of guild to get localized message for.
-        message (str): What message to get.
-        locale (str, optional): Locale code used to get the message.
+        guild_id (int): ID of guild to get localized object for.
+        reference (str): Reference to which object to get.
+        locale (str, optional): Locale code used to get the object.
             Defaults to none.
+        as_list (bool, optional): Whether or not to return the whole list when
+            getting a list object. If False, a random object from the list is
+            returned. Defaults to False
 
     Returns:
         One of the following:
 
-        str: Localized message.
-        dict: Localized dictionary.
+        str: Localized string.
         list: Localized list.
+        dict: Localized dictionary.
     """
     if not locale:
         locale = database_guild_locale_get(guild_id)
 
-    obj = LOCALIZED_MESSAGES[locale][message]
+    obj = LOCALIZATION[locale][reference]
 
-    if isinstance(obj, list) and as_list:
+    if not as_list and isinstance(obj, list):
         return random.choice(obj)
 
     return obj

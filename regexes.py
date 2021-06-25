@@ -55,7 +55,7 @@ DATABASE_FIELD = re.compile(r"""
         |               # OR
         -t|--title      # Match either "-t" or "--title".
         |               # OR
-        -c|--contents   # Match either "-c" or "--contents".
+        -c|--content   # Match either "-c" or "--content".
         |               # OR
         --count         # Match "count".
     )                   # Close capture group (field).
@@ -119,7 +119,7 @@ SET_CHANNEL_OPTIONAL_VALUE = re.compile(r"""
                         # between 1 and ∞ times.""",
                                         flags=re.IGNORECASE | re.VERBOSE)
 
-TITLE_CONTENTS = re.compile(r"""
+TITLE_CONTENT = re.compile(r"""
     (?:                     # Open non-capturing group.
         (?:                 # Open non-capturing group.
             ['\"]           # Match either "'" or '"'.
@@ -130,14 +130,14 @@ TITLE_CONTENTS = re.compile(r"""
                             # 0 or 1 times.
         \s*                 # Match between 0 and ∞ whitespace characters.
         ['\"]               # Match either "'" or '"'.
-        (?P<contents>.+)    # CAPTURE GROUP (contents) | Match any character
+        (?P<content>.+)    # CAPTURE GROUP (content) | Match any character
                             # between 1 and ∞ times.
         ['\"]               # Match either "'" or '"'.
     )                       # Close-non-capturing group.
     |                       # OR
-    (?P<contents_2>.+)      # CAPTURE GROUP (contents_2) | Match any character
+    (?P<content_2>.+)      # CAPTURE GROUP (content_2) | Match any character
                             # between 1 and ∞ times.""",
-                            flags=re.IGNORECASE | re.VERBOSE | re.DOTALL)
+                           flags=re.IGNORECASE | re.VERBOSE | re.DOTALL)
 
 TITLE_OPTIONAL = re.compile(r"""
     (?:-t|--title)? # Match either "-t" or "--title", either 0 or 1 times.

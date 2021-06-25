@@ -45,7 +45,7 @@ class Utils(commands.Cog):
         Delete an amount of messages from a channel.
 
         Args:
-            arguments (str): Arguments passed to command.
+            arguments (str): Arguments passed to command. Defaults to None.
 
         Usage:
             purge [{-l|--limit}] <limit>
@@ -76,9 +76,9 @@ class Utils(commands.Cog):
         if message_reference:
             end_message_id = message_reference.message_id
         elif regexes.LIMIT_OPTIONAL.fullmatch(arguments):
-            # 1 is added to account for the message sent by the bot.
-            limit = int(regexes.LIMIT_OPTIONAL.fullmatch(
-                arguments).group("limit")) + 1
+            # 1 is added to account for the message used to run the command.
+            limit = int(
+                regexes.LIMIT_OPTIONAL.fullmatch(arguments).group("limit")) + 1
         elif regexes.ID.fullmatch(arguments):
             end_message_id = int(regexes.ID.fullmatch(arguments).group("id"))
         elif not regexes.ALL.fullmatch(arguments):
@@ -170,11 +170,14 @@ class Utils(commands.Cog):
             try:
                 end_message = await ctx.channel.fetch_message(end_message_id)
 
+                # 1 is added to account for the message sent by the bot.
                 await end_message.reply(
                     functions.get_localized_object(
                         ctx.guild.id, "COUNT_FOUND_REPLY").format(count + 1),
                     mention_author=False)
                 return
+            # Catch exception just in case message is deleted before the bot
+            # has the chance to reply to it.
             except discord.NotFound:
                 pass
 
@@ -200,7 +203,7 @@ class Utils(commands.Cog):
         Change the guild prefix.
 
         Args:
-            new (str): Prefix to change to.
+            new (str): Prefix to change to. Defaults to None.
 
         Usage:
             prefix <new prefix>
@@ -212,6 +215,7 @@ class Utils(commands.Cog):
                 Change prefix to "./".
         """
         current = functions.database_guild_prefix_get(self.bot, ctx)
+
         if not new:
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "PREFIX_REQUIRE"))
@@ -226,7 +230,7 @@ class Utils(commands.Cog):
         Change guild locale.
 
         Args:
-            new (str): Locale to change to.
+            new (str): Locale to change to. Defaults to None.
 
         Usage:
             locale <new locale>
@@ -242,11 +246,11 @@ class Utils(commands.Cog):
 
         if not new or not new.upper() in [i.upper() for i in available]:
             await ctx.send(functions.get_localized_object(
-                ctx.guild.id, "LOCALE_REQUIRE").format(", ".join(
-                    f"`{i}`" for i in available
-                )))
+                ctx.guild.id, "LOCALE_REQUIRE").format(
+                    ", ".join(f"`{i}`" for i in available)))
         else:
             new = available[[i.upper() for i in available].index(new.upper())]
+
             functions.database_guild_locale_set(ctx.guild.id, new)
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "LOCALE_CHANGE").format(current, new))
@@ -277,7 +281,6 @@ class Utils(commands.Cog):
 
         if regexes.NONE.search(arguments):
             functions.database_logging_channel_set(ctx.guild.id, None)
-
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "LOGGING_SET_CHANNEL_NONE"))
             return
@@ -289,12 +292,9 @@ class Utils(commands.Cog):
             channel = await commands.TextChannelConverter().convert(
                 ctx, channel_name)
 
-            functions.database_logging_channel_set(
-                ctx.guild.id, channel.id)
-
+            functions.database_logging_channel_set(ctx.guild.id, channel.id)
             await ctx.send(functions.get_localized_object(
-                ctx.guild.id, "LOGGING_SET_CHANNEL").format(
-                    channel.mention))
+                ctx.guild.id, "LOGGING_SET_CHANNEL").format(channel.mention))
         except commands.ChannelNotFound:
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "LOGGING_SET_CHANNEL_NOT_FOUND").format(

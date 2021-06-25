@@ -4,7 +4,6 @@ import discord
 import functions
 import regexes
 import settings
-from discord import Embed
 from discord.ext import commands
 
 
@@ -48,10 +47,10 @@ class Entertainment(commands.Cog):
             copypasta [{-i|--id}] <copypasta ID>
             copypasta [{-t|--title}] <copypasta title>
             copypasta {-s|--search} <search query>
-            copypasta {-a|--add} "<copypasta title>" "<copypasta contents>"
+            copypasta {-a|--add} "<copypasta title>" "<copypasta content>"
             copypasta {-d|--delete} <copypasta ID>
             copypasta {-l|--list} [{-a|--ascending|-d|--descending}]
-                                  [{-i|--id|-t|--title|-c|--contents|--count}]
+                                  [{-i|--id|-t|--title|-c|--content|--count}]
 
         Examples:
             copypasta:
@@ -61,7 +60,7 @@ class Entertainment(commands.Cog):
             copypasta example:
                 Send copypasta which contains "example" in its title.
             copypasta -s example query:
-                Search for "example query" in copypastas title and contents.
+                Search for "example query" in copypastas title and content.
             copypasta -a "Title" "Contents":
                 Add "Contents" as a copypasta titled "Title".
             copypasta -d 8:
@@ -77,16 +76,15 @@ class Entertainment(commands.Cog):
 
             Args:
                 copypasta (Tuple[int, str, str, int]): Tuple containing
-                    copypasta ID, title, contents and count, respectively.
+                    copypasta ID, title, content and count, respectively.
 
             Returns:
                 discord.Embed: Copypasta.
             """
-            id_, title, contents, count = copypasta
+            id_, title, content, count = copypasta
 
-            embed = Embed(title=title,
-                          description=contents,
-                          color=settings.EMBED_COLOR)
+            embed = discord.Embed(
+                title=title, description=content, color=settings.EMBED_COLOR)
 
             # 1 is added to `count` to account for the fact that the data is
             # queried before it is updated. So if a copypasta is sent for the
@@ -110,11 +108,11 @@ class Entertainment(commands.Cog):
 
             Args:
                 copypasta_list (List[Tuple[int, str, str, int]]): A list of
-                    tuples containing copypasta ID, title, contents and count,
+                    tuples containing copypasta ID, title, content and count,
                     respectively.
                 emphasis (str, optional): Snippet of text that should be
                     highlighted. If present, the function will try to keep
-                    it in the center of contents column. Defaults to None.
+                    it in the center of content column. Defaults to None.
 
             Returns:
                 List[str]: List containing strings formatted as tables,
@@ -125,14 +123,14 @@ class Entertainment(commands.Cog):
                 ctx.guild.id, "COPYPASTA_ID")
             HEADING_TITLE = functions.get_localized_object(
                 ctx.guild.id, "COPYPASTA_TITLE")
-            HEADING_CONTENTS = functions.get_localized_object(
-                ctx.guild.id, "COPYPASTA_CONTENTS")
+            HEADING_CONTENT = functions.get_localized_object(
+                ctx.guild.id, "COPYPASTA_CONTENT")
             HEADING_COUNT = functions.get_localized_object(
                 ctx.guild.id, "COPYPASTA_COUNT")
             SEPARATOR = "|"
             PADDING = "…"
             PADDING_LEN = len(PADDING)
-            FORMAT = "{sep}{id}{sep}{title}{sep}{contents}{sep}{count}{sep}\n"
+            FORMAT = "{sep}{id}{sep}{title}{sep}{content}{sep}{count}{sep}\n"
 
             # Initialize character length limits. These are constant and tables
             # will truncate data once a value surpass its limit. IDs and counts
@@ -146,21 +144,31 @@ class Entertainment(commands.Cog):
             # Initialize character length max values. These are generated every
             # time a list of tables is created, based on the already defined
             # limits and values from the copypastas.
-            max_len_id = max(len(HEADING_ID),
-                             len(str(max(copypasta_list,
-                                         key=lambda l: l[0])[0])))
-            max_len_title = max(len(HEADING_TITLE),
-                                min(LIMIT_LEN_TITLE, len(max(copypasta_list,
-                                                             key=lambda l: len(l[1]))[1])))
-            max_len_count = max(len(HEADING_COUNT),
-                                len(str(max(copypasta_list,
-                                            key=lambda l: l[3])[3])))
-            max_len_contents = max(len(HEADING_CONTENTS),
-                                   min(LIMIT_LEN_LINE
-                                       - max_len_id
-                                       - max_len_title
-                                       - max_len_count, len(max(copypasta_list,
-                                                                key=lambda l: len(l[2]))[2])))
+
+            # First, get the entry with the largest ID number from copypasta
+            # list, then convert entry's ID field `[0]` to a string, as to get
+            # not the ID number, but it's number of digits. Finally, get the
+            # max amount of characters between the ID table heading and
+            # largest ID value, and assign it as the max length for the ID
+            # cells for this table. A very similar process is used for the
+            # other fields as well.
+            max_len_id = max(
+                len(HEADING_ID),
+                len(str(max(copypasta_list, key=lambda l: l[0])[0])))
+            max_len_title = max(
+                len(HEADING_TITLE),
+                min(LIMIT_LEN_TITLE,
+                    len(max(copypasta_list, key=lambda l: len(l[1]))[1])))
+            max_len_count = max(
+                len(HEADING_COUNT),
+                len(str(max(copypasta_list, key=lambda l: l[3])[3])))
+            max_len_content = max(
+                len(HEADING_CONTENT),
+                min((LIMIT_LEN_LINE
+                     - max_len_id
+                     - max_len_title
+                     - max_len_count),
+                    len(max(copypasta_list, key=lambda l: len(l[2]))[2])))
 
             # Initialize first table by opening a Markdown code block.
             table_list = []
@@ -169,19 +177,19 @@ class Entertainment(commands.Cog):
             # Add heading sections to table.
             section_id = HEADING_ID.center(max_len_id)
             section_title = HEADING_TITLE.center(max_len_title)
-            section_contents = HEADING_CONTENTS.center(max_len_contents)
+            section_content = HEADING_CONTENT.center(max_len_content)
             section_count = HEADING_COUNT.center(max_len_count)
             table += FORMAT.format(sep=SEPARATOR,
                                    id=section_id,
                                    title=section_title,
-                                   contents=section_contents,
+                                   content=section_content,
                                    count=section_count)
 
             for copypasta in copypasta_list:
                 # Separate copypasta data into variables and remove newlines
-                # from contents.
-                id_, title, contents, count = copypasta
-                contents = contents.replace("\n", "")
+                # from content.
+                id_, title, content, count = copypasta
+                content = content.replace("\n", "")
 
                 # Initialize ID, title and count sections.
                 section_id = str(id_).rjust(max_len_id)
@@ -192,25 +200,25 @@ class Entertainment(commands.Cog):
                                      + PADDING)
                 section_count = str(count).ljust(max_len_count)
 
-                # If highlighted text is in the copypasta contents:
-                # (upper() is used to do this case-insensitively).
-                if emphasis and emphasis.upper() in contents.upper():
+                # If highlighted text is in the copypasta content:
+                # (`upper()` is used to do this case-insensitively).
+                if emphasis and emphasis.upper() in content.upper():
                     # Limit its length and get its starting index.
                     emphasis_len = len(emphasis)
-                    if emphasis_len >= max_len_contents:
-                        emphasis = emphasis[:max_len_contents]
-                    emphasis_index = contents.upper().find(emphasis.upper())
+                    if emphasis_len >= max_len_content:
+                        emphasis = emphasis[:max_len_content]
+                    emphasis_index = content.upper().find(emphasis.upper())
 
                     # Get how many characters will remain after removing length
-                    # of highlighted text from max length of this cell,
-                    # then divide it into a pair for each side of the cell.
+                    # of highlighted text from max length of this cell, then
+                    # divide it into a pair for each side of the cell.
                     left_spaces, right_spaces = functions.divide_in_pairs(
-                        max_len_contents - emphasis_len)
+                        max_len_content - emphasis_len)
 
-                    # Get strings to left and right of highlighted
-                    # text in contents and their lengths.
-                    left_string = contents[:emphasis_index]
-                    right_string = contents[emphasis_index + emphasis_len:]
+                    # Get strings to left and right of highlighted text in
+                    # content and their lengths.
+                    left_string = content[:emphasis_index]
+                    right_string = content[emphasis_index + emphasis_len:]
                     left_string_len = len(left_string)
                     right_string_len = len(right_string)
 
@@ -233,41 +241,43 @@ class Entertainment(commands.Cog):
                         left_spaces += unused_spaces
                         right_spaces -= unused_spaces
 
-                    # Initialize contents section and add padding if necessary.
-                    section_contents = (left_string[left_string_len - left_spaces:]
-                                        + contents[emphasis_index:emphasis_index + emphasis_len]
-                                        + right_string[:right_spaces])
+                    # Initialize content section and add padding if necessary.
+                    section_content = (
+                        left_string[left_string_len - left_spaces:]
+                        + content[emphasis_index:emphasis_index + emphasis_len]
+                        + right_string[:right_spaces])
                     if padding_on_left:
-                        section_contents = (
-                            PADDING + section_contents[PADDING_LEN:])
+                        section_content = (
+                            PADDING + section_content[PADDING_LEN:])
                     if padding_on_right:
-                        section_contents = section_contents[:len(section_contents)
-                                                            - PADDING_LEN] + PADDING
+                        section_content = section_content[:len(
+                            section_content) - PADDING_LEN] + PADDING
 
-                # If highlighted text is not in the copypasta contents:
+                # If highlighted text is not in the copypasta content:
                 else:
-                    # If the number of characters in copypasta contents is
+                    # If the number of characters in copypasta content is
                     # within its max length, don't do anything. If it's not,
                     # limit it to its max length and add padding.
-                    if len(contents) <= max_len_contents:
-                        section_contents = contents
+                    if len(content) <= max_len_content:
+                        section_content = content
                     else:
-                        section_contents = contents[:max_len_contents -
-                                                    PADDING_LEN] + PADDING
+                        section_content = content[:max_len_content
+                                                  - PADDING_LEN] + PADDING
 
                 # Justify cell and add this row to the table.
-                section_contents = section_contents.ljust(max_len_contents)
+                section_content = section_content.ljust(max_len_content)
                 table += FORMAT.format(sep=SEPARATOR,
                                        id=section_id,
                                        title=section_title,
-                                       contents=section_contents,
+                                       content=section_content,
                                        count=section_count)
 
                 # If there is no more space for another row in the table,
                 # close this table, append it to list of tables,
                 # and open a new table.
                 # (3 is added to account for closing Markdown code block.)
-                if len(table) + 3 + CHARACTERS_PER_ROW > settings.DISCORD_CHARACTER_LIMIT:
+                if (len(table) + CHARACTERS_PER_ROW + 3
+                        > settings.DISCORD_CHARACTER_LIMIT):
                     table += "```"
                     table_list.append(table)
                     table = "```"
@@ -283,6 +293,7 @@ class Entertainment(commands.Cog):
         # Send a random copypasta.
         if arguments is None:
             copypasta = functions.database_copypasta_get(ctx.guild.id)
+
             if not copypasta:
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_NONE_FOUND").format(ctx.guild))
@@ -293,6 +304,7 @@ class Entertainment(commands.Cog):
         elif regexes.ID_OPTIONAL.fullmatch(arguments):
             id_ = regexes.ID_OPTIONAL.fullmatch(arguments).group("id")
             copypasta = functions.database_copypasta_get(ctx.guild.id, id_)
+
             if not copypasta:
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_NONE_FOUND_ID").format(
@@ -306,43 +318,49 @@ class Entertainment(commands.Cog):
             remaining = regexes.ADD_OPTIONAL_VALUE.fullmatch(
                 arguments).group(1)
             title = None
+
             if not remaining and not message_reference:
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_INVALID_USAGE").format(
                         functions.database_guild_prefix_get(self.bot, ctx)))
                 return
+
             if remaining:
-                match = regexes.TITLE_CONTENTS.fullmatch(remaining.strip())
+                match = regexes.TITLE_CONTENT.fullmatch(remaining.strip())
                 title = match.group("title")
-                contents = (match.group("contents") or ""
-                            + match.group("contents_2") or "")
+                content = (match.group("content") or ""
+                           + match.group("content_2") or "")
+
                 if message_reference:
-                    title = contents if not title else title
-                    contents = message_reference.resolved.content
+                    title = content if not title else title
+                    content = message_reference.resolved.content
             else:
-                contents = message_reference.resolved.content
+                content = message_reference.resolved.content
+
             exists = functions.database_copypasta_search(
-                ctx.guild.id, contents, exact_match=True)
+                ctx.guild.id, content, exact_match=True)
+
             if not exists:
                 if not title:
-                    title = regexes.FIRST_FEW_WORDS.match(contents).group(1)
+                    title = regexes.FIRST_FEW_WORDS.match(content).group(1)
 
-                if (len(contents) > settings.DISCORD_EMBED_DESCRIPTION_LIMIT
+                if (len(content) > settings.DISCORD_EMBED_DESCRIPTION_LIMIT
                         or len(title) > settings.DISCORD_EMBED_TITLE_LIMIT):
                     await ctx.send(functions.get_localized_object(
                         ctx.guild.id, "COPYPASTA_CHARACTER_LIMIT").format(
                         functions.database_guild_prefix_get(self.bot, ctx)))
                     return
 
-                functions.database_copypasta_add(ctx.guild.id, title, contents)
+                functions.database_copypasta_add(ctx.guild.id, title, content)
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_ADD").format(title))
             else:
                 # Query the database instead of grabbing copypasta
                 # directly if it exists, so that the number of times
                 # it was sent is updated.
-                copypasta = functions.database_copypasta_get(ctx.guild.id,
-                                                             exists[0][0])
+                copypasta = functions.database_copypasta_get(
+                    ctx.guild.id, exists[0][0])
+
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_ALREADY_EXISTS_ADD"))
                 await ctx.send(embed=format_copypasta(copypasta))
@@ -350,6 +368,7 @@ class Entertainment(commands.Cog):
         # Delete a copypasta from the database.
         elif regexes.DELETE.fullmatch(arguments):
             id_ = regexes.DELETE.fullmatch(arguments).group("id")
+
             functions.database_copypasta_delete(ctx.guild.id, id_)
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "COPYPASTA_DELETE").format(id_))
@@ -358,6 +377,7 @@ class Entertainment(commands.Cog):
         elif regexes.SEARCH.fullmatch(arguments):
             query = regexes.SEARCH.fullmatch(arguments).group("query")
             results = functions.database_copypasta_search(ctx.guild.id, query)
+
             if not results:
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_NONE_FOUND_QUERY").format(
@@ -385,10 +405,10 @@ class Entertainment(commands.Cog):
                 "": "count",
                 "-I": "id",
                 "-T": "title",
-                "-C": "contents",
+                "-C": "content",
                 "--ID": "id",
                 "--TITLE": "title",
-                "--CONTENTS": "contents",
+                "--CONTENT": "content",
                 "--COUNT": "count"
             }
             ARRANGEMENTS = {
@@ -443,7 +463,6 @@ class Entertainment(commands.Cog):
 
                 functions.database_copypasta_channel_set(
                     ctx.guild.id, channel.id)
-
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_SET_CHANNEL").format(
                         channel.mention))
@@ -527,8 +546,8 @@ class Entertainment(commands.Cog):
                     # Query the database instead of grabbing copypasta
                     # directly from list, so that the number of times
                     # it was sent is updated.
-                    copypasta = functions.database_copypasta_get(ctx.guild.id,
-                                                                 results[0][0])
+                    copypasta = functions.database_copypasta_get(
+                        ctx.guild.id, results[0][0])
                     await ctx.send(embed=format_copypasta(copypasta))
 
 

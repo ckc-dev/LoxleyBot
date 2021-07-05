@@ -91,10 +91,10 @@ class Entertainment(commands.Cog):
             # first time, it shows a count of "1" instead of "0", and so on.
             embed.set_footer(text="{}: {} | {}: {}".format(
                 functions.get_localized_object(
-                    ctx.guild.id, 'COPYPASTA_ID'),
+                    ctx.guild.id, 'COPYPASTA_TABLE_HEADER_ID'),
                 id_,
                 functions.get_localized_object(
-                    ctx.guild.id, 'COPYPASTA_COUNT'),
+                    ctx.guild.id, 'COPYPASTA_TABLE_HEADER_COUNT'),
                 count + 1))
 
             return embed
@@ -120,13 +120,13 @@ class Entertainment(commands.Cog):
             """
             CHARACTERS_PER_ROW = settings.COPYPASTA_LIST_CHARACTERS_PER_ROW
             HEADING_ID = functions.get_localized_object(
-                ctx.guild.id, "COPYPASTA_ID")
+                ctx.guild.id, "COPYPASTA_TABLE_HEADER_ID")
             HEADING_TITLE = functions.get_localized_object(
-                ctx.guild.id, "COPYPASTA_TITLE")
+                ctx.guild.id, "COPYPASTA_TABLE_HEADER_TITLE")
             HEADING_CONTENT = functions.get_localized_object(
-                ctx.guild.id, "COPYPASTA_CONTENT")
+                ctx.guild.id, "COPYPASTA_TABLE_HEADER_CONTENT")
             HEADING_COUNT = functions.get_localized_object(
-                ctx.guild.id, "COPYPASTA_COUNT")
+                ctx.guild.id, "COPYPASTA_TABLE_HEADER_COUNT")
             SEPARATOR = "|"
             PADDING = "…"
             PADDING_LEN = len(PADDING)
@@ -296,7 +296,8 @@ class Entertainment(commands.Cog):
 
             if not copypasta:
                 await ctx.send(functions.get_localized_object(
-                    ctx.guild.id, "COPYPASTA_NONE_FOUND").format(ctx.guild))
+                    ctx.guild.id, "COPYPASTA_NONE_FOUND").format(
+                        guild_name=ctx.guild))
             else:
                 await ctx.send(embed=format_copypasta(copypasta))
 
@@ -308,7 +309,8 @@ class Entertainment(commands.Cog):
             if not copypasta:
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_NONE_FOUND_ID").format(
-                        id_, ctx.guild))
+                        copypasta_id=id_,
+                        guild_name=ctx.guild))
             else:
                 await ctx.send(embed=format_copypasta(copypasta))
 
@@ -322,7 +324,8 @@ class Entertainment(commands.Cog):
             if not remaining and not message_reference:
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_INVALID_USAGE").format(
-                        functions.database_guild_prefix_get(self.bot, ctx)))
+                        prefix=functions.database_guild_prefix_get(
+                            self.bot, ctx)))
                 return
 
             if remaining:
@@ -347,13 +350,13 @@ class Entertainment(commands.Cog):
                 if (len(content) > settings.DISCORD_EMBED_DESCRIPTION_LIMIT
                         or len(title) > settings.DISCORD_EMBED_TITLE_LIMIT):
                     await ctx.send(functions.get_localized_object(
-                        ctx.guild.id, "COPYPASTA_CHARACTER_LIMIT").format(
-                        functions.database_guild_prefix_get(self.bot, ctx)))
+                        ctx.guild.id, "COPYPASTA_ADD_CHARACTER_LIMIT"))
                     return
 
                 functions.database_copypasta_add(ctx.guild.id, title, content)
                 await ctx.send(functions.get_localized_object(
-                    ctx.guild.id, "COPYPASTA_ADD").format(title))
+                    ctx.guild.id, "COPYPASTA_ADD").format(
+                        copypasta_title=title))
             else:
                 # Query the database instead of grabbing copypasta
                 # directly if it exists, so that the number of times
@@ -362,7 +365,7 @@ class Entertainment(commands.Cog):
                     ctx.guild.id, exists[0][0])
 
                 await ctx.send(functions.get_localized_object(
-                    ctx.guild.id, "COPYPASTA_ALREADY_EXISTS_ADD"))
+                    ctx.guild.id, "COPYPASTA_ADD_ALREADY_EXISTS"))
                 await ctx.send(embed=format_copypasta(copypasta))
 
         # Delete a copypasta from the database.
@@ -371,7 +374,7 @@ class Entertainment(commands.Cog):
 
             functions.database_copypasta_delete(ctx.guild.id, id_)
             await ctx.send(functions.get_localized_object(
-                ctx.guild.id, "COPYPASTA_DELETE").format(id_))
+                ctx.guild.id, "COPYPASTA_DELETE").format(copypasta_id=id_))
 
         # Search for one or more copypastas.
         elif regexes.SEARCH.fullmatch(arguments):
@@ -381,7 +384,8 @@ class Entertainment(commands.Cog):
             if not results:
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_NONE_FOUND_QUERY").format(
-                        query, ctx.guild))
+                        query=query,
+                        guild_name=ctx.guild))
             else:
                 if len(results) > 1:
                     for row in format_copypasta_list(results, query):
@@ -394,7 +398,7 @@ class Entertainment(commands.Cog):
                                                                  results[0][0])
                     await ctx.send(functions.get_localized_object(
                         ctx.guild.id, "COPYPASTA_ONE_FOUND_QUERY").format(
-                            query))
+                            query=query))
                     await ctx.send(embed=format_copypasta(copypasta))
 
         # List all available copypastas.
@@ -440,7 +444,8 @@ class Entertainment(commands.Cog):
 
             if not results:
                 await ctx.send(functions.get_localized_object(
-                    ctx.guild.id, "COPYPASTA_NONE_FOUND").format(ctx.guild))
+                    ctx.guild.id, "COPYPASTA_NONE_FOUND").format(
+                        guild_name=ctx.guild))
             else:
                 for row in format_copypasta_list(results):
                     await ctx.send(row)
@@ -465,16 +470,17 @@ class Entertainment(commands.Cog):
                     ctx.guild.id, channel.id)
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_SET_CHANNEL").format(
-                        channel.mention))
+                        channel_name=channel.mention))
             except commands.ChannelNotFound:
                 await ctx.send(functions.get_localized_object(
-                    ctx.guild.id, "COPYPASTA_SET_CHANNEL_NOT_FOUND").format(
-                        channel_name, ctx.guild))
+                    ctx.guild.id, "SET_CHANNEL_NOT_FOUND").format(
+                        channel_name=channel_name,
+                        guild_name=ctx.guild))
 
         # Export copypastas to a JSON file.
         elif regexes.EXPORT.fullmatch(arguments):
             await ctx.send(functions.get_localized_object(
-                ctx.guild.id, "COPYPASTA_BE_PATIENT"))
+                ctx.guild.id, "BE_PATIENT"))
 
             buffers = functions.copypasta_export_json(ctx.guild.id)
 
@@ -485,7 +491,7 @@ class Entertainment(commands.Cog):
         # Import copypastas from a JSON file.
         elif regexes.IMPORT.match(arguments) and ctx.message.attachments:
             await ctx.send(functions.get_localized_object(
-                ctx.guild.id, "COPYPASTA_BE_PATIENT"))
+                ctx.guild.id, "BE_PATIENT"))
 
             attachment = ctx.message.attachments[0]
             data = await attachment.read()
@@ -507,17 +513,20 @@ class Entertainment(commands.Cog):
             if imported:
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_IMPORT_IMPORTED").format(
-                        f"({len(imported)}/{parsed_count})"))
+                        imported_copypasta_count=(
+                            f"({len(imported)}/{parsed_count})")))
 
             if ignored:
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_IMPORT_IGNORED").format(
-                        f"({len(ignored)}/{parsed_count})"))
+                        ignored_copypasta_count=(
+                            f"({len(ignored)}/{parsed_count})")))
 
             if invalid:
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_IMPORT_INVALID").format(
-                        f"({len(invalid)}/{parsed_count})"))
+                        invalid_copypasta_count=(
+                            f"({len(invalid)}/{parsed_count})")))
 
                 for i in invalid:
                     # 6 is removed from Discord's character limit when limiting
@@ -534,12 +543,14 @@ class Entertainment(commands.Cog):
             if not results:
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_NONE_FOUND_TITLE").format(
-                        title, ctx.guild))
+                        query=title,
+                        guild_name=ctx.guild))
             else:
                 if len(results) > 1:
                     await ctx.send(functions.get_localized_object(
                         ctx.guild.id, "COPYPASTA_MULTIPLE_FOUND_TITLE").format(
-                            len(results), title))
+                            copypasta_count=len(results),
+                            query=title))
                     for row in format_copypasta_list(results):
                         await ctx.send(row)
                 else:

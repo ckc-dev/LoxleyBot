@@ -33,7 +33,7 @@ class Management(commands.Cog):
 
         if not arguments and not message_reference:
             await ctx.send(functions.get_localized_object(
-                ctx.guild.id, f"{kick_type}_INVALID_ARGUMENT"))
+                ctx.guild.id, f"{kick_type}_INVALID_USAGE"))
             return
 
         members = []
@@ -67,11 +67,15 @@ class Management(commands.Cog):
                 else:
                     await member.kick(reason=reason)
 
-                await ctx.send(message.format(member.mention, reason))
+                await ctx.send(message.format(
+                    member=member.mention,
+                    reason=reason))
 
                 # Catch exception in case member has disabled non-friend DMs.
                 try:
-                    await member.send(direct_message.format(ctx.guild, reason))
+                    await member.send(direct_message.format(
+                        guild_name=ctx.guild,
+                        reason=reason))
                 except discord.HTTPException:
                     pass
             except commands.MemberNotFound:
@@ -189,7 +193,7 @@ class Management(commands.Cog):
 
         if not users and not message_reference:
             await ctx.send(functions.get_localized_object(
-                ctx.guild.id, "UNBAN_INVALID_ARGUMENT"))
+                ctx.guild.id, "UNBAN_INVALID_USAGE"))
             return
 
         user_list = [] if not users else [
@@ -205,7 +209,8 @@ class Management(commands.Cog):
                     await ctx.guild.unban(ban.user)
                     await ctx.send(functions.get_localized_object(
                         ctx.guild.id, "UNBAN_MESSAGE").format(
-                            ban.user.name, ban.user.discriminator))
+                            user_name=ban.user.name,
+                            user_discriminator=ban.user.discriminator))
 
 
 def setup(bot):

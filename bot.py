@@ -48,7 +48,7 @@ async def on_message(message):
 
     if BOT.user in message.mentions:
         await ctx.send(functions.get_localized_object(
-            message.guild.id, "MENTION_HELP").format(guild_prefix))
+            message.guild.id, "MENTION_HELP").format(prefix=guild_prefix))
         return
 
     copypasta_channel = functions.database_copypasta_channel_get(ctx.guild.id)
@@ -90,7 +90,8 @@ async def on_raw_message_delete(payload):
                 value=functions.get_localized_object(
                     guild_id,
                     "LOGGING_MESSAGE_DELETED_FIELD_HEADER_VALUE").format(
-                        channel.mention, message.author.mention),
+                        channel_name=channel.mention,
+                        message_author=message.author.mention),
                 inline=False)
             embed.add_field(
                 name=functions.get_localized_object(
@@ -107,7 +108,7 @@ async def on_raw_message_delete(payload):
                 value=functions.get_localized_object(
                     guild_id,
                     "LOGGING_MESSAGE_DELETED_FIELD_HEADER_VALUE_NO_CACHE").format(
-                        channel.mention),
+                        channel_name=channel.mention),
                 inline=False)
 
         embed.add_field(
@@ -123,7 +124,8 @@ async def on_raw_message_delete(payload):
         embed.set_footer(
             text=functions.get_localized_object(
                 guild_id, "LOGGING_MESSAGE_DELETED_FOOTER").format(
-                    datetime.datetime.utcnow().strftime(strftime_format)))
+                    utc_time=datetime.datetime.utcnow().strftime(
+                        strftime_format)))
 
         await logging_channel.send(embed=embed)
 
@@ -141,7 +143,7 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send(functions.get_localized_object(
             ctx.guild.id, "MISSING_PERMISSIONS").format(
-                ctx.message.author.mention))
+                member=ctx.message.author.mention))
 
 
 @BOT.event
@@ -163,11 +165,10 @@ async def on_guild_join(guild):
 
         for locale in functions.get_available_locales():
             message += functions.get_localized_object(
-                guild.id, "BOT_GUILD_JOIN", locale).format(
-                    locale,
-                    guild.name,
-                    settings.BOT_DEFAULT_PREFIX,
-                    settings.BOT_DEFAULT_PREFIX) + "\n"
+                guild.id, "GUILD_JOIN", locale).format(
+                    locale=locale,
+                    guild_name=guild.name,
+                    prefix=settings.BOT_DEFAULT_PREFIX) + "\n"
 
         await general.send(message)
 

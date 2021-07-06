@@ -25,8 +25,12 @@ class Entertainment(commands.Cog):
 
     @commands.command()
     async def copypasta(self, ctx, *, arguments=None):
-        """
+        r"""
         Manage and send copypastas.
+
+        It is recommended to escape all quotes in copypasta title and content,
+        E.g.: "Example of \'escaped\' quotes", otherwise, copypasta data could
+        be incorrectly split.
 
         When sending a copypasta by its title, if more than one copypasta is
         found, a list containing those is sent instead.
@@ -47,10 +51,15 @@ class Entertainment(commands.Cog):
             copypasta [{-i|--id}] <copypasta ID>
             copypasta [{-t|--title}] <copypasta title>
             copypasta {-s|--search} <search query>
-            copypasta {-a|--add} "<copypasta title>" "<copypasta content>"
+            copypasta {-a|--add} ["<copypasta title>"] "<copypasta content>"
+            copypasta {-a|--add} ["<copypasta title>"]
+                                 (referencing/replying a message)
             copypasta {-d|--delete} <copypasta ID>
             copypasta {-l|--list} [{-a|--ascending|-d|--descending}]
                                   [{-i|--id|-t|--title|-c|--content|--count}]
+            copypasta {-sc|--set-channel} [<channel>]
+            copypasta {-e|--export}
+            copypasta {--import} (embedding a file to the message)
 
         Examples:
             copypasta:
@@ -61,14 +70,30 @@ class Entertainment(commands.Cog):
                 Send copypasta which contains "example" in its title.
             copypasta -s example query:
                 Search for "example query" in copypastas title and content.
-            copypasta -a "Title" "Contents":
-                Add "Contents" as a copypasta titled "Title".
+            copypasta -a "Content":
+                Add "Content" as a copypasta, which will have its title
+                generated automatically.
+            copypasta -a "Title" "Content":
+                Add "Content" as a copypasta titled "Title".
+            copypasta -a (referencing/replying a message):
+                Add referenced message as a copypasta, which will have its
+                title generated automatically.
+            copypasta -a (referencing/replying a message) "Title":
+                Add referenced message as a copypasta titled "Title".
             copypasta -d 8:
                 Delete copypasta with ID 8.
             copypasta -l:
                 List all copypastas.
             copypasta -l -t -a:
                 List all copypastas, sorted by title, in ascending order.
+            copypasta -sc:
+                Set copypasta channel to channel on which command was used.
+            copypasta -sc #copypastas:
+                Set copypasta channel to #copypastas.
+            copypasta -e:
+                Export copypasta list to a .JSON file.
+            copypasta --import:
+                Import an exported .JSON file containing a copypasta list.
         """
         def format_copypasta(copypasta):
             """

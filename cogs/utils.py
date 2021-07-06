@@ -82,7 +82,7 @@ class Utils(commands.Cog):
                 regexes.LIMIT_OPTIONAL.fullmatch(arguments).group("limit")) + 1
         elif regexes.ID.fullmatch(arguments):
             end_message_id = int(regexes.ID.fullmatch(arguments).group("id"))
-        elif not regexes.ALL.fullmatch(arguments):
+        elif not regexes.ALL_INDEPENDENT.fullmatch(arguments):
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "PURGE_INVALID_USAGE"))
             return
@@ -152,7 +152,7 @@ class Utils(commands.Cog):
 
         if message_reference:
             end_message_id = message_reference.message_id
-        elif not arguments or regexes.ALL.fullmatch(arguments):
+        elif not arguments or regexes.ALL_INDEPENDENT.fullmatch(arguments):
             end_message_id = None
         elif regexes.ID_OPTIONAL.fullmatch(arguments):
             end_message_id = int(
@@ -273,12 +273,12 @@ class Utils(commands.Cog):
                 Defaults to None.
 
         Usage:
-            logging --set-channel <channel>
+            logging {-sc|--set-channel} [<channel>]
 
         Examples:
-            logging --set-channel:
+            logging -sc:
                 Set logging channel to channel on which command was used.
-            logging --set-channel #log:
+            logging -sc #log:
                 Set logging channel to #log.
         """
         if not arguments or not regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(
@@ -287,7 +287,7 @@ class Utils(commands.Cog):
                 ctx.guild.id, "LOGGING_INVALID_USAGE"))
             return
 
-        if regexes.NONE.search(arguments):
+        if regexes.NONE_INDEPENDENT.search(arguments):
             functions.database_logging_channel_set(ctx.guild.id, None)
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "LOGGING_SET_CHANNEL_NONE"))

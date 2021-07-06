@@ -201,7 +201,7 @@ class Entertainment(commands.Cog):
                 section_count = str(count).ljust(max_len_count)
 
                 # If highlighted text is in the copypasta content:
-                # (`upper()` is used to do this case-insensitively).
+                # `upper()` is used to do this case-insensitively.
                 if emphasis and emphasis.upper() in content.upper():
                     # Limit its length and get its starting index.
                     emphasis_len = len(emphasis)
@@ -317,20 +317,24 @@ class Entertainment(commands.Cog):
         # Add a copypasta to the database.
         elif regexes.ADD_OPTIONAL_VALUE.fullmatch(arguments):
             message_reference = ctx.message.reference
-            remaining = regexes.ADD_OPTIONAL_VALUE.fullmatch(
+            remaining_string = regexes.ADD_OPTIONAL_VALUE.fullmatch(
                 arguments).group(1)
             title = None
 
-            if not remaining and not message_reference:
+            if not remaining_string and not message_reference:
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_INVALID_USAGE").format(
                         prefix=functions.database_guild_prefix_get(
                             self.bot, ctx)))
                 return
 
-            if remaining:
-                match = regexes.TITLE_CONTENT.fullmatch(remaining.strip())
+            if remaining_string:
+                match = regexes.TITLE_AND_CONTENT.fullmatch(
+                    remaining_string.strip())
                 title = match.group("title")
+
+                # `or ""` is used just in case group is empty. Otherwise,
+                # a NoneType would be used as an operand, raising an error.
                 content = (match.group("content") or ""
                            + match.group("content_2") or "")
 
@@ -402,7 +406,7 @@ class Entertainment(commands.Cog):
                     await ctx.send(embed=format_copypasta(copypasta))
 
         # List all available copypastas.
-        elif regexes.LIST.match(arguments):
+        elif regexes.LIST_INDEPENDENT.match(arguments):
             # Initialize dictionaries containing possible arrangements
             # and fields by which results will be ordered by.
             FIELDS = {
@@ -427,12 +431,12 @@ class Entertainment(commands.Cog):
             field = ""
             arrangement = ""
 
-            if regexes.DATABASE_FIELD.search(arguments):
-                field = regexes.DATABASE_FIELD.search(
+            if regexes.COPYPASTA_LIST_DATABASE_FIELDS.search(arguments):
+                field = regexes.COPYPASTA_LIST_DATABASE_FIELDS.search(
                     arguments).group("field").upper()
 
-            if regexes.ARRANGEMENT.search(arguments):
-                arrangement = regexes.ARRANGEMENT.search(
+            if regexes.COPYPASTA_LIST_ARRANGEMENT.search(arguments):
+                arrangement = regexes.COPYPASTA_LIST_ARRANGEMENT.search(
                     arguments).group("arrangement").upper()
 
             order_field = FIELDS[field]
@@ -452,7 +456,7 @@ class Entertainment(commands.Cog):
 
         # Set a channel where all messsages will be saved as copypastas.
         elif regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(arguments):
-            if regexes.NONE.search(arguments):
+            if regexes.NONE_INDEPENDENT.search(arguments):
                 functions.database_copypasta_channel_set(ctx.guild.id, None)
 
                 await ctx.send(functions.get_localized_object(
@@ -478,7 +482,7 @@ class Entertainment(commands.Cog):
                         guild_name=ctx.guild))
 
         # Export copypastas to a JSON file.
-        elif regexes.EXPORT.fullmatch(arguments):
+        elif regexes.EXPORT_INDEPENDENT.fullmatch(arguments):
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "BE_PATIENT"))
 
@@ -489,7 +493,8 @@ class Entertainment(commands.Cog):
                 await ctx.send(file=discord.File(buffer, name))
 
         # Import copypastas from a JSON file.
-        elif regexes.IMPORT.match(arguments) and ctx.message.attachments:
+        elif (regexes.IMPORT_INDEPENDENT_VERBOSE.match(arguments)
+              and ctx.message.attachments):
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "BE_PATIENT"))
 

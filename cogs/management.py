@@ -83,6 +83,7 @@ class Management(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(kick_members=True)
+    @commands.bot_has_permissions(kick_members=True)
     async def kick(self, ctx, *, arguments=None):
         """
         Kick one or more members from the guild.
@@ -123,6 +124,7 @@ class Management(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
+    @commands.bot_has_permissions(ban_members=True)
     async def ban(self, ctx, *, arguments=None):
         """
         Ban one or more members from the guild.
@@ -163,6 +165,7 @@ class Management(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
+    @commands.bot_has_permissions(ban_members=True)
     async def unban(self, ctx, *, users=None):
         """
         Remove one or more users from the guild banlist.

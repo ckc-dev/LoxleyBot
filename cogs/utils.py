@@ -40,6 +40,7 @@ class Utils(commands.Cog):
                 latency=round(self.bot.latency * 1000)))
 
     @commands.command()
+    @commands.bot_has_permissions(manage_messages=True)
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, *, arguments=None):
         """
@@ -202,6 +203,7 @@ class Utils(commands.Cog):
                 threshold_message=threshold_message))
 
     @commands.command()
+    @commands.has_permissions(manage_guild=True)
     async def prefix(self, ctx, new=None):
         """
         Change the guild prefix.
@@ -231,6 +233,7 @@ class Utils(commands.Cog):
                     new_prefix=new))
 
     @commands.command()
+    @commands.has_permissions(manage_guild=True)
     async def locale(self, ctx, new=None):
         """
         Change guild locale.
@@ -264,6 +267,7 @@ class Utils(commands.Cog):
                     new_locale=new))
 
     @commands.command()
+    @commands.has_permissions(manage_guild=True)
     async def logging(self, ctx, *, arguments=None):
         """
         Set a text channel for logging deleted messages.

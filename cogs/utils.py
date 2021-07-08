@@ -182,7 +182,9 @@ class Utils(commands.Cog):
             # Catch exception just in case message is deleted before the bot
             # has the chance to reply to it.
             except discord.NotFound:
-                pass
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "COUNT_REPLY_DELETED"))
+                return
 
         functions.database_message_count_set(
             ctx.guild.id, ctx.channel.id, ctx.channel.last_message_id, count)

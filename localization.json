@@ -31,6 +31,7 @@
     "COUNT_FOUND_MESSAGE": "I've found {message_count} messages in {channel_name}. {threshold_message}",
     "COUNT_FOUND_REPLY": "I've found {message_count} messages up to this message.",
     "COUNT_INVALID_USAGE": "Please provide a message ID to stop counting when reached or use `-a` to count all messages.",
+    "COUNT_REPLY_DELETED": "It seems like the referenced message was deleted before I could reply to it.",
     "COUNT_THRESHOLD_DICT": {
       "Seems like it's just getting started, welcome everyone!": 1,
       "Keep it up!": 500,
@@ -100,6 +101,7 @@
     "COUNT_FOUND_MESSAGE": "Eu encontrei {message_count} mensagens em {channel_name}. {threshold_message}",
     "COUNT_FOUND_REPLY": "Eu encontrei {message_count} mensagens até esta mensagem.",
     "COUNT_INVALID_USAGE": "Por favor forneça um ID de para parar a contagem quando alcançada ou use `-a` para contar todas as mensagens.",
+    "COUNT_REPLY_DELETED": "Parece que a mensagem referenciada foi excluída antes que eu pudesse respondê-la.",
     "COUNT_THRESHOLD_DICT": {
       "Parece que está apenas começando. Sejam todos bem-vindos!": 1,
       "Continuem assim!": 500,

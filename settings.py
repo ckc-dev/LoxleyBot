@@ -14,7 +14,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 BOT_DEFAULT_PREFIX = "./"
 BOT_DEFAULT_LOCALE = "en-US"
 LOCALIZATION_FILE_NAME = "localization.json"
-BOT_ACTIVITY = f"{BOT_DEFAULT_PREFIX}help"
+BOT_ACTIVITY = "@me for help!"
 
 # Names commonly used for "general" text channel.
 COMMON_GENERAL_TEXT_CHANNEL_NAMES = ["general", "geral", "chat", "common"]

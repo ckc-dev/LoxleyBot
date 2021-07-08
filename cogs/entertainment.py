@@ -412,6 +412,40 @@ class Entertainment(commands.Cog):
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "COPYPASTA_DELETE").format(copypasta_id=id_))
 
+        # Set a channel where all messsages will be saved as copypastas.
+        elif regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(arguments):
+            if not ctx.channel.permissions_for(ctx.author).manage_guild:
+                permissions = discord.Permissions(manage_guild=True)
+                missing = (
+                    [perm for perm, required in iter(permissions) if required])
+
+                raise commands.MissingPermissions(missing)
+
+            if regexes.NONE_INDEPENDENT.search(arguments):
+                functions.database_copypasta_channel_set(ctx.guild.id, None)
+
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "COPYPASTA_SET_CHANNEL_NONE"))
+                return
+
+            channel_name = regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(
+                arguments).group("channel") or ctx.channel.name
+
+            try:
+                channel = await commands.TextChannelConverter().convert(
+                    ctx, channel_name)
+
+                functions.database_copypasta_channel_set(
+                    ctx.guild.id, channel.id)
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "COPYPASTA_SET_CHANNEL").format(
+                        channel_name=channel.mention))
+            except commands.ChannelNotFound:
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "SET_CHANNEL_NOT_FOUND").format(
+                        channel_name=channel_name,
+                        guild_name=ctx.guild))
+
         # Search for one or more copypastas.
         elif regexes.SEARCH.fullmatch(arguments):
             query = regexes.SEARCH.fullmatch(arguments).group("query")
@@ -485,40 +519,6 @@ class Entertainment(commands.Cog):
             else:
                 for row in format_copypasta_list(results):
                     await ctx.send(row)
-
-        # Set a channel where all messsages will be saved as copypastas.
-        elif regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(arguments):
-            if not ctx.channel.permissions_for(ctx.author).manage_guild:
-                permissions = discord.Permissions(manage_guild=True)
-                missing = (
-                    [perm for perm, required in iter(permissions) if required])
-
-                raise commands.MissingPermissions(missing)
-
-            if regexes.NONE_INDEPENDENT.search(arguments):
-                functions.database_copypasta_channel_set(ctx.guild.id, None)
-
-                await ctx.send(functions.get_localized_object(
-                    ctx.guild.id, "COPYPASTA_SET_CHANNEL_NONE"))
-                return
-
-            channel_name = regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(
-                arguments).group("channel") or ctx.channel.name
-
-            try:
-                channel = await commands.TextChannelConverter().convert(
-                    ctx, channel_name)
-
-                functions.database_copypasta_channel_set(
-                    ctx.guild.id, channel.id)
-                await ctx.send(functions.get_localized_object(
-                    ctx.guild.id, "COPYPASTA_SET_CHANNEL").format(
-                        channel_name=channel.mention))
-            except commands.ChannelNotFound:
-                await ctx.send(functions.get_localized_object(
-                    ctx.guild.id, "SET_CHANNEL_NOT_FOUND").format(
-                        channel_name=channel_name,
-                        guild_name=ctx.guild))
 
         # Export copypastas to a JSON file.
         elif regexes.EXPORT_INDEPENDENT.fullmatch(arguments):

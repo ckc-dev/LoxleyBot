@@ -145,6 +145,13 @@ async def on_command_error(ctx, error):
             ctx.guild.id, "MISSING_PERMISSIONS").format(
                 member=ctx.message.author.mention))
 
+    elif isinstance(error, commands.BotMissingPermissions):
+        await ctx.send(functions.get_localized_object(
+            ctx.guild.id, "BOT_MISSING_PERMISSIONS"))
+
+    else:
+        raise error
+
 
 @BOT.event
 async def on_guild_join(guild):

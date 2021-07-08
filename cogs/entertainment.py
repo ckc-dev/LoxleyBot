@@ -399,6 +399,13 @@ class Entertainment(commands.Cog):
 
         # Delete a copypasta from the database.
         elif regexes.DELETE.fullmatch(arguments):
+            if not ctx.channel.permissions_for(ctx.author).manage_emojis:
+                permissions = discord.Permissions(manage_emojis=True)
+                missing = (
+                    [perm for perm, required in iter(permissions) if required])
+
+                raise commands.MissingPermissions(missing)
+
             id_ = regexes.DELETE.fullmatch(arguments).group("id")
 
             functions.database_copypasta_delete(ctx.guild.id, id_)
@@ -481,6 +488,13 @@ class Entertainment(commands.Cog):
 
         # Set a channel where all messsages will be saved as copypastas.
         elif regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(arguments):
+            if not ctx.channel.permissions_for(ctx.author).manage_guild:
+                permissions = discord.Permissions(manage_guild=True)
+                missing = (
+                    [perm for perm, required in iter(permissions) if required])
+
+                raise commands.MissingPermissions(missing)
+
             if regexes.NONE_INDEPENDENT.search(arguments):
                 functions.database_copypasta_channel_set(ctx.guild.id, None)
 

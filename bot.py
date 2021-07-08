@@ -152,6 +152,9 @@ async def on_command_error(ctx, error):
     else:
         raise error
 
+    await ctx.send(functions.get_localized_object(
+        ctx.guild.id, "MISSING_PERMISSIONS_DETAILS").format(details=error))
+
 
 @BOT.event
 async def on_guild_join(guild):

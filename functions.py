@@ -166,6 +166,10 @@ def database_create():
                           locale TEXT NOT NULL,
             copypasta_channel_id INTEGER UNIQUE,
               logging_channel_id INTEGER UNIQUE);""")
+    CURSOR.execute("""
+        CREATE TABLE copypasta_bans(
+            guild_id INTEGER NOT NULL,
+             user_id INTEGER NOT NULL);""")
     CURSOR.close()
 
 
@@ -495,6 +499,68 @@ def database_copypasta_channel_set(guild_id, channel_id):
         UPDATE guild_data
            SET copypasta_channel_id = ?
          WHERE guild_id = ?;""", (channel_id, guild_id))
+    settings.DATABASE_CONNECTION.commit()
+    CURSOR.close()
+
+
+def database_copypasta_ban_get(guild_id, user_id):
+    """
+    Get ban status for a user's capability to add copypastas to a guild.
+
+    Args:
+        guild_id (int): ID of guild which user belongs to.
+        user_id (int): ID of user which will have ban status queried.
+
+    Returns:
+        Tuple[int]: Tuple containing user ID.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    results = CURSOR.execute("""
+        SELECT user_id
+          FROM copypasta_bans
+         WHERE guild_id = ?
+           AND user_id = ?;""", (guild_id, user_id)).fetchone()
+    CURSOR.close()
+
+    return results
+
+
+def database_copypasta_ban_user(guild_id, user_id):
+    """
+    Ban a user from adding copypastas to a guild.
+
+    Args:
+        guild_id (int): ID of guild from which user will be banned
+            from adding copypastas.
+        user_id (int): ID of user who will be banned from adding copypastas to
+            the guild.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    CURSOR.execute("""
+        INSERT INTO copypasta_bans(
+            guild_id,
+            user_id
+        )
+        VALUES(?, ?);""", (guild_id, user_id))
+    settings.DATABASE_CONNECTION.commit()
+    CURSOR.close()
+
+
+def database_copypasta_unban_user(guild_id, user_id):
+    """
+    Unban a user from adding copypastas to a guild.
+
+    Args:
+        guild_id (int): ID of guild from which user will be unbanned
+            from adding copypastas.
+        user_id (int): ID of user who will be unbanned from adding copypastas
+            to the guild.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    CURSOR.execute("""
+        DELETE FROM copypasta_bans
+              WHERE guild_id = ?
+                AND user_id = ?;""", (guild_id, user_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 

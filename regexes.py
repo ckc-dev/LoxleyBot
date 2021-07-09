@@ -38,6 +38,11 @@ ALL_INDEPENDENT = re.compile(r"""
     \b              # Match word boundary.""",
                              flags=re.IGNORECASE | re.VERBOSE)
 
+BAN_INDEPENDENT = re.compile(r"""
+    (?:-b|--ban)    # Match either "-b" or "--ban".
+    \b              # Match word boundary.""",
+                             flags=re.IGNORECASE | re.VERBOSE)
+
 COPYPASTA_LIST_ARRANGEMENT = re.compile(r"""
     (?P<arrangement>    # CAPTURE GROUP (arrangement) | Open capture group.
         -a|--ascending  # Match either "-a" or "--ascending".
@@ -141,6 +146,11 @@ TITLE_OPTIONAL = re.compile(r"""
     (?P<title>.+)   # CAPTURE GROUP (title) | Match any character between
                     # 1 and ∞ times.""",
                             flags=re.IGNORECASE | re.VERBOSE)
+
+UNBAN_INDEPENDENT = re.compile(r"""
+    (?:-u|--unban)  # Match either "-u" or "--unban".
+    \b              # Match word boundary.""",
+                               flags=re.IGNORECASE | re.VERBOSE)
 
 # GENERAL USE:
 # RegExes that are not parameters, but have more general use cases.

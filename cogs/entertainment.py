@@ -63,6 +63,8 @@ class Entertainment(commands.Cog):
             copypasta {-sc|--set-channel} [<channel>]
             copypasta {-e|--export}
             copypasta {--import} (embedding a file to the message)
+            copypasta {-b|--ban} <members>
+            copypasta {-u|--unban} <members>
 
         Examples:
             copypasta:
@@ -99,6 +101,11 @@ class Entertainment(commands.Cog):
                 Export copypasta list to a .JSON file.
             copypasta --import:
                 Import an exported .JSON file containing a copypasta list.
+            copypasta -b @example_member:
+                Ban "example_member" from adding copypastas, by mention.
+            copypasta -u @member1 "Member 2" member#0003:
+                Unban three members from adding copypastas, by mention, name,
+                and name#discriminator.
         """
         def format_copypasta(copypasta):
             """
@@ -320,6 +327,49 @@ class Entertainment(commands.Cog):
 
             return table_list
 
+        async def manage_copypasta_bans(ctx, arguments, ban=False):
+            """Manage banning and unbanning users from adding copypastas.
+
+            Args:
+                ctx (discord.ext.commands.Context): Context passed to function.
+                arguments (str, optional): Arguments passed to function.
+                ban (bool, optional): Whether to ban or unban users.
+                    Defaults to False.
+
+            Raises:
+                commands.MissingPermissions: raised if command invoker does not
+                    have the required permissions to run command.
+            """
+            if not ctx.channel.permissions_for(ctx.author).ban_members:
+                permissions = discord.Permissions(ban_members=True)
+                missing = (
+                    [perm for perm, required in iter(permissions) if required])
+
+                raise commands.MissingPermissions(missing)
+
+            option = "BAN" if ban else "UNBAN"
+            message = functions.get_localized_object(
+                ctx.guild.id, f"COPYPASTA_{option}")
+            members = (
+                i[0] + i[1]
+                for i in regexes.STRINGS_BETWEEN_SPACES.findall(arguments))
+
+            for member in members:
+                try:
+                    member = await commands.MemberConverter().convert(
+                        ctx, member)
+
+                    if ban:
+                        functions.database_copypasta_ban_user(
+                            ctx.guild.id, member.id)
+                    else:
+                        functions.database_copypasta_unban_user(
+                            ctx.guild.id, member.id)
+
+                    await ctx.send(message.format(member=member.mention))
+                except commands.MemberNotFound:
+                    pass
+
         # Send a random copypasta.
         if arguments is None:
             copypasta = functions.database_copypasta_get(ctx.guild.id)
@@ -346,6 +396,15 @@ class Entertainment(commands.Cog):
 
         # Add a copypasta to the database.
         elif regexes.ADD_OPTIONAL_VALUE.fullmatch(arguments):
+            banned = functions.database_copypasta_ban_get(
+                ctx.guild.id, ctx.author.id)
+
+            if banned:
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "COPYPASTA_BANNED").format(
+                        member=ctx.author.mention, guild_name=ctx.guild))
+                return
+
             message_reference = ctx.message.reference
             remaining_string = regexes.ADD_OPTIONAL_VALUE.fullmatch(
                 arguments).group(1)
@@ -583,6 +642,16 @@ class Entertainment(commands.Cog):
                     # string length to account for Markdown code block used.
                     await ctx.send("```{}```".format(
                         str(i)[:settings.DISCORD_CHARACTER_LIMIT - 6]))
+
+        # Ban one or more members from adding copypastas.
+        elif regexes.BAN_INDEPENDENT.match(arguments):
+            remaining = regexes.BAN_INDEPENDENT.sub("", arguments).strip()
+            await manage_copypasta_bans(ctx, remaining, True)
+
+        # Unban one or more members from adding copypastas.
+        elif regexes.UNBAN_INDEPENDENT.match(arguments):
+            remaining = regexes.UNBAN_INDEPENDENT.sub("", arguments).strip()
+            await manage_copypasta_bans(ctx, remaining)
 
         # Send either a specific copypasta by title or a list
         # of copypastas containing user query in their title.

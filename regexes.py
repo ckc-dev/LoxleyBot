@@ -63,7 +63,15 @@ COPYPASTA_LIST_DATABASE_FIELDS = re.compile(r"""
 DELETE = re.compile(r"""
     (?:-d|--delete) # Match either "-d" or "--delete".
     \s*             # Match between 0 and ∞ whitespace characters.
-    (?P<id>\d+)     # CAPTURE GROUP (id) | Match between 1 and ∞ digits.""",
+    (?P<ids>        # CAPTURE GROUP (ids) | Open capture group.
+        \d+         # Match between 1 and ∞ digits.
+        (?:         # Open non-capturing group.
+            \s*     # Match between 0 and ∞ whitespace characters.
+            ,       # Match ",".
+            \s*     # Match between 0 and ∞ whitespace characters.
+            \d+     # Match between 1 and ∞ digits.
+        )*          # Close non-capturing group, match between 0 and ∞ times.
+    )               # Close capture group (id).""",
                     flags=re.IGNORECASE | re.VERBOSE)
 
 EXPORT_INDEPENDENT = re.compile(r"""

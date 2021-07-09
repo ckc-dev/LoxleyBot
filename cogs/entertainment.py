@@ -42,6 +42,9 @@ class Entertainment(commands.Cog):
         in descending order. If a field is specified, but not an order, will
         use ascending order by default.
 
+        When deleting copypastas, it is possible to use commas to separate IDs,
+        as to delete multiple copypastas at once.
+
         Args:
             arguments (str, optional): Arguments passed to command.
                 Defaults to None.
@@ -82,6 +85,8 @@ class Entertainment(commands.Cog):
                 Add referenced message as a copypasta titled "Title".
             copypasta -d 8:
                 Delete copypasta with ID 8.
+            copypasta -d 1, 2, 3:
+                Delete copypastas with IDs 1, 2, and 3.
             copypasta -l:
                 List all copypastas.
             copypasta -l -t -a:
@@ -406,11 +411,12 @@ class Entertainment(commands.Cog):
 
                 raise commands.MissingPermissions(missing)
 
-            id_ = regexes.DELETE.fullmatch(arguments).group("id")
+            ids = regexes.DELETE.fullmatch(arguments).group("ids")
 
-            functions.database_copypasta_delete(ctx.guild.id, id_)
-            await ctx.send(functions.get_localized_object(
-                ctx.guild.id, "COPYPASTA_DELETE").format(copypasta_id=id_))
+            for id_ in [int(i) for i in ids.split(",")]:
+                functions.database_copypasta_delete(ctx.guild.id, id_)
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "COPYPASTA_DELETE").format(copypasta_id=id_))
 
         # Set a channel where all messsages will be saved as copypastas.
         elif regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(arguments):

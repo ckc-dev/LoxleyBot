@@ -473,9 +473,17 @@ class Entertainment(commands.Cog):
             ids = regexes.DELETE.fullmatch(arguments).group("ids")
 
             for id_ in [int(i) for i in ids.split(",")]:
-                functions.database_copypasta_delete(ctx.guild.id, id_)
-                await ctx.send(functions.get_localized_object(
-                    ctx.guild.id, "COPYPASTA_DELETE").format(copypasta_id=id_))
+                exists = functions.database_copypasta_get(ctx.guild.id, id_)
+
+                if not exists:
+                    await ctx.send(functions.get_localized_object(
+                        ctx.guild.id, "COPYPASTA_NONE_FOUND_ID").format(
+                            copypasta_id=id_,
+                            guild_name=ctx.guild))
+                else:
+                    functions.database_copypasta_delete(ctx.guild.id, id_)
+                    await ctx.send(functions.get_localized_object(
+                        ctx.guild.id, "COPYPASTA_DELETE").format(copypasta_id=id_))
 
         # Set a channel where all messsages will be saved as copypastas.
         elif regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(arguments):

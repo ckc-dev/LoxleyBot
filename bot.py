@@ -16,7 +16,9 @@ if not settings.BOT_TOKEN:
 if not functions.database_exists():
     functions.database_create()
 
-BOT = commands.Bot(command_prefix=functions.database_guild_prefix_get)
+BOT = commands.Bot(
+    command_prefix=functions.database_guild_prefix_get,
+    intents=discord.Intents.all())
 BOT.activity = discord.Game(settings.BOT_ACTIVITY)
 
 
@@ -78,7 +80,11 @@ async def on_raw_message_delete(payload):
         message = payload.cached_message
         id_ = payload.message_id
         date = discord.utils.snowflake_time(id_)
-        strftime_format = functions.get_localized_object(guild_id, "STRFTIME")
+        guild_date_format = functions.get_localized_object(
+            guild_id, "STRFTIME_DATE")
+        guild_time_format = functions.get_localized_object(
+            guild_id, "STRFTIME_TIME")
+        format = f"{guild_date_format} | {guild_time_format}"
         channel = BOT.get_channel(payload.channel_id)
         embed = discord.Embed(color=settings.EMBED_COLOR)
 
@@ -114,18 +120,16 @@ async def on_raw_message_delete(payload):
         embed.add_field(
             name=functions.get_localized_object(
                 guild_id, "LOGGING_MESSAGE_DELETED_FIELD_CREATION_TIME_NAME"),
-            value=date.strftime(strftime_format),
+            value=date.strftime(format),
             inline=False)
         embed.add_field(
             name=functions.get_localized_object(
                 guild_id, "LOGGING_MESSAGE_DELETED_FIELD_ID_NAME"),
             value=f"`{id_}`",
             inline=False)
-        embed.set_footer(
-            text=functions.get_localized_object(
-                guild_id, "LOGGING_MESSAGE_DELETED_FOOTER").format(
-                    utc_time=datetime.datetime.utcnow().strftime(
-                        strftime_format)))
+        embed.set_footer(text=functions.get_localized_object(
+            guild_id, "LOGGING_MESSAGE_DELETED_FOOTER").format(
+                utc_time=datetime.datetime.utcnow().strftime(format)))
 
         await logging_channel.send(embed=embed)
 

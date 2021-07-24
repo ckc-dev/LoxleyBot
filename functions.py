@@ -164,12 +164,21 @@ def database_create():
                         guild_id INTEGER NOT NULL UNIQUE,
                           prefix TEXT NOT NULL,
                           locale TEXT NOT NULL,
+                        timezone TEXT NOT NULL,
             copypasta_channel_id INTEGER UNIQUE,
-              logging_channel_id INTEGER UNIQUE);""")
+              logging_channel_id INTEGER UNIQUE,
+             birthday_channel_id INTEGER UNIQUE);""")
     CURSOR.execute("""
         CREATE TABLE copypasta_bans(
             guild_id INTEGER NOT NULL,
              user_id INTEGER NOT NULL);""")
+    CURSOR.execute("""
+        CREATE TABLE birthdays(
+            guild_id INTEGER NOT NULL,
+             user_id INTEGER NOT NULL,
+               month INTEGER NOT NULL,
+                 day INTEGER NOT NULL,
+         PRIMARY KEY (guild_id, user_id));""")
     CURSOR.close()
 
 
@@ -182,9 +191,12 @@ def database_guild_initialize(guild_id):
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
     CURSOR.execute("""
-        INSERT INTO guild_data (guild_id, prefix, locale)
-             VALUES (?, ?, ?);""", (guild_id, settings.BOT_DEFAULT_PREFIX,
-                                    settings.BOT_DEFAULT_LOCALE))
+        INSERT INTO guild_data (guild_id, prefix, locale, timezone)
+             VALUES (?, ?, ?, ?);""", (
+        guild_id,
+        settings.BOT_DEFAULT_PREFIX,
+        settings.BOT_DEFAULT_LOCALE,
+        settings.BOT_DEFAULT_TIMEZONE))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -601,6 +613,148 @@ def database_logging_channel_set(guild_id, channel_id):
          WHERE guild_id = ?;""", (channel_id, guild_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
+
+
+def database_guild_timezone_get(guild_id):
+    """
+    Get the timezone for a guild from the database.
+
+    Args:
+        guild_id (int): ID of guild which will have its timezone queried.
+
+    Returns:
+        str: Guild's timezone, formatted as {+|-}HH:MM. E.g.: +00:00.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    results = CURSOR.execute("""
+        SELECT timezone
+          FROM guild_data
+         WHERE guild_id = ?;""", (guild_id,)).fetchone()
+    CURSOR.close()
+
+    return results[0]
+
+
+def database_guild_timezone_set(guild_id, timezone):
+    """
+    Set the timezone for a guild on the database.
+
+    Args:
+        guild_id (int): ID of guild which will have its logging channel ID set.
+        timezone (str): What to set guild's logging channel ID to.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    CURSOR.execute("""
+        UPDATE guild_data
+           SET timezone = ?
+         WHERE guild_id = ?;""", (timezone, guild_id))
+    settings.DATABASE_CONNECTION.commit()
+    CURSOR.close()
+
+
+def database_birthday_channel_get(guild_id):
+    """
+    Get the ID for a guild's birthday announcement channel from the database.
+
+    Args:
+        guild_id (int): ID of guild which will have its birthday
+            announcement channel ID queried.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    results = CURSOR.execute("""
+        SELECT birthday_channel_id
+          FROM guild_data
+         WHERE guild_id = ?;""", (guild_id,)).fetchone()
+    CURSOR.close()
+
+    # Since this is used in a loop, `if results else None` is added just in
+    # case guild does not have a birthday announcement channel set up.
+    return results[0] if results else None
+
+
+def database_birthday_channel_set(guild_id, channel_id):
+    """
+    Set the ID for a guild's birthday announcement channel on the database.
+
+    Args:
+        guild_id (int): ID of guild which will have its birthday
+            announcement channel ID set.
+        channel_id (int): What to set guild's birthday
+            announcement channel ID to.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    CURSOR.execute("""
+        UPDATE guild_data
+           SET birthday_channel_id = ?
+         WHERE guild_id = ?;""", (channel_id, guild_id))
+    settings.DATABASE_CONNECTION.commit()
+    CURSOR.close()
+
+
+def database_birthday_add(guild_id, user_id, month, day):
+    """
+    Add a birthday to the database.
+
+    Args:
+        guild_id (int): ID of guild to which birthday belongs.
+        user_id (int): ID of user who will have birthday added.
+        month (int): Birthday month.
+        day (int):  Birthday day.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    CURSOR.execute("""
+        INSERT OR REPLACE
+                     INTO birthdays (
+                          guild_id,
+                          user_id,
+                          month,
+                          day)
+                   VALUES (?, ?, ?, ?);""", (guild_id, user_id, month, day))
+    settings.DATABASE_CONNECTION.commit()
+    CURSOR.close()
+
+
+def database_birthday_delete(guild_id, user_id):
+    """
+    Delete a birthday from the database.
+
+    Args:
+        guild_id (int): ID of guild to which birthday belongs.
+        user_id (int): ID of user who will have birthday deleted.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    CURSOR.execute("""
+        DELETE FROM birthdays
+              WHERE guild_id = ?
+                AND user_id = ?;""", (guild_id, user_id))
+    settings.DATABASE_CONNECTION.commit()
+    CURSOR.close()
+
+
+def database_birthday_list_get(guild_id, month, day):
+    """
+    Get a list of birthdays for a guild and date.
+
+    Args:
+        guild_id (int): ID of guild which will have birthdays queried.
+        month (int): Month to use when querying birthdays.
+        day (int): Day to use when querying birthdays.
+
+    Returns:
+        List[Tuple[int]]: A list of tuples containing the IDs of users whose
+            birthday is on this day and month in this guild as their first and
+            only item.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    results = CURSOR.execute("""
+        SELECT user_id
+          FROM birthdays
+         WHERE guild_id = ?
+           AND month = ?
+           AND day = ?;""", (guild_id, month, day)).fetchall()
+    CURSOR.close()
+
+    return results
 
 
 def copypasta_export_json(guild_id):

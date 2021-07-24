@@ -1,5 +1,7 @@
 """Contains cogs used for useful, often small and simple functions."""
 
+import datetime
+
 import discord
 import functions
 import regexes
@@ -18,10 +20,12 @@ class Utils(commands.Cog):
         """
         self.bot = bot
         self.database_message_count_auto_update.start()
+        self.check_for_birthdays.start()
 
     def cog_unload(self):
         """Will run when cog is unloaded."""
         self.database_message_count_auto_update.cancel()
+        self.check_for_birthdays.cancel()
 
     @commands.command()
     async def ping(self, ctx):
@@ -270,6 +274,41 @@ class Utils(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(manage_guild=True)
+    async def timezone(self, ctx, new=None):
+        """
+        Change guild timezone.
+
+        Is is required to use the following format: {+|-}HH:MM.
+            E.g.: -03:00 or +12:30.
+
+        Args:
+            new (str): Timezone to change to. Defaults to None.
+
+        Usage:
+            timezone <new timezone>
+
+        Examples:
+            timezone -03:00:
+                Change timezone to -03:00.
+            locale +12:30:
+                Change timezone to +12:30".
+        """
+        if not new or not regexes.TIMEZONE.fullmatch(new):
+            await ctx.send(functions.get_localized_object(
+                ctx.guild.id, "TIMEZONE_INVALID_USAGE"))
+            return
+
+        current = functions.database_guild_timezone_get(ctx.guild.id)
+
+        functions.database_guild_timezone_set(ctx.guild.id, new)
+
+        await ctx.send(functions.get_localized_object(
+            ctx.guild.id, "TIMEZONE_CHANGE").format(
+                current_timezone=current,
+                new_timezone=new))
+
+    @commands.command()
+    @commands.has_permissions(manage_guild=True)
     async def logging(self, ctx, *, arguments=None):
         """
         Set a text channel for logging deleted messages.
@@ -315,6 +354,98 @@ class Utils(commands.Cog):
                 ctx.guild.id, "SET_CHANNEL_NOT_FOUND").format(
                     channel_name=channel_name, guild_name=ctx.guild))
 
+    @commands.command()
+    async def birthday(self, ctx, *, arguments=None):
+        """
+        Manage birthdays.
+
+        The format used in the date when running command depends on the
+            guild locale. To check which format to use, simply run this
+            command without any argument and read the help message.
+
+        When saving birthday information, albeit required due to
+            localization issues, birth year is not saved.
+
+        Args:
+            arguments (str, optional): Arguments passed to command.
+                Defaults to None.
+
+        Usage:
+            birthday {-sc|--set-channel} [<channel>]
+            birthday {-n|--none}
+            birthday <date>
+
+        Examples:
+            birthday -sc:
+                Set birthday announcement channel to channel on which
+                    command was used.
+            birthday -sc #announcements:
+                Set birthday announcement channel to #announcements.
+            birthday -n:
+                Delete birthday information.
+            birthday 30/01/2000:
+                Save birthday information as January 30.
+        """
+        if not arguments:
+            await ctx.send(functions.get_localized_object(
+                ctx.guild.id, "BIRTHDAY_INVALID_USAGE"))
+            return
+        if regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(arguments):
+            if not ctx.channel.permissions_for(ctx.author).manage_guild:
+                permissions = discord.Permissions(manage_guild=True)
+                missing = (
+                    [perm for perm, required in iter(permissions) if required])
+
+                raise commands.MissingPermissions(missing)
+
+            if regexes.NONE_INDEPENDENT.search(arguments):
+                functions.database_birthday_channel_set(ctx.guild.id, None)
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "BIRTHDAY_SET_CHANNEL_NONE"))
+                return
+
+            channel_name = regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(
+                arguments).group("channel") or ctx.channel.name
+
+            try:
+                channel = await commands.TextChannelConverter().convert(
+                    ctx, channel_name)
+
+                functions.database_birthday_channel_set(
+                    ctx.guild.id, channel.id)
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "BIRTHDAY_SET_CHANNEL").format(
+                        channel_name=channel.mention))
+            except commands.ChannelNotFound:
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "SET_CHANNEL_NOT_FOUND").format(
+                        channel_name=channel_name,
+                        guild_name=ctx.guild))
+        elif regexes.NONE_INDEPENDENT.fullmatch(arguments):
+            functions.database_birthday_delete(ctx.guild.id, ctx.author.id)
+            await ctx.send(functions.get_localized_object(
+                ctx.guild.id, "BIRTHDAY_DELETED"))
+        elif regexes.DIGITS.search(arguments):
+            date_string = "".join(regexes.DIGITS.findall(arguments))
+            date_format = functions.get_localized_object(
+                ctx.guild.id, "STRFTIME_DATE")
+            cleaned_date_format = "".join(
+                regexes.DATETIME_FORMAT_CODE.findall(date_format))
+            try:
+                date = datetime.datetime.strptime(
+                    date_string, cleaned_date_format)
+
+                functions.database_birthday_add(
+                    ctx.guild.id, ctx.author.id, date.month, date.day)
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "BIRTHDAY_ADDED"))
+            except ValueError:
+                await ctx.send(functions.get_localized_object(
+                    ctx.guild.id, "BIRTHDAY_INVALID_USAGE"))
+        else:
+            await ctx.send(functions.get_localized_object(
+                ctx.guild.id, "BIRTHDAY_INVALID_USAGE"))
+
     @tasks.loop(hours=24)
     async def database_message_count_auto_update(self):
         """Update message count in database every 24 hours."""
@@ -324,6 +455,33 @@ class Utils(commands.Cog):
                     count = await self.count_messages(channel)
                     functions.database_message_count_set(
                         guild.id, channel.id, channel.last_message_id, count)
+
+    @tasks.loop(hours=24)
+    async def check_for_birthdays(self):
+        """Check each guild for birthdays, every 24 hours."""
+        for guild in self.bot.guilds:
+            birthday_channel = guild.get_channel(
+                functions.database_birthday_channel_get(guild.id))
+            if not birthday_channel:
+                continue
+            guild_timezone = regexes.TIMEZONE.fullmatch(
+                functions.database_guild_timezone_get(guild.id))
+            guild_timezone_hours = int(
+                guild_timezone.group("sign") + guild_timezone.group("hours"))
+            guild_timezone_minutes = int(
+                guild_timezone.group("sign") + guild_timezone.group("minutes"))
+            adjusted_time = datetime.datetime.utcnow() + datetime.timedelta(
+                hours=guild_timezone_hours, minutes=guild_timezone_minutes)
+            birthday_list = functions.database_birthday_list_get(
+                guild.id, adjusted_time.month, adjusted_time.day)
+            for birthday in birthday_list:
+                try:
+                    member = guild.get_member(birthday[0])
+                    await birthday_channel.send(functions.get_localized_object(
+                        guild.id, "BIRTHDAY_MESSAGE").format(
+                            user=member.mention))
+                except commands.MemberNotFound:
+                    pass
 
     @database_message_count_auto_update.before_loop
     async def wait_until_ready(self):

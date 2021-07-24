@@ -13,6 +13,7 @@ dotenv.load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 BOT_DEFAULT_PREFIX = "./"
 BOT_DEFAULT_LOCALE = "en-US"
+BOT_DEFAULT_TIMEZONE = "+00:00"
 LOCALIZATION_FILE_NAME = "localization.json"
 BOT_ACTIVITY = "@me for help!"
 

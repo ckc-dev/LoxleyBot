@@ -155,6 +155,15 @@ UNBAN_INDEPENDENT = re.compile(r"""
 # GENERAL USE:
 # RegExes that are not parameters, but have more general use cases.
 
+DATETIME_FORMAT_CODE = re.compile(r"""
+    (%\w)   # CAPTURE GROUP (1) | Match a single character
+            # preceded by a "%".""",
+                                  re.VERBOSE)
+
+DIGITS = re.compile(r"""
+    (\d+)   # CAPTURE GROUP (1) | Match Match between 1 and ∞ digits.""",
+                    re.VERBOSE)
+
 # RegEx based on restrictions described in Discord's documentation. Source:
 # https://discord.com/developers/docs/resources/user#usernames-and-nicknames
 DISCORD_USER = re.compile(r"""
@@ -216,6 +225,20 @@ STRINGS_BETWEEN_SPACES = re.compile(r"""
                 # between 1 and ∞ times, as few times as possible.
     )           # Close non-capturing group.""",
                                     flags=re.IGNORECASE | re.VERBOSE)
+
+TIMEZONE = re.compile(r"""
+    (?P<sign>-|\+?) # CAPTURE GROUP (sign) | Either match "-" or optionally
+                    # match "+".
+    (?P<hours>      # CAPTURE GROUP (hours) | Open capture group.
+        [0-1][0-9]  # Match a number between 00 and 19.
+        |           # OR
+        2[0-3]      # Match a number between 20 and 23.
+    )               # Close capture group (hours).
+    :               # Match ":".
+    (?P<minutes>    # CAPTURE GROUP (minutes) | Open capture group.
+        [0-5][0-9]  # Match a number between 00 and 59.
+    )               # Close capture group (minutes).""",
+                      re.VERBOSE)
 
 TITLE_AND_CONTENT = re.compile(r"""
     (?:                     # Open non-capturing group.

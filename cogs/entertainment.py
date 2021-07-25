@@ -342,10 +342,7 @@ class Entertainment(commands.Cog):
             """
             if not ctx.channel.permissions_for(ctx.author).ban_members:
                 permissions = discord.Permissions(ban_members=True)
-                missing = (
-                    [perm for perm, required in iter(permissions) if required])
-
-                raise commands.MissingPermissions(missing)
+                functions.raise_missing_permissions(permissions)
 
             option = "BAN" if ban else "UNBAN"
             message = functions.get_localized_object(
@@ -465,10 +462,7 @@ class Entertainment(commands.Cog):
         elif regexes.DELETE.fullmatch(arguments):
             if not ctx.channel.permissions_for(ctx.author).manage_emojis:
                 permissions = discord.Permissions(manage_emojis=True)
-                missing = (
-                    [perm for perm, required in iter(permissions) if required])
-
-                raise commands.MissingPermissions(missing)
+                functions.raise_missing_permissions(permissions)
 
             ids = regexes.DELETE.fullmatch(arguments).group("ids")
 
@@ -489,10 +483,7 @@ class Entertainment(commands.Cog):
         elif regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(arguments):
             if not ctx.channel.permissions_for(ctx.author).manage_guild:
                 permissions = discord.Permissions(manage_guild=True)
-                missing = (
-                    [perm for perm, required in iter(permissions) if required])
-
-                raise commands.MissingPermissions(missing)
+                functions.raise_missing_permissions(permissions)
 
             if regexes.NONE_INDEPENDENT.search(arguments):
                 functions.database_copypasta_channel_set(ctx.guild.id, None)

@@ -4,6 +4,8 @@ import io
 import json
 import random
 
+from discord.ext import commands
+
 import regexes
 import settings
 
@@ -928,3 +930,22 @@ def get_localized_object(guild_id, reference, locale=None, as_list=False):
         return random.choice(obj)
 
     return obj
+
+
+def raise_missing_permissions(permissions):
+    """
+    Raise commands.MissingPermissions for missing permissions to run a command.
+
+    Gets required permissions as an input, creates a list of missing
+        permissions, and raises exception using those.
+
+    Args:
+        permissions (discord.Permissions): Permissions required to run command.
+
+    Raises:
+        commands.MissingPermissions: Raised when the command invoker does not
+            have the permissions required to run a command.
+    """
+    missing = ([perm for perm, required in iter(permissions) if required])
+
+    raise commands.MissingPermissions(missing)

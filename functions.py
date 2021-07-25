@@ -294,6 +294,12 @@ def database_guild_purge(guild_id):
     CURSOR.execute("""
         DELETE FROM guild_data
               WHERE guild_id = ?;""", (guild_id,))
+    CURSOR.execute("""
+        DELETE FROM copypasta_bans
+              WHERE guild_id = ?;""", (guild_id,))
+    CURSOR.execute("""
+        DELETE FROM birthdays
+              WHERE guild_id = ?;""", (guild_id,))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 

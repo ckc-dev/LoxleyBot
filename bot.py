@@ -201,4 +201,15 @@ for file in os.listdir("cogs"):
     if file.endswith(".py"):
         BOT.load_extension(f"cogs.{file[:-3]}")
 
+@BOT.event
+async def on_member_remove(member):
+    """
+    Will run every time a member leaves a guild.
+
+    Args:
+        member (discord.Member): Member who left the guild.
+    """
+    functions.database_birthday_delete(member.guild.id, member.id)
+    functions.database_copypasta_unban_user(member.guild.id, member.id)
+
 BOT.run(settings.BOT_TOKEN)

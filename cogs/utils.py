@@ -393,10 +393,7 @@ class Utils(commands.Cog):
         if regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(arguments):
             if not ctx.channel.permissions_for(ctx.author).manage_guild:
                 permissions = discord.Permissions(manage_guild=True)
-                missing = (
-                    [perm for perm, required in iter(permissions) if required])
-
-                raise commands.MissingPermissions(missing)
+                functions.raise_missing_permissions(permissions)
 
             if regexes.NONE_INDEPENDENT.search(arguments):
                 functions.database_birthday_channel_set(ctx.guild.id, None)

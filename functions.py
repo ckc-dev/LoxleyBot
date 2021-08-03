@@ -168,6 +168,7 @@ def database_create():
                           locale TEXT NOT NULL,
                         timezone TEXT NOT NULL,
             copypasta_channel_id INTEGER UNIQUE,
+ copypasta_channel_last_saved_id INTEGER UNIQUE,
               logging_channel_id INTEGER UNIQUE,
              birthday_channel_id INTEGER UNIQUE);""")
     CURSOR.execute("""
@@ -203,7 +204,7 @@ def database_guild_initialize(guild_id):
     CURSOR.close()
 
 
-def database_guild_prefix_get(client, message):
+def database_guild_prefix_get(client, message, by_id=False):
     """
     Get a guild prefix from the database.
 
@@ -211,6 +212,8 @@ def database_guild_prefix_get(client, message):
         client (discord.Client): Client to which guild prefix will be queried.
         message (discord.Message): Message coming from guild which prefix will
             be queried.
+        by_id (bool): Whether or not to get prefix by passing a guild ID to
+            function, instead of a message object.
 
     Returns:
         str: Guild prefix.
@@ -219,7 +222,8 @@ def database_guild_prefix_get(client, message):
     results = CURSOR.execute("""
         SELECT prefix
           FROM guild_data
-         WHERE guild_id = ?;""", (message.guild.id,)).fetchone()
+         WHERE guild_id = ?;""", (
+        message if by_id else message.guild.id,)).fetchone()
     CURSOR.close()
 
     return results[0]
@@ -519,6 +523,46 @@ def database_copypasta_channel_set(guild_id, channel_id):
         UPDATE guild_data
            SET copypasta_channel_id = ?
          WHERE guild_id = ?;""", (channel_id, guild_id))
+    settings.DATABASE_CONNECTION.commit()
+    CURSOR.close()
+
+
+def database_copypasta_channel_last_saved_id_get(guild_id):
+    """
+    Get the ID for the last copypasta saved on a guild's copypasta channel.
+
+    Args:
+        guild_id (int): ID of guild which will have the ID of the last saved
+            copypasta on the copypasta channel queried.
+
+    Returns:
+        int: ID of the last saved copypasta on guild's copypasta channel.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    results = CURSOR.execute("""
+        SELECT copypasta_channel_last_saved_id
+          FROM guild_data
+         WHERE guild_id = ?;""", (guild_id,)).fetchone()
+    CURSOR.close()
+
+    return results[0]
+
+
+def database_copypasta_channel_last_saved_id_set(guild_id, last_saved_id):
+    """
+    Set the ID for the last copypasta saved on a guild's copypasta channel.
+
+    Args:
+        guild_id (int): ID of guild which will have the ID of the last saved
+            copypasta on the copypasta channel set.
+        last_saved_id (int): What to set the ID of the last saved copypasta
+            on the copypasta channel to.
+    """
+    CURSOR = settings.DATABASE_CONNECTION.cursor()
+    CURSOR.execute("""
+        UPDATE guild_data
+           SET copypasta_channel_last_saved_id = ?
+         WHERE guild_id = ?;""", (last_saved_id, guild_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 

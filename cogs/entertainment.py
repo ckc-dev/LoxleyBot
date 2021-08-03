@@ -504,6 +504,8 @@ class Entertainment(commands.Cog):
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "COPYPASTA_SET_CHANNEL").format(
                         channel_name=channel.mention))
+                functions.database_copypasta_channel_last_saved_id_set(
+                    ctx.guild.id, ctx.channel.last_message_id)
             except commands.ChannelNotFound:
                 await ctx.send(functions.get_localized_object(
                     ctx.guild.id, "SET_CHANNEL_NOT_FOUND").format(

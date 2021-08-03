@@ -22,6 +22,59 @@ BOT = commands.Bot(
 BOT.activity = discord.Game(settings.BOT_ACTIVITY)
 
 
+async def copypasta_channel_process_message(message):
+    """
+    Process messages sent to copypasta channel.
+
+    Args:
+        message (discord.Message): Message to process.
+    """
+    functions.database_copypasta_channel_last_saved_id_set(
+        message.guild.id, message.id)
+
+    guild_prefix = functions.database_guild_prefix_get(BOT, message)
+    flag = "import" if message.attachments else "add"
+    message.content = (f"{guild_prefix}copypasta --{flag} {message.content}")
+
+    await BOT.process_commands(message)
+
+
+@BOT.event
+async def on_ready():
+    """Will run once bot is done preparing data received from Discord."""
+    # Save messages sent to copypasta channel while bot was offline.
+    for guild in BOT.guilds:
+        copypasta_channel = BOT.get_channel(
+            functions.database_copypasta_channel_get(guild.id))
+
+        if not copypasta_channel:
+            continue
+
+        last_saved_copypasta_id = (
+            functions.database_copypasta_channel_last_saved_id_get(guild.id))
+        try:
+            last_saved_copypasta = await copypasta_channel.fetch_message(
+                last_saved_copypasta_id)
+            after = last_saved_copypasta.created_at
+        except discord.errors.NotFound:
+            after = None
+
+        async for message in copypasta_channel.history(
+                limit=None, after=after, oldest_first=True):
+
+            if message.id == last_saved_copypasta_id:
+                break
+
+            if message.author == BOT.user:
+                continue
+
+            ctx = await BOT.get_context(message)
+            if ctx.valid:
+                continue
+
+            await copypasta_channel_process_message(message)
+
+
 @BOT.event
 async def on_message(message):
     """
@@ -56,10 +109,7 @@ async def on_message(message):
     copypasta_channel = functions.database_copypasta_channel_get(ctx.guild.id)
 
     if copypasta_channel and message.channel.id == copypasta_channel:
-        flag = "import" if message.attachments else "add"
-        message.content = (
-            f"{guild_prefix}copypasta --{flag} {message.content}")
-        await BOT.process_commands(message)
+        await copypasta_channel_process_message(message)
 
 
 @BOT.event
@@ -200,6 +250,7 @@ async def on_guild_remove(guild):
 for file in os.listdir("cogs"):
     if file.endswith(".py"):
         BOT.load_extension(f"cogs.{file[:-3]}")
+
 
 @BOT.event
 async def on_member_remove(member):

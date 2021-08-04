@@ -5,6 +5,7 @@ import os
 import sqlite3
 
 import dotenv
+import psycopg2
 
 # Load environment variables (such as bot token).
 dotenv.load_dotenv()
@@ -29,8 +30,21 @@ LOGGER.setLevel(logging.DEBUG)
 LOGGER.addHandler(HANDLER)
 
 # Values to use when working with the database.
-DATABASE_NAME = "sqlite.db"
-DATABASE_CONNECTION = sqlite3.connect(DATABASE_NAME)
+
+# If `True`, SQLite will be used as the database engine, otherwise,
+# PostgreSQL will be used.
+FILE_BASED_DATABASE = False
+SQLITE_DATABASE_NAME = "sqlite.db"
+POSTGRESQL_DATABASE_URL = os.getenv("DATABASE_URL")
+
+if FILE_BASED_DATABASE:
+    DATABASE_CONNECTION = sqlite3.connect(SQLITE_DATABASE_NAME)
+else:
+    if not POSTGRESQL_DATABASE_URL:
+        raise ValueError(
+            "'DATABASE_URL' environment variable was not provided.")
+
+    DATABASE_CONNECTION = psycopg2.connect(POSTGRESQL_DATABASE_URL)
 
 # Values to use when generating copypasta embeds.
 DISCORD_EMBED_TITLE_LIMIT = 256

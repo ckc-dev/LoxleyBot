@@ -9,6 +9,11 @@ from discord.ext import commands
 import regexes
 import settings
 
+# Unnamed and named placeholders to use in SQL queries,
+# depending on which database engine is being used.
+P = "?" if settings.FILE_BASED_DATABASE else "%s"
+PN = ":{}" if settings.FILE_BASED_DATABASE else "%({})s"
+
 
 def marco_polo(string):
     """
@@ -134,54 +139,66 @@ def divide_in_pairs(n):
 
 
 def database_exists():
-    """Return True if database file already exists, False otherwise."""
+    """Return `True` if database already exists, `False` otherwise."""
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    results = CURSOR.execute("""
-        SELECT name
-          FROM sqlite_master
-         WHERE type="table";""").fetchall()
+
+    if settings.FILE_BASED_DATABASE:
+        CURSOR.execute("""
+            SELECT name
+              FROM sqlite_master
+             WHERE type="table";""")
+    else:
+        CURSOR.execute("""
+            SELECT table_name
+              FROM information_schema.tables
+             WHERE table_schema='public'
+               AND table_type='BASE TABLE';""")
+
+    results = CURSOR.fetchall()
     CURSOR.close()
 
     return bool(results)
 
 
 def database_create():
-    """Create a SQLite database."""
+    """Create database tables."""
     CURSOR = settings.DATABASE_CONNECTION.cursor()
+
     CURSOR.execute("""
         CREATE TABLE message_counts(
-                   guild_id INTEGER NOT NULL,
-                 channel_id INTEGER NOT NULL UNIQUE,
-            last_message_id INTEGER NOT NULL,
+                   guild_id BIGINT NOT NULL,
+                 channel_id BIGINT NOT NULL UNIQUE,
+            last_message_id BIGINT NOT NULL,
                       count INTEGER NOT NULL);""")
     CURSOR.execute("""
         CREATE TABLE copypastas(
                   id INTEGER NOT NULL,
-            guild_id INTEGER NOT NULL,
+            guild_id BIGINT NOT NULL,
                title TEXT NOT NULL,
              content TEXT NOT NULL,
                count INTEGER DEFAULT 0);""")
     CURSOR.execute("""
         CREATE TABLE guild_data(
-                        guild_id INTEGER NOT NULL UNIQUE,
+                        guild_id BIGINT NOT NULL UNIQUE,
                           prefix TEXT NOT NULL,
                           locale TEXT NOT NULL,
                         timezone TEXT NOT NULL,
-            copypasta_channel_id INTEGER UNIQUE,
- copypasta_channel_last_saved_id INTEGER UNIQUE,
-              logging_channel_id INTEGER UNIQUE,
-             birthday_channel_id INTEGER UNIQUE);""")
+            copypasta_channel_id BIGINT UNIQUE,
+ copypasta_channel_last_saved_id BIGINT UNIQUE,
+              logging_channel_id BIGINT UNIQUE,
+             birthday_channel_id BIGINT UNIQUE);""")
     CURSOR.execute("""
         CREATE TABLE copypasta_bans(
-            guild_id INTEGER NOT NULL,
-             user_id INTEGER NOT NULL);""")
+            guild_id BIGINT NOT NULL,
+             user_id BIGINT NOT NULL);""")
     CURSOR.execute("""
         CREATE TABLE birthdays(
-            guild_id INTEGER NOT NULL,
-             user_id INTEGER NOT NULL,
+            guild_id BIGINT NOT NULL,
+             user_id BIGINT NOT NULL,
                month INTEGER NOT NULL,
                  day INTEGER NOT NULL,
          PRIMARY KEY (guild_id, user_id));""")
+    settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
 
@@ -193,9 +210,10 @@ def database_guild_initialize(guild_id):
         guild_id (int): ID of guild which will be initialized.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
+
+    CURSOR.execute(f"""
         INSERT INTO guild_data (guild_id, prefix, locale, timezone)
-             VALUES (?, ?, ?, ?);""", (
+             VALUES ({P}, {P}, {P}, {P});""", (
         guild_id,
         settings.BOT_DEFAULT_PREFIX,
         settings.BOT_DEFAULT_LOCALE,
@@ -219,13 +237,15 @@ def database_guild_prefix_get(client, message, by_id=False):
         str: Guild prefix.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    results = CURSOR.execute("""
+
+    CURSOR.execute(f"""
         SELECT prefix
           FROM guild_data
-         WHERE guild_id = ?;""", (
-        message if by_id else message.guild.id,)).fetchone()
-    CURSOR.close()
+         WHERE guild_id = {P};""", (message if by_id else message.guild.id,))
 
+    results = CURSOR.fetchone()
+
+    CURSOR.close()
     return results[0]
 
 
@@ -238,10 +258,11 @@ def database_guild_prefix_set(guild_id, prefix):
         prefix (str): What to set guild prefix to.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
+
+    CURSOR.execute(f"""
         UPDATE guild_data
-           SET prefix = ?
-         WHERE guild_id = ?;""", (prefix, guild_id))
+           SET prefix = {P}
+         WHERE guild_id = {P};""", (prefix, guild_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -257,12 +278,15 @@ def database_guild_locale_get(guild_id):
         str: Guild locale.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    results = CURSOR.execute("""
+
+    CURSOR.execute(f"""
         SELECT locale
           FROM guild_data
-         WHERE guild_id = ?;""", (guild_id,)).fetchone()
-    CURSOR.close()
+         WHERE guild_id = {P};""", (guild_id,))
 
+    results = CURSOR.fetchone()
+
+    CURSOR.close()
     return results[0]
 
 
@@ -275,10 +299,11 @@ def database_guild_locale_set(guild_id, locale):
         locale (str): What to set guild locale to.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
+
+    CURSOR.execute(f"""
         UPDATE guild_data
-           SET locale = ?
-         WHERE guild_id = ?;""", (locale, guild_id))
+           SET locale = {P}
+         WHERE guild_id = {P};""", (locale, guild_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -291,21 +316,22 @@ def database_guild_purge(guild_id):
         guild_id (int): ID of guild which will have its data deleted.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
+
+    CURSOR.execute(f"""
         DELETE FROM message_counts
-              WHERE guild_id = ?;""", (guild_id,))
-    CURSOR.execute("""
+              WHERE guild_id = {P};""", (guild_id,))
+    CURSOR.execute(f"""
         DELETE FROM copypastas
-              WHERE guild_id = ?;""", (guild_id,))
-    CURSOR.execute("""
+              WHERE guild_id = {P};""", (guild_id,))
+    CURSOR.execute(f"""
         DELETE FROM guild_data
-              WHERE guild_id = ?;""", (guild_id,))
-    CURSOR.execute("""
+              WHERE guild_id = {P};""", (guild_id,))
+    CURSOR.execute(f"""
         DELETE FROM copypasta_bans
-              WHERE guild_id = ?;""", (guild_id,))
-    CURSOR.execute("""
+              WHERE guild_id = {P};""", (guild_id,))
+    CURSOR.execute(f"""
         DELETE FROM birthdays
-              WHERE guild_id = ?;""", (guild_id,))
+              WHERE guild_id = {P};""", (guild_id,))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -323,13 +349,16 @@ def database_message_count_get(channel_id):
             and the ID of the last message sent to this channel, respectively.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    results = CURSOR.execute("""
+
+    CURSOR.execute(f"""
         SELECT count,
                last_message_id
           FROM message_counts
-         WHERE channel_id = ?;""", (channel_id,)).fetchone()
-    CURSOR.close()
+         WHERE channel_id = {P};""", (channel_id,))
 
+    results = CURSOR.fetchone()
+
+    CURSOR.close()
     return results
 
 
@@ -344,15 +373,28 @@ def database_message_count_set(guild_id, channel_id, last_message_id, count):
         count (int): Total message count for this channel.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
-        INSERT OR REPLACE
-                     INTO message_counts (
-                          guild_id,
-                          channel_id,
-                          last_message_id,
-                          count)
-                   VALUES (?, ?, ?, ?);""", (guild_id, channel_id,
-                                             last_message_id, count))
+    params = {
+        "guild_id": guild_id,
+        "channel_id": channel_id,
+        "last_message_id": last_message_id,
+        "count": count
+    }
+
+    CURSOR.execute(f"""
+        INSERT INTO message_counts (
+                    guild_id,
+                    channel_id,
+                    last_message_id,
+                    count)
+             VALUES (
+                    {PN.format("guild_id")},
+                    {PN.format("channel_id")},
+                    {PN.format("last_message_id")},
+                    {PN.format("count")})
+        ON CONFLICT (channel_id)
+          DO UPDATE
+                SET last_message_id = {PN.format("last_message_id")},
+                    count = {PN.format("count")}""", params)
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -372,25 +414,27 @@ def database_copypasta_get(guild_id, copypasta_id=None):
             content and count, respectively.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-
     params = {"guild_id": guild_id, "id": copypasta_id}
-    results = CURSOR.execute(f"""
+
+    CURSOR.execute(f"""
         SELECT id,
                title,
                content,
                count
           FROM copypastas
-         WHERE guild_id = :guild_id
-         {'AND id = :id'
+         WHERE guild_id = {PN.format("guild_id")}
+        {f'AND id = {PN.format("id")}'
             if copypasta_id else
-        'ORDER BY RANDOM()'};""", params).fetchone()
+        'ORDER BY RANDOM()'};""", params)
+
+    results = CURSOR.fetchone()
 
     if results:
-        CURSOR.execute("""
+        CURSOR.execute(f"""
             UPDATE copypastas
                SET count = count + 1
-             WHERE guild_id = ?
-               AND id = ?;""", (guild_id, results[0]))
+             WHERE guild_id = {P}
+               AND id = {P};""", (guild_id, results[0]))
 
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
@@ -423,20 +467,25 @@ def database_copypasta_search(guild_id, query=None, by_title=False,
             copypasta ID, title, content and count, respectively.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    params = {"guild_id": guild_id,
-              "query": f"{'%' if not exact_match else ''}{query or ''}{'%' if not exact_match else ''}"}
-    results = CURSOR.execute(f"""
+    params = {
+        "guild_id": guild_id,
+        "query": f"{'%' if not exact_match else ''}{query or ''}{'%' if not exact_match else ''}"
+    }
+
+    CURSOR.execute(f"""
           SELECT id,
                  title,
                  content,
                  count
             FROM copypastas
-           WHERE guild_id = :guild_id
-             AND(title LIKE :query
-            {'OR content LIKE :query' if not by_title else ''})
-        ORDER BY {field} {arrangement};""", params).fetchall()
-    CURSOR.close()
+           WHERE guild_id = {PN.format("guild_id")}
+             AND(title LIKE {PN.format("query")}
+           {f'OR content LIKE {PN.format("query")}' if not by_title else ''})
+        ORDER BY {field} {arrangement};""", params)
 
+    results = CURSOR.fetchall()
+
+    CURSOR.close()
     return results
 
 
@@ -450,23 +499,24 @@ def database_copypasta_add(guild_id, title, content):
         content (str): Contents of the copypasta.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
+
+    CURSOR.execute(f"""
         INSERT INTO copypastas(
-            id,
-            guild_id,
-            title,
-            content
-        )
-        VALUES(
-            COALESCE(
-                 (SELECT id
-                    FROM copypastas
-                   WHERE guild_id = ?
-                ORDER BY id DESC
-                   LIMIT 1) + 1,
-                1
-            ), ?, ?, ?
-        );""", (guild_id, guild_id, title, content))
+                    id,
+                    guild_id,
+                    title,
+                    content)
+             VALUES (
+                    COALESCE (
+                              (SELECT id
+                                 FROM copypastas
+                                WHERE guild_id = {P}
+                             ORDER BY id DESC
+                                LIMIT 1) + 1,
+                             1),
+                    {P},
+                    {P},
+                    {P});""", (guild_id, guild_id, title, content))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -480,10 +530,11 @@ def database_copypasta_delete(guild_id, copypasta_id):
         copypasta_id (int): ID of to-be-deleted copypasta.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
+
+    CURSOR.execute(f"""
         DELETE FROM copypastas
-              WHERE guild_id = ?
-                AND id = ?;""", (guild_id, copypasta_id))
+              WHERE guild_id = {P}
+                AND id = {P};""", (guild_id, copypasta_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -500,12 +551,15 @@ def database_copypasta_channel_get(guild_id):
         int: Guild's copypasta channel ID.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    results = CURSOR.execute("""
+
+    CURSOR.execute(f"""
         SELECT copypasta_channel_id
           FROM guild_data
-         WHERE guild_id = ?;""", (guild_id,)).fetchone()
-    CURSOR.close()
+         WHERE guild_id = {P};""", (guild_id,))
 
+    results = CURSOR.fetchone()
+
+    CURSOR.close()
     return results[0]
 
 
@@ -519,10 +573,11 @@ def database_copypasta_channel_set(guild_id, channel_id):
         channel_id (int): What to set guild's copypasta channel ID to.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
+
+    CURSOR.execute(f"""
         UPDATE guild_data
-           SET copypasta_channel_id = ?
-         WHERE guild_id = ?;""", (channel_id, guild_id))
+           SET copypasta_channel_id = {P}
+         WHERE guild_id = {P};""", (channel_id, guild_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -539,12 +594,15 @@ def database_copypasta_channel_last_saved_id_get(guild_id):
         int: ID of the last saved copypasta on guild's copypasta channel.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    results = CURSOR.execute("""
+
+    CURSOR.execute(f"""
         SELECT copypasta_channel_last_saved_id
           FROM guild_data
-         WHERE guild_id = ?;""", (guild_id,)).fetchone()
-    CURSOR.close()
+         WHERE guild_id = {P};""", (guild_id,))
 
+    results = CURSOR.fetchone()
+
+    CURSOR.close()
     return results[0]
 
 
@@ -559,10 +617,11 @@ def database_copypasta_channel_last_saved_id_set(guild_id, last_saved_id):
             on the copypasta channel to.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
+
+    CURSOR.execute(f"""
         UPDATE guild_data
-           SET copypasta_channel_last_saved_id = ?
-         WHERE guild_id = ?;""", (last_saved_id, guild_id))
+           SET copypasta_channel_last_saved_id = {P}
+         WHERE guild_id = {P};""", (last_saved_id, guild_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -579,13 +638,16 @@ def database_copypasta_ban_get(guild_id, user_id):
         Tuple[int]: Tuple containing user ID.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    results = CURSOR.execute("""
+
+    CURSOR.execute(f"""
         SELECT user_id
           FROM copypasta_bans
-         WHERE guild_id = ?
-           AND user_id = ?;""", (guild_id, user_id)).fetchone()
-    CURSOR.close()
+         WHERE guild_id = {P}
+           AND user_id = {P};""", (guild_id, user_id))
 
+    results = CURSOR.fetchone()
+
+    CURSOR.close()
     return results
 
 
@@ -600,12 +662,12 @@ def database_copypasta_ban_user(guild_id, user_id):
             the guild.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
+
+    CURSOR.execute(f"""
         INSERT INTO copypasta_bans(
-            guild_id,
-            user_id
-        )
-        VALUES(?, ?);""", (guild_id, user_id))
+                    guild_id,
+                    user_id)
+             VALUES ({P}, {P});""", (guild_id, user_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -621,10 +683,11 @@ def database_copypasta_unban_user(guild_id, user_id):
             to the guild.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
+
+    CURSOR.execute(f"""
         DELETE FROM copypasta_bans
-              WHERE guild_id = ?
-                AND user_id = ?;""", (guild_id, user_id))
+              WHERE guild_id = {P}
+                AND user_id = {P};""", (guild_id, user_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -641,12 +704,15 @@ def database_logging_channel_get(guild_id):
         int: Guild's logging channel ID.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    results = CURSOR.execute("""
+
+    CURSOR.execute(f"""
         SELECT logging_channel_id
           FROM guild_data
-         WHERE guild_id = ?;""", (guild_id,)).fetchone()
-    CURSOR.close()
+         WHERE guild_id = {P};""", (guild_id,))
 
+    results = CURSOR.fetchone()
+
+    CURSOR.close()
     return results[0]
 
 
@@ -659,10 +725,11 @@ def database_logging_channel_set(guild_id, channel_id):
         channel_id (int): What to set guild's logging channel ID to.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
+
+    CURSOR.execute(f"""
         UPDATE guild_data
-           SET logging_channel_id = ?
-         WHERE guild_id = ?;""", (channel_id, guild_id))
+           SET logging_channel_id = {P}
+         WHERE guild_id = {P};""", (channel_id, guild_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -678,12 +745,15 @@ def database_guild_timezone_get(guild_id):
         str: Guild's timezone, formatted as {+|-}HH:MM. E.g.: +00:00.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    results = CURSOR.execute("""
+
+    CURSOR.execute(f"""
         SELECT timezone
           FROM guild_data
-         WHERE guild_id = ?;""", (guild_id,)).fetchone()
-    CURSOR.close()
+         WHERE guild_id = {P};""", (guild_id,))
 
+    results = CURSOR.fetchone()
+
+    CURSOR.close()
     return results[0]
 
 
@@ -696,10 +766,11 @@ def database_guild_timezone_set(guild_id, timezone):
         timezone (str): What to set guild's logging channel ID to.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
+
+    CURSOR.execute(f"""
         UPDATE guild_data
-           SET timezone = ?
-         WHERE guild_id = ?;""", (timezone, guild_id))
+           SET timezone = {P}
+         WHERE guild_id = {P};""", (timezone, guild_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -713,10 +784,14 @@ def database_birthday_channel_get(guild_id):
             announcement channel ID queried.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    results = CURSOR.execute("""
+
+    CURSOR.execute(f"""
         SELECT birthday_channel_id
           FROM guild_data
-         WHERE guild_id = ?;""", (guild_id,)).fetchone()
+         WHERE guild_id = {P};""", (guild_id,))
+
+    results = CURSOR.fetchone()
+
     CURSOR.close()
 
     # Since this is used in a loop, `if results else None` is added just in
@@ -735,10 +810,11 @@ def database_birthday_channel_set(guild_id, channel_id):
             announcement channel ID to.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
+
+    CURSOR.execute(f"""
         UPDATE guild_data
-           SET birthday_channel_id = ?
-         WHERE guild_id = ?;""", (channel_id, guild_id))
+           SET birthday_channel_id = {P}
+         WHERE guild_id = {P};""", (channel_id, guild_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -754,14 +830,28 @@ def database_birthday_add(guild_id, user_id, month, day):
         day (int):  Birthday day.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
-        INSERT OR REPLACE
-                     INTO birthdays (
-                          guild_id,
-                          user_id,
-                          month,
-                          day)
-                   VALUES (?, ?, ?, ?);""", (guild_id, user_id, month, day))
+    params = {
+        "guild_id": guild_id,
+        "user_id": user_id,
+        "month": month,
+        "day": day
+    }
+
+    CURSOR.execute(f"""
+        INSERT INTO birthdays (
+                    guild_id,
+                    user_id,
+                    month,
+                    day)
+             VALUES (
+                    {PN.format("guild_id")},
+                    {PN.format("user_id")},
+                    {PN.format("month")},
+                    {PN.format("day")})
+        ON CONFLICT (guild_id, user_id)
+          DO UPDATE
+                SET month = {PN.format("month")},
+                    day = {PN.format("day")};""", params)
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -775,10 +865,11 @@ def database_birthday_delete(guild_id, user_id):
         user_id (int): ID of user who will have birthday deleted.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    CURSOR.execute("""
+
+    CURSOR.execute(f"""
         DELETE FROM birthdays
-              WHERE guild_id = ?
-                AND user_id = ?;""", (guild_id, user_id))
+              WHERE guild_id = {P}
+                AND user_id = {P};""", (guild_id, user_id))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -798,14 +889,17 @@ def database_birthday_list_get(guild_id, month, day):
             only item.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
-    results = CURSOR.execute("""
+
+    CURSOR.execute(f"""
         SELECT user_id
           FROM birthdays
-         WHERE guild_id = ?
-           AND month = ?
-           AND day = ?;""", (guild_id, month, day)).fetchall()
-    CURSOR.close()
+         WHERE guild_id = {P}
+           AND month = {P}
+           AND day = {P};""", (guild_id, month, day))
 
+    results = CURSOR.fetchall()
+
+    CURSOR.close()
     return results
 
 

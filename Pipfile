@@ -7,6 +7,7 @@ name = "pypi"
 "discord.py" = "*"
 python-dotenv = "*"
 pipfile = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 

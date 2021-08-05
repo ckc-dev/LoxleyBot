@@ -10,9 +10,6 @@ import functions
 import regexes
 import settings
 
-if not settings.BOT_TOKEN:
-    raise ValueError("'BOT_TOKEN' environment variable was not provided.")
-
 if not functions.database_exists():
     functions.database_create()
 

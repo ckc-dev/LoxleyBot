@@ -11,12 +11,15 @@ import psycopg2
 dotenv.load_dotenv()
 
 # Values to use when initializing bot.
-BOT_TOKEN = os.getenv("BOT_TOKEN")
 BOT_DEFAULT_PREFIX = "./"
 BOT_DEFAULT_LOCALE = "en-US"
 BOT_DEFAULT_TIMEZONE = "+00:00"
 LOCALIZATION_FILE_NAME = "localization.json"
 BOT_ACTIVITY = "@me for help!"
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+if not BOT_TOKEN:
+    raise ValueError("'BOT_TOKEN' environment variable was not provided.")
+
 
 # Names commonly used for "general" text channel.
 COMMON_GENERAL_TEXT_CHANNEL_NAMES = ["general", "geral", "chat", "common"]

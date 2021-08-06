@@ -461,16 +461,10 @@ class Utils(commands.Cog):
                 functions.database_birthday_channel_get(guild.id))
             if not birthday_channel:
                 continue
-            guild_timezone = regexes.TIMEZONE.fullmatch(
-                functions.database_guild_timezone_get(guild.id))
-            guild_timezone_hours = int(
-                guild_timezone.group("sign") + guild_timezone.group("hours"))
-            guild_timezone_minutes = int(
-                guild_timezone.group("sign") + guild_timezone.group("minutes"))
-            adjusted_time = datetime.datetime.utcnow() + datetime.timedelta(
-                hours=guild_timezone_hours, minutes=guild_timezone_minutes)
+            utc_time = datetime.datetime.utcnow()
+            local_time = functions.utc_to_local(utc_time, guild.id)
             birthday_list = functions.database_birthday_list_get(
-                guild.id, adjusted_time.month, adjusted_time.day)
+                guild.id, local_time.month, local_time.day)
             for birthday in birthday_list:
                 try:
                     member = guild.get_member(birthday[0])

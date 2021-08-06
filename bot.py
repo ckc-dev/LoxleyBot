@@ -132,6 +132,8 @@ async def on_raw_message_delete(payload):
         guild_time_format = functions.get_localized_object(
             guild_id, "STRFTIME_TIME")
         format = f"{guild_date_format} | {guild_time_format}"
+        utc_time = datetime.datetime.utcnow()
+        local_time = functions.utc_to_local(utc_time, guild_id)
         channel = BOT.get_channel(payload.channel_id)
         embed = discord.Embed(color=settings.EMBED_COLOR)
 
@@ -167,7 +169,12 @@ async def on_raw_message_delete(payload):
         embed.add_field(
             name=functions.get_localized_object(
                 guild_id, "LOGGING_MESSAGE_DELETED_FIELD_CREATION_TIME_NAME"),
-            value=date.strftime(format),
+            value=functions.get_localized_object(
+                guild_id,
+                "LOGGING_MESSAGE_DELETED_FIELD_CREATION_TIME_VALUE").format(
+                    local_time=functions.utc_to_local(date, guild_id).strftime(format),
+                    utc_time=date.strftime(format)
+                ),
             inline=False)
         embed.add_field(
             name=functions.get_localized_object(
@@ -176,7 +183,8 @@ async def on_raw_message_delete(payload):
             inline=False)
         embed.set_footer(text=functions.get_localized_object(
             guild_id, "LOGGING_MESSAGE_DELETED_FOOTER").format(
-                utc_time=datetime.datetime.utcnow().strftime(format)))
+                local_time=local_time.strftime(format),
+                utc_time=utc_time.strftime(format)))
 
         await logging_channel.send(embed=embed)
 

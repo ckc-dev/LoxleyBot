@@ -1,5 +1,6 @@
 """Contains general use functions used in other parts of the bot."""
 
+import datetime
 import io
 import json
 import random
@@ -1087,3 +1088,24 @@ def raise_missing_permissions(permissions):
     missing = ([perm for perm, required in iter(permissions) if required])
 
     raise commands.MissingPermissions(missing)
+
+
+def utc_to_local(utc_time, guild_id):
+    """
+    Adjust a UTC datetime object to a guild's timezone.
+
+    Args:
+        utc_time (datetime.datetime): UTC time.
+        guild_id (int): ID of guild for which time will be adjusted.
+
+    Returns:
+        datetime.datetime: Adjusted datetime object.
+    """
+    guild_timezone = database_guild_timezone_get(guild_id)
+    match = regexes.TIMEZONE.fullmatch(guild_timezone)
+    hour_adjustment = int(match.group("sign") + match.group("hours"))
+    minute_adjustment = int(match.group("sign") + match.group("minutes"))
+    adjusted_time = utc_time + datetime.timedelta(
+        hours=hour_adjustment, minutes=minute_adjustment)
+
+    return adjusted_time

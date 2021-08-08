@@ -172,9 +172,10 @@ async def on_raw_message_delete(payload):
             value=functions.get_localized_object(
                 guild_id,
                 "LOGGING_MESSAGE_DELETED_FIELD_CREATION_TIME_VALUE").format(
-                    local_time=functions.utc_to_local(date, guild_id).strftime(format),
+                    local_time=functions.utc_to_local(
+                        date, guild_id).strftime(format),
                     utc_time=date.strftime(format)
-                ),
+            ),
             inline=False)
         embed.add_field(
             name=functions.get_localized_object(
@@ -233,13 +234,13 @@ async def on_guild_join(guild):
         message = ""
 
         for locale in functions.get_available_locales():
-            message += functions.get_localized_object(
+            message = functions.get_localized_object(
                 guild.id, "GUILD_JOIN", locale).format(
                     locale=locale,
                     guild_name=guild.name,
-                    prefix=settings.BOT_DEFAULT_PREFIX) + "\n"
+                    prefix=settings.BOT_DEFAULT_PREFIX)
 
-        await general.send(message)
+            await general.send(message)
 
 
 @BOT.event

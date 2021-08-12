@@ -29,21 +29,25 @@ class Entertainment(commands.Cog):
         Manage and send copypastas.
 
         It is recommended to escape all quotes in copypasta title and content,
-        E.g.: "Example of \'escaped\' quotes", otherwise, copypasta data could
-        be incorrectly split.
+            e.g.: "Example of \'escaped\' quotes", otherwise, copypasta data
+            could be incorrectly split.
 
         When sending a copypasta by its title, if more than one copypasta is
-        found, a list containing those is sent instead.
+            found, a list containing those is sent instead.
 
         When searching for copypastas, if only one copypasta matches search
-        query, it is sent instead.
+            query, it is sent instead.
 
         When listing copypastas, by default, results are sorted by usage count,
-        in descending order. If a field is specified, but not an order, will
-        use ascending order by default.
+            in descending order. If a field is specified, but not an order,
+            ascending order will be used by default.
 
         When deleting copypastas, it is possible to use commas to separate IDs,
-        as to delete multiple copypastas at once.
+            as to delete multiple copypastas at once.
+
+        When setting a channel, it is also possible to use "-n" or "--none",
+            as an argument instead of a channel, as to remove any channel
+            already set.
 
         Args:
             arguments (str, optional): Arguments passed to command.
@@ -60,7 +64,7 @@ class Entertainment(commands.Cog):
             copypasta {-d|--delete} <copypasta ID>
             copypasta {-l|--list} [{-a|--ascending|-d|--descending}]
                                   [{-i|--id|-t|--title|-c|--content|--count}]
-            copypasta {-sc|--set-channel} [<channel>]
+            copypasta {-sc|--set-channel} [<channel>|-n|--none]
             copypasta {-e|--export}
             copypasta {--import} (embedding a file to the message)
             copypasta {-b|--ban} <members>
@@ -77,12 +81,12 @@ class Entertainment(commands.Cog):
                 Search for "example query" in copypastas title and content.
             copypasta -a "Content":
                 Add "Content" as a copypasta, which will have its title
-                generated automatically.
+                    generated automatically.
             copypasta -a "Title" "Content":
                 Add "Content" as a copypasta titled "Title".
             copypasta -a (referencing/replying a message):
                 Add referenced message as a copypasta, which will have its
-                title generated automatically.
+                    title generated automatically.
             copypasta -a (referencing/replying a message) "Title":
                 Add referenced message as a copypasta titled "Title".
             copypasta -d 8:
@@ -105,7 +109,7 @@ class Entertainment(commands.Cog):
                 Ban "example_member" from adding copypastas, by mention.
             copypasta -u @member1 "Member 2" member#0003:
                 Unban three members from adding copypastas, by mention, name,
-                and name#discriminator.
+                    and name#discriminator.
         """
         def format_copypasta(copypasta):
             """
@@ -141,15 +145,17 @@ class Entertainment(commands.Cog):
             Format a list of copypastas as one or more tables.
 
             Returns a list of strings formatted as tables,
-            generated from a list of copypastas.
+                generated from a list of copypastas.
+
+            If an `emphasis` is provided, the function will try to keep it in
+                the center of the content column.
 
             Args:
                 copypasta_list (List[Tuple[int, str, str, int]]): A list of
                     tuples containing copypasta ID, title, content and count,
                     respectively.
                 emphasis (str, optional): Snippet of text that should be
-                    highlighted. If present, the function will try to keep
-                    it in the center of content column. Defaults to None.
+                    highlighted. Defaults to None.
 
             Returns:
                 List[str]: List containing strings formatted as tables,
@@ -332,7 +338,7 @@ class Entertainment(commands.Cog):
 
             Args:
                 ctx (discord.ext.commands.Context): Context passed to function.
-                arguments (str, optional): Arguments passed to function.
+                arguments (str): Arguments passed to function.
                 ban (bool, optional): Whether to ban or unban users.
                     Defaults to False.
 
@@ -347,9 +353,7 @@ class Entertainment(commands.Cog):
             option = "BAN" if ban else "UNBAN"
             message = functions.get_localized_object(
                 ctx.guild.id, f"COPYPASTA_{option}")
-            members = (
-                i[0] + i[1]
-                for i in regexes.STRINGS_BETWEEN_SPACES.findall(arguments))
+            members = (i[0] + i[1] for i in regexes.STRING.findall(arguments))
 
             for member in members:
                 try:
@@ -380,7 +384,7 @@ class Entertainment(commands.Cog):
 
         # Send a specific copypasta by ID.
         elif regexes.ID_OPTIONAL.fullmatch(arguments):
-            id_ = regexes.ID_OPTIONAL.fullmatch(arguments).group("id")
+            id_ = regexes.ID_OPTIONAL.fullmatch(arguments)["id"]
             copypasta = functions.database_copypasta_get(ctx.guild.id, id_)
 
             if not copypasta:
@@ -404,7 +408,7 @@ class Entertainment(commands.Cog):
 
             message_reference = ctx.message.reference
             remaining_string = regexes.ADD_OPTIONAL_VALUE.fullmatch(
-                arguments).group(1)
+                arguments)[1]
             title = None
 
             if not remaining_string and not message_reference:
@@ -417,12 +421,11 @@ class Entertainment(commands.Cog):
             if remaining_string:
                 match = regexes.TITLE_AND_CONTENT.fullmatch(
                     remaining_string.strip())
-                title = match.group("title")
+                title = match["title"]
 
                 # `or ""` is used just in case group is empty. Otherwise,
                 # a NoneType would be used as an operand, raising an error.
-                content = (match.group("content") or ""
-                           + match.group("content_2") or "")
+                content = (match["content"] or "" + match["content_2"] or "")
 
                 if message_reference:
                     title = content if not title else title
@@ -435,7 +438,7 @@ class Entertainment(commands.Cog):
 
             if not exists:
                 if not title:
-                    title = regexes.FIRST_FEW_WORDS.match(content).group(1)
+                    title = regexes.FIRST_FEW_WORDS.match(content)[1]
 
                 if (len(content) > settings.DISCORD_EMBED_DESCRIPTION_LIMIT
                         or len(title) > settings.DISCORD_EMBED_TITLE_LIMIT):
@@ -464,7 +467,7 @@ class Entertainment(commands.Cog):
                 permissions = discord.Permissions(manage_emojis=True)
                 functions.raise_missing_permissions(permissions)
 
-            ids = regexes.DELETE.fullmatch(arguments).group("ids")
+            ids = regexes.DELETE.fullmatch(arguments)["ids"]
 
             for id_ in [int(i) for i in ids.split(",")]:
                 exists = functions.database_copypasta_get(ctx.guild.id, id_)
@@ -493,7 +496,7 @@ class Entertainment(commands.Cog):
                 return
 
             channel_name = regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(
-                arguments).group("channel") or ctx.channel.name
+                arguments)["channel"] or ctx.channel.name
 
             try:
                 channel = await commands.TextChannelConverter().convert(
@@ -514,7 +517,7 @@ class Entertainment(commands.Cog):
 
         # Search for one or more copypastas.
         elif regexes.SEARCH.fullmatch(arguments):
-            query = regexes.SEARCH.fullmatch(arguments).group("query")
+            query = regexes.SEARCH.fullmatch(arguments)["query"]
             results = functions.database_copypasta_search(ctx.guild.id, query)
 
             if not results:
@@ -565,11 +568,11 @@ class Entertainment(commands.Cog):
 
             if regexes.COPYPASTA_LIST_DATABASE_FIELDS.search(arguments):
                 field = regexes.COPYPASTA_LIST_DATABASE_FIELDS.search(
-                    arguments).group("field").upper()
+                    arguments)["field"].upper()
 
             if regexes.COPYPASTA_LIST_ARRANGEMENT.search(arguments):
                 arrangement = regexes.COPYPASTA_LIST_ARRANGEMENT.search(
-                    arguments).group("arrangement").upper()
+                    arguments)["arrangement"].upper()
 
             order_field = FIELDS[field]
             order_arrangement = (
@@ -657,7 +660,7 @@ class Entertainment(commands.Cog):
         # Send either a specific copypasta by title or a list
         # of copypastas containing user query in their title.
         elif regexes.TITLE_OPTIONAL.fullmatch(arguments):
-            title = regexes.TITLE_OPTIONAL.fullmatch(arguments).group("title")
+            title = regexes.TITLE_OPTIONAL.fullmatch(arguments)["title"]
             results = functions.database_copypasta_search(
                 ctx.guild.id, title, by_title=True)
             if not results:

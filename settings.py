@@ -11,20 +11,21 @@ import psycopg2
 dotenv.load_dotenv()
 
 # Values to use when initializing bot.
-BOT_DEFAULT_PREFIX = "./"
-BOT_DEFAULT_LOCALE = "en-US"
-BOT_DEFAULT_TIMEZONE = "+00:00"
 LOCALIZATION_FILE_NAME = "localization.json"
 BOT_ACTIVITY = "@me for help!"
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise ValueError("'BOT_TOKEN' environment variable was not provided.")
 
+# Values to use when bot first enters a guild.
+GUILD_DEFAULT_PREFIX = "./"
+GUILD_DEFAULT_LOCALE = "en-US"
+GUILD_DEFAULT_TIMEZONE = "+00:00"
 
 # Names commonly used for "general" text channel.
 COMMON_GENERAL_TEXT_CHANNEL_NAMES = ["general", "geral", "chat", "common"]
 
-# Values to use when seting up logging.
+# Values to use when setting up logging.
 LOGGER = logging.getLogger("discord")
 HANDLER = logging.FileHandler(filename="bot.log", encoding="utf-8", mode="w")
 LOG_FORMAT = "%(asctime)s:%(levelname)s:%(name)s: %(message)s"

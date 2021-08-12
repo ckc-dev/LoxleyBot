@@ -33,7 +33,7 @@ def marco_polo(string):
         Generate a random integer, to be used as a number of characters.
 
         Randomly picks a number of characters between `i - 2` and `i + 2`,
-        based on the amount of characters on the user input.
+            based on the amount of characters `i` on the input string.
 
         Args:
             string (str): A string of characters to get amount from.
@@ -50,7 +50,7 @@ def marco_polo(string):
 
     def gen_char_string(strings, sub):
         """
-        Generate a string of characters based on user input.
+        Generate a string of characters based on input strings.
 
         Args:
             strings (List[str]): A list containing strings used to generate
@@ -74,14 +74,13 @@ def marco_polo(string):
         for _ in range(sum(gen_char_amount(s) for s in strings) // len(strings)):
             s += "".join(random.choices(
                 [sub.lower(), sub.upper()],
-                weights=[1 - uppercase_chance, uppercase_chance]
-            ))
+                weights=[1 - uppercase_chance, uppercase_chance]))
 
         return s
 
     def gen_punctuation_string(string):
         """
-        Generate a string of punctuation, based on user input.
+        Generate a string of punctuation, based on input string.
 
         Args:
             string (str): A group of punctuation characters used to generate
@@ -109,17 +108,17 @@ def marco_polo(string):
     s = ""
     match = regexes.MARCO.fullmatch(string)
     character_dicts = [
-        {"P": [match.group("m")]},
-        {"O": [match.group("a")]},
-        {"L": [match.group("r"), match.group("c")]},
-        {"O": [match.group("o")]},
+        {"P": [match["m"]]},
+        {"O": [match["a"]]},
+        {"L": [match["r"], match["c"]]},
+        {"O": [match["o"]]}
     ]
 
     for d in character_dicts:
         s += gen_char_string(*d.values(), *d)
 
-    if match.group("punctuation"):
-        s += gen_punctuation_string(match.group("punctuation"))
+    if match["punctuation"]:
+        s += gen_punctuation_string(match["punctuation"])
 
     return s
 
@@ -128,7 +127,7 @@ def divide_in_pairs(n):
     """
     Divide a number into a tuple containing a pair of whole numbers.
 
-    E.g.: 80 returns (40, 40), 79 returns (39, 40).
+    e.g.: An input of 80 returns (40, 40), and an input of 79 returns (39, 40).
 
     Args:
         n (int): Number to divide.
@@ -180,14 +179,14 @@ def database_create():
                count INTEGER DEFAULT 0);""")
     CURSOR.execute("""
         CREATE TABLE guild_data(
-                        guild_id BIGINT NOT NULL UNIQUE,
-                          prefix TEXT NOT NULL,
-                          locale TEXT NOT NULL,
-                        timezone TEXT NOT NULL,
-            copypasta_channel_id BIGINT UNIQUE,
- copypasta_channel_last_saved_id BIGINT UNIQUE,
-              logging_channel_id BIGINT UNIQUE,
-             birthday_channel_id BIGINT UNIQUE);""")
+                                   guild_id BIGINT NOT NULL UNIQUE,
+                                     prefix TEXT NOT NULL,
+                                     locale TEXT NOT NULL,
+                                   timezone TEXT NOT NULL,
+                       copypasta_channel_id BIGINT UNIQUE,
+            copypasta_channel_last_saved_id BIGINT UNIQUE,
+                         logging_channel_id BIGINT UNIQUE,
+                        birthday_channel_id BIGINT UNIQUE);""")
     CURSOR.execute("""
         CREATE TABLE copypasta_bans(
             guild_id BIGINT NOT NULL,
@@ -216,9 +215,9 @@ def database_guild_initialize(guild_id):
         INSERT INTO guild_data (guild_id, prefix, locale, timezone)
              VALUES ({P}, {P}, {P}, {P});""", (
         guild_id,
-        settings.BOT_DEFAULT_PREFIX,
-        settings.BOT_DEFAULT_LOCALE,
-        settings.BOT_DEFAULT_TIMEZONE))
+        settings.GUILD_DEFAULT_PREFIX,
+        settings.GUILD_DEFAULT_LOCALE,
+        settings.GUILD_DEFAULT_TIMEZONE))
     settings.DATABASE_CONNECTION.commit()
     CURSOR.close()
 
@@ -227,12 +226,15 @@ def database_guild_prefix_get(client, message, by_id=False):
     """
     Get a guild prefix from the database.
 
+    A guild ID can also be passed directly instead of a message, as long as
+        `by_id` is also passed as `True`.
+
     Args:
         client (discord.Client): Client to which guild prefix will be queried.
         message (discord.Message): Message coming from guild which prefix will
             be queried.
-        by_id (bool): Whether or not to get prefix by passing a guild ID to
-            function, instead of a message object.
+        by_id (bool, optional): Whether or not to get prefix by passing a guild
+            ID to function, instead of a message object. Defaults to False.
 
     Returns:
         str: Guild prefix.
@@ -342,8 +344,8 @@ def database_message_count_get(channel_id):
     Get current message count for a channel from the database.
 
     Args:
-        channel_id (int): ID of the channel whose number of messages
-            will be queried.
+        channel_id (int): ID of the channel whose message count will be
+            queried.
 
     Returns:
         Tuple[int, int]: A tuple containing the message count for this channel
@@ -368,8 +370,9 @@ def database_message_count_set(guild_id, channel_id, last_message_id, count):
     Set current message count for a channel on the database.
 
     Args:
-        channel_id (int): ID of the channel whose number of messages
-            will be set.
+        guild_id (int): ID of the guild containing the channel whose message
+            count will be set.
+        channel_id (int): ID of the channel whose message count will be set.
         last_message_id (int): ID of the last message sent to this channel.
         count (int): Total message count for this channel.
     """
@@ -404,10 +407,11 @@ def database_copypasta_get(guild_id, copypasta_id=None):
     """
     Get data for a copypasta from the database.
 
+    If no copypasta ID is passed, will return data for a random copypasta.
+
     Args:
         guild_id (int): ID of the guild to which copypasta belongs.
         copypasta_id (int, optional): ID of to-be-queried copypasta.
-            If no ID is passed, will return data for a random copypasta.
             Defaults to None.
 
     Returns:
@@ -449,11 +453,12 @@ def database_copypasta_search(guild_id, query=None, by_title=False,
     """
     Search for one or more copypastas on the database.
 
+    If query is `None`, all copypastas belonging to the guild will be returned.
+
     Args:
         guild_id (int): ID of guild to which copypastas belong.
         query (str, optional): What to search for in copypasta title or
-            content. If query is None, all copypastas that
-            belong to this guild will be returned. Defaults to None.
+            content. Defaults to None.
         by_title (bool, optional): Whether or not to search only by
             title and not by content. Defaults to False.
         exact_match (bool, optional): Whether or not to search for an exact
@@ -497,7 +502,7 @@ def database_copypasta_add(guild_id, title, content):
     Args:
         guild_id (int): ID of guild to which copypasta will belong.
         title (str): Title of the copypasta.
-        content (str): Contents of the copypasta.
+        content (str): Content of the copypasta.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
 
@@ -743,7 +748,7 @@ def database_guild_timezone_get(guild_id):
         guild_id (int): ID of guild which will have its timezone queried.
 
     Returns:
-        str: Guild's timezone, formatted as {+|-}HH:MM. E.g.: +00:00.
+        str: Guild's timezone, formatted as {+|-}HH:MM, e.g.: +00:00.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
 
@@ -763,8 +768,8 @@ def database_guild_timezone_set(guild_id, timezone):
     Set the timezone for a guild on the database.
 
     Args:
-        guild_id (int): ID of guild which will have its logging channel ID set.
-        timezone (str): What to set guild's logging channel ID to.
+        guild_id (int): ID of guild which will have its timezone set.
+        timezone (str): What to set guild's timezone to.
     """
     CURSOR = settings.DATABASE_CONNECTION.cursor()
 
@@ -912,7 +917,7 @@ def copypasta_export_json(guild_id):
         guild_id (int): ID of guild which will have its copypastas exported.
 
     Returns:
-        List(io.BytesIO): A list of memory buffers containing copypastas,
+        List[io.BytesIO]: A list of memory buffers containing copypastas,
             formatted as JSON.
     """
     # A number of bytes (or characters) is removed from Discord's file size
@@ -973,6 +978,8 @@ def copypasta_import_json(data, guild_id):
 
     After data is saved, operation results are returned.
 
+    Returns `None` if an error occurs when trying to load JSON data.
+
     Args:
         data (str, bytes): Data to be loaded as JSON.
         guild_id (int): ID of guild which will have copypastas imported to.
@@ -1001,7 +1008,7 @@ def copypasta_import_json(data, guild_id):
 
             if not exists:
                 if not title:
-                    title = regexes.FIRST_FEW_WORDS.match(content).group(1)
+                    title = regexes.FIRST_FEW_WORDS.match(content)[1]
 
                 if (len(content) > settings.DISCORD_EMBED_DESCRIPTION_LIMIT
                         or len(title) > settings.DISCORD_EMBED_TITLE_LIMIT):
@@ -1032,7 +1039,7 @@ def get_available_locales():
     Get current available bot locales.
 
     Returns:
-        List(str): A list of strings containing available bot locales.
+        List[str]: A list of strings containing available bot locales.
     """
     return list(LOCALIZATION.keys())
 
@@ -1042,7 +1049,11 @@ def get_localized_object(guild_id, reference, locale=None, as_list=False):
     Get a localized object from the localization file for a guild.
 
     This object may be a string, list of objects, or dictionary.
+
     If no specific locale code is passed, guild locale will be used.
+
+    If the object is a list and `as_list` is `False`, a random object from it
+        will be returned.
 
     Args:
         guild_id (int): ID of guild to get localized object for.
@@ -1050,8 +1061,7 @@ def get_localized_object(guild_id, reference, locale=None, as_list=False):
         locale (str, optional): Locale code used to get the object.
             Defaults to none.
         as_list (bool, optional): Whether or not to return the whole list when
-            getting a list object. If False, a random object from the list is
-            returned. Defaults to False
+            getting a list object. Defaults to False.
 
     Returns:
         One of the following:
@@ -1103,8 +1113,8 @@ def utc_to_local(utc_time, guild_id):
     """
     guild_timezone = database_guild_timezone_get(guild_id)
     match = regexes.TIMEZONE.fullmatch(guild_timezone)
-    hour_adjustment = int(match.group("sign") + match.group("hours"))
-    minute_adjustment = int(match.group("sign") + match.group("minutes"))
+    hour_adjustment = int(match["sign"] + match["hours"])
+    minute_adjustment = int(match["sign"] + match["minutes"])
     adjusted_time = utc_time + datetime.timedelta(
         hours=hour_adjustment, minutes=minute_adjustment)
 

@@ -84,9 +84,9 @@ class Utils(commands.Cog):
         elif regexes.LIMIT_OPTIONAL.fullmatch(arguments):
             # 1 is added to account for the message used to run the command.
             limit = int(
-                regexes.LIMIT_OPTIONAL.fullmatch(arguments).group("limit")) + 1
+                regexes.LIMIT_OPTIONAL.fullmatch(arguments)["limit"]) + 1
         elif regexes.ID.fullmatch(arguments):
-            end_message_id = int(regexes.ID.fullmatch(arguments).group("id"))
+            end_message_id = int(regexes.ID.fullmatch(arguments)["id"])
         elif not regexes.ALL_INDEPENDENT.fullmatch(arguments):
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "PURGE_INVALID_USAGE"))
@@ -161,7 +161,7 @@ class Utils(commands.Cog):
             end_message_id = None
         elif regexes.ID_OPTIONAL.fullmatch(arguments):
             end_message_id = int(
-                regexes.ID_OPTIONAL.fullmatch(arguments).group("id"))
+                regexes.ID_OPTIONAL.fullmatch(arguments)["id"])
         else:
             await ctx.send(functions.get_localized_object(
                 ctx.guild.id, "COUNT_INVALID_USAGE"))
@@ -179,7 +179,7 @@ class Utils(commands.Cog):
                 # 1 is added to account for the message sent by the bot.
                 await end_message.reply(
                     functions.get_localized_object(
-                        ctx.guild.id, "COUNT_FOUND_REPLY").format(
+                        ctx.guild.id, "COUNT_RESULTS_REPLY").format(
                             message_count=count + 1),
                     mention_author=False)
                 return
@@ -203,7 +203,7 @@ class Utils(commands.Cog):
 
         # 1 is added to account for the message sent by the bot.
         await ctx.send(functions.get_localized_object(
-            ctx.guild.id, "COUNT_FOUND_MESSAGE").format(
+            ctx.guild.id, "COUNT_RESULTS").format(
                 message_count=count + 1,
                 channel_name=ctx.channel.mention,
                 threshold_message=threshold_message))
@@ -278,8 +278,8 @@ class Utils(commands.Cog):
         """
         Change guild timezone.
 
-        Is is required to use the following format: {+|-}HH:MM.
-            E.g.: -03:00 or +12:30.
+        Is is required to use the following format: {+|-}HH:MM,
+            e.g.: -03:00 or +12:30.
 
         Args:
             new (str): Timezone to change to. Defaults to None.
@@ -313,12 +313,16 @@ class Utils(commands.Cog):
         """
         Set a text channel for logging deleted messages.
 
+        When setting a channel, it is also possible to use "-n" or "--none",
+            as an argument instead of a channel, as to remove any channel
+            already set.
+
         Args:
             arguments (str, optional): Arguments passed to command.
                 Defaults to None.
 
         Usage:
-            logging {-sc|--set-channel} [<channel>]
+            logging {-sc|--set-channel} [<channel>|-n|--none]
 
         Examples:
             logging -sc:
@@ -339,7 +343,7 @@ class Utils(commands.Cog):
             return
 
         channel_name = regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(
-            arguments).group("channel") or ctx.channel.name
+            arguments)["channel"] or ctx.channel.name
 
         try:
             channel = await commands.TextChannelConverter().convert(
@@ -366,12 +370,16 @@ class Utils(commands.Cog):
         When saving birthday information, albeit required due to
             localization issues, birth year is not saved.
 
+        When setting a channel, it is also possible to use "-n" or "--none",
+            as an argument instead of a channel, as to remove any channel
+            already set.
+
         Args:
             arguments (str, optional): Arguments passed to command.
                 Defaults to None.
 
         Usage:
-            birthday {-sc|--set-channel} [<channel>]
+            birthday {-sc|--set-channel} [<channel>|-n|--none]
             birthday {-n|--none}
             birthday <date>
 
@@ -384,7 +392,8 @@ class Utils(commands.Cog):
             birthday -n:
                 Delete birthday information.
             birthday 30/01/2000:
-                Save birthday information as January 30.
+                Save birthday information as January 30, given the guild uses a
+                    DD/MM/YYY date format.
         """
         if not arguments:
             await ctx.send(functions.get_localized_object(
@@ -402,7 +411,7 @@ class Utils(commands.Cog):
                 return
 
             channel_name = regexes.SET_CHANNEL_OPTIONAL_VALUE.fullmatch(
-                arguments).group("channel") or ctx.channel.name
+                arguments)["channel"] or ctx.channel.name
 
             try:
                 channel = await commands.TextChannelConverter().convert(
@@ -445,7 +454,7 @@ class Utils(commands.Cog):
 
     @tasks.loop(hours=24)
     async def database_message_count_auto_update(self):
-        """Update message count in database every 24 hours."""
+        """Update message count for each guild."""
         for guild in self.bot.guilds:
             for channel in guild.text_channels:
                 if channel.permissions_for(guild.me).read_messages:
@@ -455,7 +464,7 @@ class Utils(commands.Cog):
 
     @tasks.loop(hours=24)
     async def check_for_birthdays(self):
-        """Check each guild for birthdays, every 24 hours."""
+        """Check each guild for birthdays."""
         for guild in self.bot.guilds:
             birthday_channel = guild.get_channel(
                 functions.database_birthday_channel_get(guild.id))
@@ -475,8 +484,9 @@ class Utils(commands.Cog):
                     pass
 
     @database_message_count_auto_update.before_loop
+    @check_for_birthdays.before_loop
     async def wait_until_ready(self):
-        """Wait until bot is ready before updating database."""
+        """Wait until bot is ready before starting loops."""
         await self.bot.wait_until_ready()
 
 

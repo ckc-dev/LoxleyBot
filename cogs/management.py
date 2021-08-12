@@ -48,12 +48,11 @@ class Management(commands.Cog):
             match_reason = regexes.REASON.search(arguments)
 
             if match_reason:
-                reason = match_reason.group("reason")
+                reason = match_reason["reason"]
                 arguments = regexes.REASON.sub("", arguments)
 
             members.extend(
-                i[0] + i[1]
-                for i in regexes.STRINGS_BETWEEN_SPACES.findall(arguments))
+                i[0] + i[1] for i in regexes.STRING.findall(arguments))
 
         if message_reference:
             members.append(str(message_reference.resolved.author.id))
@@ -88,10 +87,13 @@ class Management(commands.Cog):
         """
         Kick one or more members from the guild.
 
-        If no reason is specified, a default reason is provided. Reason must be
-        between either single (') or double (") quotes. Members must be
-        separated by spaces and if a member name contains spaces, it must also
-        be between either single (') or double (") quotes.
+        If no reason is specified, a default reason is provided.
+
+        Reason must be between either single (') or double (") quotes.
+
+        Members must be separated by spaces and if a member name contains
+            spaces, it must also be between either single (') or double (")
+            quotes.
 
         Args:
             arguments (str): Arguments passed to command. Defaults to None.
@@ -106,19 +108,19 @@ class Management(commands.Cog):
                 Kick "example_member" by mention, providing a default reason.
             kick "Example Member":
                 Kick a member with spaces in their name, "Example member",
-                providing a default reason.
+                    providing a default reason.
             kick -r "For having a long username." example_member#1234:
                 Kick a member by name#discriminator,
-                providing the reason "For having a long username."
+                    providing the reason "For having a long username."
             kick @member1 "Member 2" member#0003:
                 Kick three members by mention, name, and name#discriminator,
-                providing a default reason.
+                    providing a default reason.
             kick (referencing/replying a message):
                 Kick the author of the referenced message,
-                providing a default reason.
+                    providing a default reason.
             kick @member1 "Member 2" (referencing/replying a message):
                 Kick the author of the referenced message and two more members,
-                providing a default reason.
+                    providing a default reason.
         """
         await self.kick_members(ctx, arguments)
 
@@ -129,10 +131,13 @@ class Management(commands.Cog):
         """
         Ban one or more members from the guild.
 
-        If no reason is specified, a default reason is provided. Reason must be
-        between either single (') or double (") quotes. Members must be
-        separated by spaces and if a member name contains spaces, it must also
-        be between either single (') or double (") quotes.
+        If no reason is specified, a default reason is provided.
+
+        Reason must be between either single (') or double (") quotes.
+
+        Members must be separated by spaces and if a member name contains
+            spaces, it must also be between either single (') or double (")
+            quotes.
 
         Args:
             arguments (str): Arguments passed to command. Defaults to None.
@@ -147,19 +152,19 @@ class Management(commands.Cog):
                 Ban "example_member" by mention, providing a default reason.
             ban "Example Member":
                 Ban a member with spaces in their name, "Example member",
-                providing a default reason.
+                    providing a default reason.
             ban -r "For having a long username." example_member#1234:
                 Ban a member by name#discriminator,
-                providing the reason "For having a long username."
+                    providing the reason "For having a long username."
             ban @member1 "Member 2" member#0003:
                 Ban three members by mention, name, and name#discriminator,
-                providing a default reason.
+                    providing a default reason.
             ban (referencing/replying a message):
                 Ban the author of the referenced message,
-                providing a default reason.
+                    providing a default reason.
             ban @member1 "Member 2" (referencing/replying a message):
                 Ban the author of referenced message and two more members,
-                providing a default reason.
+                    providing a default reason.
         """
         await self.kick_members(ctx, arguments, True)
 
@@ -170,9 +175,10 @@ class Management(commands.Cog):
         """
         Remove one or more users from the guild banlist.
 
-        Users must be formatted as "username#discriminator". Users must be
-        separated by spaces and if a user name contains spaces, it must be
-        between either single (') or double (") quotes.
+        Users must be formatted as "username#discriminator".
+
+        Users must be separated by spaces and if a user name contains spaces,
+            it must be between either single (') or double (") quotes.
 
         Args:
             users (str): String containing users to remove from guild banlist.

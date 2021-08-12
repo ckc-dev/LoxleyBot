@@ -6,7 +6,7 @@ import re
 # RegExes used to match parameters (or flags) passed to bot commands.
 #
 # "Optional" parameters should be used when a flag can be omitted when passing
-# the parameter. E.g.: Using an optional --id parameter should yield the same
+# the parameter, e.g.: Using an optional --id parameter should yield the same
 # results in the following cases:
 #   command 10
 #   command -i 10
@@ -15,22 +15,23 @@ import re
 # {-i|--id} is passed.
 #
 # "Optional value" parameters should be used when the flag is required, but a
-# default value is used if no value is specified. E.g.: Using an optional value
+# default value is used if no value is specified, e.g.: Using an optional value
 # --set-channel parameter should yield the same results in the following cases:
 #   command -sc
 #   command --set-channel default_channel
 #
-# "Independent" parameters are used by themselves, without any value. E.g.:
-# Using an independent --none parameter means the string should simply contain
-# "--none" in it.
+# "Independent" parameters are used by themselves, without any value, e.g.:
+# Using an independent --none parameter means the string succeeding the command
+# should simply contain "--none" in it.
 #
-# "Verbose" parameters can only be used in a verbose manner.
+# "Verbose" parameters can only be used in a verbose manner. That is, no short
+# notation is available.
 
 ADD_OPTIONAL_VALUE = re.compile(r"""
     (?:-a|--add)    # Match either "-a" or "--add".
     \s*             # Match between 0 and ∞ whitespace characters.
     (.+)?           # CAPTURE GROUP | Match any character between
-                    # 1 and ∞ times, either 0 or 1 times""",
+                    # 1 and ∞ times, either 0 or 1 times.""",
                                 flags=re.IGNORECASE | re.VERBOSE | re.DOTALL)
 
 ALL_INDEPENDENT = re.compile(r"""
@@ -76,7 +77,7 @@ DELETE = re.compile(r"""
             \s*     # Match between 0 and ∞ whitespace characters.
             \d+     # Match between 1 and ∞ digits.
         )*          # Close non-capturing group, match between 0 and ∞ times.
-    )               # Close capture group (id).""",
+    )               # Close capture group (ids).""",
                     flags=re.IGNORECASE | re.VERBOSE)
 
 EXPORT_INDEPENDENT = re.compile(r"""
@@ -137,7 +138,7 @@ SET_CHANNEL_OPTIONAL_VALUE = re.compile(r"""
     (?:-sc|--set-channel)   # Match either "-sc" or "--set-channel".
     \s*                     # Match between 0 and ∞ whitespace characters.
     (?P<channel>.+)?        # CAPTURE GROUP (channel) | Match any character
-                            # between 1 and ∞ times.""",
+                            # between 1 and ∞ times, either 0 or 1 times.""",
                                         flags=re.IGNORECASE | re.VERBOSE)
 
 TITLE_OPTIONAL = re.compile(r"""
@@ -161,7 +162,7 @@ DATETIME_FORMAT_CODE = re.compile(r"""
                                   re.VERBOSE)
 
 DIGITS = re.compile(r"""
-    (\d+)   # CAPTURE GROUP (1) | Match Match between 1 and ∞ digits.""",
+    (\d+)   # CAPTURE GROUP (1) | Match between 1 and ∞ digits.""",
                     re.VERBOSE)
 
 # RegEx based on restrictions described in Discord's documentation. Source:
@@ -210,11 +211,10 @@ MARCO = re.compile(r"""
     (?P<c>c+)               # CAPTURE GROUP (c) | Match between 1 and ∞ "c".
     (?P<o>o+)               # CAPTURE GROUP (o) | Match between 1 and ∞ "o".
     (?P<punctuation>\W*)    # CAPTURE GROUP (punctuation) | Match between 0
-                            # and ∞ of ".", "…", "?", "!", or any
-                            # whitespace character.""",
+                            # and ∞ of any non-word character.""",
                    flags=re.IGNORECASE | re.VERBOSE)
 
-STRINGS_BETWEEN_SPACES = re.compile(r"""
+STRING = re.compile(r"""
     (?:         # Open non-capturing group.
         ['\"]   # Match either "'" or '"'.
         (.+?)   # CAPTURE GROUP | Match any character between 1 and ∞
@@ -224,11 +224,11 @@ STRINGS_BETWEEN_SPACES = re.compile(r"""
         (\S+)   # CAPTURE GROUP | Match any non-whitespace character
                 # between 1 and ∞ times, as few times as possible.
     )           # Close non-capturing group.""",
-                                    flags=re.IGNORECASE | re.VERBOSE)
+                    flags=re.IGNORECASE | re.VERBOSE)
 
 TIMEZONE = re.compile(r"""
-    (?P<sign>-|\+?) # CAPTURE GROUP (sign) | Either match "-" or optionally
-                    # match "+".
+    (?P<sign>-|\+?) # CAPTURE GROUP (sign) | Either match "-" or
+                    # optionally match "+".
     (?P<hours>      # CAPTURE GROUP (hours) | Open capture group.
         [0-1][0-9]  # Match a number between 00 and 19.
         |           # OR

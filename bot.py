@@ -65,6 +65,7 @@ async def on_ready():
             if message.author == BOT.user:
                 continue
 
+            # Check whether or not message invokes bot (i.e.: it is a command).
             ctx = await BOT.get_context(message)
             if ctx.valid:
                 continue
@@ -87,7 +88,7 @@ async def on_message(message):
 
     ctx = await BOT.get_context(message)
 
-    # Check whether or not message invokes bot (i.e., it is a command).
+    # Check whether or not message invokes bot (i.e.: it is a command).
     if ctx.valid:
         await BOT.process_commands(message)
         return
@@ -125,13 +126,13 @@ async def on_raw_message_delete(payload):
 
     if logging_channel:
         message = payload.cached_message
-        id_ = payload.message_id
-        date = discord.utils.snowflake_time(id_)
+        message_id = payload.message_id
+        creation_time = discord.utils.snowflake_time(message_id)
         guild_date_format = functions.get_localized_object(
             guild_id, "STRFTIME_DATE")
         guild_time_format = functions.get_localized_object(
             guild_id, "STRFTIME_TIME")
-        format = f"{guild_date_format} | {guild_time_format}"
+        guild_format = f"{guild_date_format} | {guild_time_format}"
         utc_time = datetime.datetime.utcnow()
         local_time = functions.utc_to_local(utc_time, guild_id)
         channel = BOT.get_channel(payload.channel_id)
@@ -173,19 +174,18 @@ async def on_raw_message_delete(payload):
                 guild_id,
                 "LOGGING_MESSAGE_DELETED_FIELD_CREATION_TIME_VALUE").format(
                     local_time=functions.utc_to_local(
-                        date, guild_id).strftime(format),
-                    utc_time=date.strftime(format)
-            ),
+                        creation_time, guild_id).strftime(guild_format),
+                    utc_time=creation_time.strftime(guild_format)),
             inline=False)
         embed.add_field(
             name=functions.get_localized_object(
                 guild_id, "LOGGING_MESSAGE_DELETED_FIELD_ID_NAME"),
-            value=f"`{id_}`",
+            value=f"`{message_id}`",
             inline=False)
         embed.set_footer(text=functions.get_localized_object(
             guild_id, "LOGGING_MESSAGE_DELETED_FOOTER").format(
-                local_time=local_time.strftime(format),
-                utc_time=utc_time.strftime(format)))
+                local_time=local_time.strftime(guild_format),
+                utc_time=utc_time.strftime(guild_format)))
 
         await logging_channel.send(embed=embed)
 
@@ -198,7 +198,7 @@ async def on_command_error(ctx, error):
     Args:
         ctx (discord.ext.commands.Context): Context passed to function.
         error (discord.ext.commands.CommandError): Base exception for all
-        command related errors.
+            command related errors.
     """
     if isinstance(error, commands.MissingPermissions):
         await ctx.send(functions.get_localized_object(
@@ -238,7 +238,7 @@ async def on_guild_join(guild):
                 guild.id, "GUILD_JOIN", locale).format(
                     locale=locale,
                     guild_name=guild.name,
-                    prefix=settings.BOT_DEFAULT_PREFIX)
+                    prefix=settings.GUILD_DEFAULT_PREFIX)
 
             await general.send(message)
 
@@ -253,10 +253,6 @@ async def on_guild_remove(guild):
     """
     functions.database_guild_purge(guild.id)
 
-for file in os.listdir("cogs"):
-    if file.endswith(".py"):
-        BOT.load_extension(f"cogs.{file[:-3]}")
-
 
 @BOT.event
 async def on_member_remove(member):
@@ -268,5 +264,9 @@ async def on_member_remove(member):
     """
     functions.database_birthday_delete(member.guild.id, member.id)
     functions.database_copypasta_unban_user(member.guild.id, member.id)
+
+for file in os.listdir("cogs"):
+    if file.endswith(".py"):
+        BOT.load_extension(f"cogs.{file[:-3]}")
 
 BOT.run(settings.BOT_TOKEN)

@@ -37,8 +37,8 @@
     "COPYPASTA_TABLE_HEADER_ID": "ID",
     "COPYPASTA_TABLE_HEADER_TITLE": "TITLE",
     "COPYPASTA_UNBAN": "{member} unbanned from adding copypastas!",
-    "COUNT_FOUND_MESSAGE": "I've found {message_count} messages in {channel_name}. {threshold_message}",
-    "COUNT_FOUND_REPLY": "I've found {message_count} messages up to this message.",
+    "COUNT_RESULTS": "I've found {message_count} messages in {channel_name}. {threshold_message}",
+    "COUNT_RESULTS_REPLY": "I've found {message_count} messages up to this message.",
     "COUNT_INVALID_USAGE": "Please provide a message ID to stop counting when reached or use `-a` to count all messages.",
     "COUNT_REPLY_DELETED": "It seems like the referenced message was deleted before I could reply to it.",
     "COUNT_THRESHOLD_DICT": {
@@ -77,7 +77,7 @@
     "STRFTIME_DATE": "%m-%d-%Y",
     "STRFTIME_TIME": "%H:%M:%S",
     "TIMEZONE_CHANGE": "Timezone changed from `{current_timezone}` to `{new_timezone}`!",
-    "TIMEZONE_INVALID_USAGE": "Please provide a valid timezone. Use the following format: `{+|-}HH:MM`. E.g.: `-03:00` or `+12:30`.",
+    "TIMEZONE_INVALID_USAGE": "Please provide a valid timezone. Use the following format: `{+|-}HH:MM`, e.g.: `-03:00` or `+12:30`.",
     "UNBAN_INVALID_USAGE": "Please provide one or more users banned from the guild.",
     "UNBAN_MESSAGE": "Unbanned {user_name}#{user_discriminator}."
   },
@@ -120,8 +120,8 @@
     "COPYPASTA_TABLE_HEADER_ID": "ID",
     "COPYPASTA_TABLE_HEADER_TITLE": "TÍTULO",
     "COPYPASTA_UNBAN": "{member} desbanido(a) de adicionar copypastas!",
-    "COUNT_FOUND_MESSAGE": "Eu encontrei {message_count} mensagens em {channel_name}. {threshold_message}",
-    "COUNT_FOUND_REPLY": "Eu encontrei {message_count} mensagens até esta mensagem.",
+    "COUNT_RESULTS": "Eu encontrei {message_count} mensagens em {channel_name}. {threshold_message}",
+    "COUNT_RESULTS_REPLY": "Eu encontrei {message_count} mensagens até esta mensagem.",
     "COUNT_INVALID_USAGE": "Por favor forneça um ID de para parar a contagem quando alcançada ou use `-a` para contar todas as mensagens.",
     "COUNT_REPLY_DELETED": "Parece que a mensagem referenciada foi excluída antes que eu pudesse respondê-la.",
     "COUNT_THRESHOLD_DICT": {
@@ -160,7 +160,7 @@
     "STRFTIME_DATE": "%d-%m-%Y",
     "STRFTIME_TIME": "%H:%M:%S",
     "TIMEZONE_CHANGE": "Fuso horário alterado de `{current_timezone}` para `{new_timezone}`!",
-    "TIMEZONE_INVALID_USAGE": "Por favor forneça um fuso horário válido. Utilize o seguinte formato: `{+|-}HH:MM`. E.g.: `-03:00` ou `+12:30`.",
+    "TIMEZONE_INVALID_USAGE": "Por favor forneça um fuso horário válido. Utilize o seguinte formato: `{+|-}HH:MM`, e.g.: `-03:00` ou `+12:30`.",
     "UNBAN_INVALID_USAGE": "Por favor forneça um ou mais usuários banidos da guilda.",
     "UNBAN_MESSAGE": "{user_name}#{user_discriminator} desbanido."
   }

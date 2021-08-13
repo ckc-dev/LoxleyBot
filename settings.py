@@ -12,7 +12,7 @@ dotenv.load_dotenv()
 
 # Values to use when initializing bot.
 LOCALIZATION_FILE_NAME = "localization.json"
-BOT_ACTIVITY = "@me for help!"
+BOT_ACTIVITY = "@me for help! | https://github.com/ckc-dev/LoxleyBot"
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise ValueError("'BOT_TOKEN' environment variable was not provided.")

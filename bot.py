@@ -13,9 +13,12 @@ import settings
 if not functions.database_exists():
     functions.database_create()
 
+# Enable privileged intent required for events such as `on_member_remove()`.
+INTENTS = discord.Intents.default()
+INTENTS.members = True
+
 BOT = commands.Bot(
-    command_prefix=functions.database_guild_prefix_get,
-    intents=discord.Intents.all())
+    command_prefix=functions.database_guild_prefix_get, intents=INTENTS)
 BOT.activity = discord.Game(settings.BOT_ACTIVITY)
 
 

@@ -1,5 +1,6 @@
 {
   "en-US": {
+    "ABOUT": "Hi, I'm Loxley! You can find documentation and more information on https://github.com/ckc-dev/LoxleyBot.",
     "BAN_DEFAULT_REASON": "No reason provided.",
     "BAN_INVALID_USAGE": "Please provide one or more guild members. Optionally, also provide a reason.",
     "BAN_MESSAGE_DIRECT": "You have been banned from `{guild_name}`. Reason: `{reason}`.",
@@ -66,7 +67,7 @@
     "LOGGING_MESSAGE_DELETED_FOOTER": "Logged on {local_time}\nUTC {utc_time}",
     "LOGGING_SET_CHANNEL_NONE": "Done! No channel will be used for logging deleted messages.",
     "LOGGING_SET_CHANNEL": "Done! Deleted messages will be logged in {channel_name}.",
-    "MENTION_HELP": "Hello! Use `{prefix}help` to get more information on what I can do. Did you know I can play Marco Polo?",
+    "MENTION_HELP": "Hello! Use `{prefix}help` to get more information on what I can do.",
     "MISSING_PERMISSIONS_DETAILS": "Details: ```{details}```",
     "MISSING_PERMISSIONS": "Sorry {member}, you don't have the permissions required to use this command.",
     "PING": "Pong! `{latency}ms`.",
@@ -78,10 +79,21 @@
     "STRFTIME_TIME": "%H:%M:%S",
     "TIMEZONE_CHANGE": "Timezone changed from `{current_timezone}` to `{new_timezone}`!",
     "TIMEZONE_INVALID_USAGE": "Please provide a valid timezone. Use the following format: `{+|-}HH:MM`, e.g.: `-03:00` or `+12:30`.",
+    "TRIVIA_HEADER": "Did you know?",
+    "TRIVIA": [
+      "I am made out of approximately 3500 (and counting) lines of code!",
+      "I am open source!",
+      "I can play Marco Polo!",
+      "I support both local and remote databases!",
+      "I am licensed under the GPLv3 license!",
+      "I was created on 01/20/2021!",
+      "You can mention (@) me in any message to get a help message!"
+    ],
     "UNBAN_INVALID_USAGE": "Please provide one or more users banned from the guild.",
     "UNBAN_MESSAGE": "Unbanned {user_name}#{user_discriminator}."
   },
   "pt-BR": {
+    "ABOUT": "Olá, sou o Loxley! Você pode encontrar documentação e mais informações em https://github.com/ckc-dev/LoxleyBot.",
     "BAN_DEFAULT_REASON": "Nenhum motivo especificado.",
     "BAN_INVALID_USAGE": "Por favor forneça um ou mais membros da guilda. Opcionalmente, forneça também um motivo.",
     "BAN_MESSAGE_DIRECT": "Você foi banido(a) de `{guild_name}`. Motivo: `{reason}`.",
@@ -149,7 +161,7 @@
     "LOGGING_MESSAGE_DELETED_FOOTER": "Registrado em {local_time}\nUTC {utc_time}",
     "LOGGING_SET_CHANNEL_NONE": "Feito! Nenhum canal será utilizado para registrar mensagens excluídas.",
     "LOGGING_SET_CHANNEL": "Feito! As mensagens excluídas serão registradas em {channel_name}.",
-    "MENTION_HELP": "Olá! Use `{prefix}help` para mais informações no que eu posso fazer. Sabia que eu sei jogar Marco Polo?",
+    "MENTION_HELP": "Olá! Use `{prefix}help` para mais informações no que eu posso fazer.",
     "MISSING_PERMISSIONS_DETAILS": "Detalhes: ```{details}```",
     "MISSING_PERMISSIONS": "Desculpe {member}, você não tem as permissões necessárias para utilizar este comando.",
     "PING": "Pong! `{latency}ms`.",
@@ -161,6 +173,16 @@
     "STRFTIME_TIME": "%H:%M:%S",
     "TIMEZONE_CHANGE": "Fuso horário alterado de `{current_timezone}` para `{new_timezone}`!",
     "TIMEZONE_INVALID_USAGE": "Por favor forneça um fuso horário válido. Utilize o seguinte formato: `{+|-}HH:MM`, e.g.: `-03:00` ou `+12:30`.",
+    "TRIVIA_HEADER": "Você sabia?",
+    "TRIVIA": [
+      "Eu sou feito de aproximadamente 3500 (e contando) linhas de código!",
+      "Eu sou código aberto!",
+      "Eu sei jogar Marco Polo!",
+      "Eu tenho suporte para bancos de dados locais e remotos!",
+      "Eu estou licenciado sob a licença GPLv3!",
+      "Eu fui criado em 20/01/2021!",
+      "Você pode me mencionar (@) em qualquer mensagem para receber uma mensagem de ajuda!"
+    ],
     "UNBAN_INVALID_USAGE": "Por favor forneça um ou mais usuários banidos da guilda.",
     "UNBAN_MESSAGE": "{user_name}#{user_discriminator} desbanido."
   }

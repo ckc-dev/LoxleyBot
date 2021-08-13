@@ -462,6 +462,26 @@ class Utils(commands.Cog):
                     functions.database_message_count_set(
                         guild.id, channel.id, channel.last_message_id, count)
 
+    @commands.command()
+    async def about(self, ctx):
+        """
+        Get more information about the bot.
+
+        Usage:
+            about
+
+        Examples:
+            about:
+                Get more information about the bot.
+        """
+        about_message = functions.get_localized_object(ctx.guild.id, "ABOUT")
+        trivia_header = functions.get_localized_object(
+            ctx.guild.id, "TRIVIA_HEADER")
+        trivia_message = functions.get_localized_object(ctx.guild.id, "TRIVIA")
+        message = f"{about_message}\n{trivia_header} {trivia_message}"
+
+        await ctx.send(message)
+
     @tasks.loop(hours=24)
     async def check_for_birthdays(self):
         """Check each guild for birthdays."""

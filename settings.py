@@ -53,7 +53,7 @@ else:
 # Values to use when generating copypasta embeds.
 DISCORD_EMBED_TITLE_LIMIT = 256
 DISCORD_EMBED_DESCRIPTION_LIMIT = 2048
-EMBED_COLOR = 0x1794be
+EMBED_COLOR = 0x639bff
 
 # Values to use when generating a list of copypastas.
 DISCORD_CHARACTER_LIMIT = 2000

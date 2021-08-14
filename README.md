@@ -2,7 +2,7 @@
 
 ![Icon](README/icon.png) ![Logo](README/logo.png)
 
-Loxley is a Discord bot that I made just for fun. Some friends and I wanted a bot with specific functions and requirements (e.g.: Being open source) for our guild, and we couldn't find any that had everything we wanted and nothing we didn't want, so I just decided to make one myself. It may or may not have features you're interested in, so feel free to deploy your own instance and try it out!
+Loxley is a Discord bot that I made just for fun using [discord.py](https://github.com/Rapptz/discord.py). Some friends and I wanted a bot with specific functions and requirements (e.g.: Being open source) for our guild, and we couldn't find any that had everything we wanted and nothing we didn't want, so I just decided to make one myself. It may or may not have features you're interested in, so feel free to deploy your own instance and try it out!
 
 ## Technologies Used:
 
@@ -38,17 +38,28 @@ In addition to the commands, the bot will also play Marco Polo when some form of
 
 # Deploying your own instance:
 
-## Provide the environment variables.
+## Create a bot and get its token:
 
-Make sure you have provided the required `BOT_TOKEN` environment variable, containing your token found in the Discord Application Dashboard. If you are using a PostgreSQL database, be sure to also provide the `DATABASE_URL` environment variable, containing the URL to your database.
+First, create an application in the Discord Developer Portal, then, under the bot settings, create a bot and take note of its token.
+
+## Clone this repository and install dependencies:
+
+1. On the terminal, run `git clone https://github.com/ckc-dev/LoxleyBot` to clone this repository.
+2. Run `cd LoxleyBot` to change the current directory into the cloned repository directory.
+3. - If `pipenv` is installed: run `pipenv install` to install the dependencies.
+   - If `pipenv` is not installed: either install `pipenv` and then run `pipenv install`, or manually install the dependencies listed in the Pipfile using `pip`.
+
+## Provide the environment variables:
+
+Make sure you have provided the required `BOT_TOKEN` environment variable, containing your token found in the Discord Developer Portal. If you are using a PostgreSQL database, be sure to also provide the `DATABASE_URL` environment variable, containing the URL to your database.
 
 This can be done either by using a `.env` file or by setting the variables directly.
 
-## Some intents are required.
+## Provide the required intents:
 
-Make sure to have the "Server Members" privileged gateway intent activated in the Discord Application Dashboard, as this is required for some of the bot's functions, such as deleting the data related to a member when the member leaves the guild.
+Make sure to have the "Server Members" privileged gateway intent activated in the Discord Developer Portal, as this is required for some of the bot's functions, such as deleting the data related to a member when the member leaves the guild.
 
-## Some permissions are required.
+## Provide the required permissions:
 
 Here is a list containing each command and the permissions required for it to function properly. Be sure to enable the required permissions for commands you want to use:
 
@@ -69,6 +80,10 @@ Here is a list containing each command and the permissions required for it to fu
   - Ban Members
 - `unban`
   - Ban Members
+
+## Run the bot:
+
+On the terminal, run `python bot.py` to run the bot.
 
 # Configuring Loxley to your guild:
 

@@ -1,4 +1,4 @@
-"""Contains general use functions used in other parts of the bot."""
+"""General use functions used in other parts of the bot."""
 
 import datetime
 import io

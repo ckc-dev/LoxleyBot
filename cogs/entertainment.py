@@ -1,4 +1,4 @@
-"""Contains cogs used for functions related to fun and entertainment."""
+"""Cogs used for functions related to fun and entertainment."""
 
 import discord
 import functions

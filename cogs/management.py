@@ -1,4 +1,4 @@
-"""Contains cogs used in guild management."""
+"""Cogs used in guild management."""
 
 import discord
 import functions

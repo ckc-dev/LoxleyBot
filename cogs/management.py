@@ -195,7 +195,7 @@ class Management(commands.Cog):
                 Unban a user with spaces in their name, "Example user".
             unban user#0001 "Example User#0002" user#0003:
                 Unban three users.
-            unban (referencing/replying a message) user#0001 user#0003
+            unban (referencing/replying a message) user#0001 user#0003:
                 Unban the author of referenced message and two more users.
         """
         message_reference = ctx.message.reference

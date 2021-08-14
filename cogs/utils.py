@@ -290,8 +290,8 @@ class Utils(commands.Cog):
         Examples:
             timezone -03:00:
                 Change timezone to -03:00.
-            locale +12:30:
-                Change timezone to +12:30".
+            timezone +12:30:
+                Change timezone to +12:30.
         """
         if not new or not regexes.TIMEZONE.fullmatch(new):
             await ctx.send(functions.get_localized_object(

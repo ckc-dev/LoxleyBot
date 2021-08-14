@@ -1,4 +1,4 @@
-"""Contains cogs used for useful, often small and simple functions."""
+"""Cogs used for useful, often small and simple functions."""
 
 import datetime
 

@@ -4,12 +4,54 @@
 
 Loxley is a Discord bot that I made just for fun using [discord.py](https://github.com/Rapptz/discord.py). Some friends and I wanted a bot with specific functions and requirements (e.g.: Being open source) for our guild, and we couldn't find any that had everything we wanted and nothing we didn't want, so I just decided to make one myself. It may or may not have features you're interested in, so feel free to deploy your own instance and try it out!
 
-## Technologies Used:
+## Technologies used:
 
 - JSON
 - Python
 - RegEx
 - SQL
+
+## Table of contents:
+
+- [Meet Loxley](#meet-loxley)
+  - [Technologies Used](#technologies-used)
+  - [Table of contents](#table-of-contents)
+  - [File Tree](#file-tree)
+- [Available commands](#available-commands)
+- [Other functions](#other-functions)
+- [Deploying your own instance](#deploying-your-own-instance)
+  - [Create a bot and get its token](#create-a-bot-and-get-its-token)
+  - [Clone this repository and install dependencies](#clone-this-repository-and-install-dependencies)
+  - [Provide the environment variables](#provide-the-environment-variables)
+  - [Provide the required intents](#provide-the-required-intents)
+  - [Provide the required permissions](#provide-the-required-permissions)
+  - [Run the bot](#run-the-bot)
+- [Configuring Loxley to your guild](#configuring-loxley-to-your-guild)
+- [Command usage](#command-usage)
+
+## File tree:
+
+```
+LoxleyBot
+┣ 📂cogs                Files containing different collections of commands.
+┃ ┣ 📜entertainment.py  Cogs used for functions related to fun and entertainment.
+┃ ┣ 📜management.py     Cogs used in guild management.
+┃ ┗ 📜utils.py          Cogs used for useful, often small and simple functions.
+┣ 📂README              Files used in the README.
+┃ ┣ 📜icon.png          Image used in the README.
+┃ ┗ 📜logo.png          Image used in the README.
+┣ 📜.gitignore          Files/directories ignored by git.
+┣ 📜bot.py              Main bot file.
+┣ 📜functions.py        General use functions used in other parts of the bot.
+┣ 📜LICENSE             Project license
+┣ 📜localization.json   Localized bot messages.
+┣ 📜Pipfile             Requirements.
+┣ 📜Pipfile.lock        Requirements.
+┣ 📜Procfile            A list of processes executed at app startup. Used on deployment.
+┣ 📜README.md           This file.
+┣ 📜regexes.py          Regular expressions used throughout the bot.
+┗ 📜settings.py         Bot settings.
+```
 
 # Available commands:
 

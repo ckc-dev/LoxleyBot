@@ -113,6 +113,8 @@ Here is a list containing each command and the permissions required for it to fu
   - Embed Links
 - `count`
   - Read Message History
+- `logging`
+  - Embed Links
 - `purge`
   - Manage Messages
   - Read Message History

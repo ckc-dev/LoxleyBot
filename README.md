@@ -14,9 +14,9 @@ Loxley is a Discord bot that I made just for fun using [discord.py](https://gith
 ## Table of contents:
 
 - [Meet Loxley](#meet-loxley)
-  - [Technologies Used](#technologies-used)
+  - [Technologies used](#technologies-used)
   - [Table of contents](#table-of-contents)
-  - [File Tree](#file-tree)
+  - [File tree](#file-tree)
 - [Available commands](#available-commands)
 - [Other functions](#other-functions)
 - [Deploying your own instance](#deploying-your-own-instance)

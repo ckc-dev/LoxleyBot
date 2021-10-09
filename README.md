@@ -1,17 +1,17 @@
-# Meet Loxley:
+# [Meet Loxley](https://github.com/ckc-dev/LoxleyBot)
 
 ![Icon](README/icon.png) ![Logo](README/logo.png)
 
 Loxley is a Discord bot that I made just for fun using [discord.py](https://github.com/Rapptz/discord.py). Some friends and I wanted a bot with specific functions and requirements (e.g.: Being open source) for our guild, and we couldn't find any that had everything we wanted and nothing we didn't want, so I just decided to make one myself. It may or may not have features you're interested in, so feel free to deploy your own instance and try it out!
 
-## Technologies used:
+## Technologies used
 
 - JSON
 - Python
 - RegEx
 - SQL
 
-## Table of contents:
+## Table of contents
 
 - [Meet Loxley](#meet-loxley)
   - [Technologies used](#technologies-used)
@@ -28,32 +28,33 @@ Loxley is a Discord bot that I made just for fun using [discord.py](https://gith
   - [Run the bot](#run-the-bot)
 - [Configuring Loxley to your guild](#configuring-loxley-to-your-guild)
 - [Command usage](#command-usage)
+- [Contributing](#contributing)
 
-## File tree:
+## File tree
 
 ```
 LoxleyBot
-┣ 📂cogs                Files containing different collections of commands.
-┃ ┣ 📜entertainment.py  Cogs used for functions related to fun and entertainment.
-┃ ┣ 📜management.py     Cogs used in guild management.
-┃ ┗ 📜utils.py          Cogs used for useful, often small and simple functions.
-┣ 📂README              Files used in the README.
-┃ ┣ 📜icon.png          Image used in the README.
-┃ ┗ 📜logo.png          Image used in the README.
-┣ 📜.gitignore          Files/directories ignored by git.
-┣ 📜bot.py              Main bot file.
-┣ 📜functions.py        General use functions used in other parts of the bot.
-┣ 📜LICENSE             Project license
-┣ 📜localization.json   Localized bot messages.
-┣ 📜Pipfile             Requirements.
-┣ 📜Pipfile.lock        Requirements.
-┣ 📜Procfile            A list of processes executed at app startup. Used on deployment.
-┣ 📜README.md           This file.
-┣ 📜regexes.py          Regular expressions used throughout the bot.
-┗ 📜settings.py         Bot settings.
+├ .gitignore          Files/directories ignored by git.
+├ bot.py              Main bot file.
+├ cogs/               Files containing different collections of commands.
+│ ├ entertainment.py  Cogs used for functions related to fun and entertainment.
+│ ├ management.py     Cogs used in guild management.
+│ └ utils.py          Cogs used for useful, often small and simple functions.
+├ functions.py        General use functions used in other parts of the bot.
+├ LICENSE             Project license.
+├ localization.json   Localized bot messages.
+├ Pipfile             Requirements.
+├ Pipfile.lock        Requirements.
+├ Procfile            A list of processes executed at app startup. Used on deployment.
+├ README/             Files used in the README.
+│ ├ icon.png          Image used in the README.
+│ └ logo.png          Image used in the README.
+├ README.md           Project README.
+├ regexes.py          Regular expressions used throughout the bot.
+└ settings.py         Bot settings.
 ```
 
-# Available commands:
+# Available commands
 
 These are the currently available commands and their respective functions. A list containing detailed descriptions and usage examples is also available [later in this document](#command-usage).
 
@@ -74,34 +75,34 @@ These are the currently available commands and their respective functions. A lis
 
 Of course, if you want to deploy your own instance, feel free to modify and create your own commands.
 
-# Other functions:
+# Other functions
 
 In addition to the commands, the bot will also play Marco Polo when some form of "Marco" is sent to a text channel it can read and send messages on. Furthermore, it will also respond with a help message when mentioned in a message, which is useful in case someone forgets which prefix to use in commands.
 
-# Deploying your own instance:
+# Deploying your own instance
 
-## Create a bot and get its token:
+## Create a bot and get its token
 
 First, create an application in the Discord Developer Portal, then, under the bot settings, create a bot and take note of its token.
 
-## Clone this repository and install dependencies:
+## Clone this repository and install dependencies
 
 1. On the terminal, run `git clone https://github.com/ckc-dev/LoxleyBot` to clone this repository.
 2. Run `cd LoxleyBot` to change the current directory into the cloned repository directory.
 3. - If `pipenv` is installed: run `pipenv install` to install the dependencies.
    - If `pipenv` is not installed: either install `pipenv` and then run `pipenv install`, or manually install the dependencies listed in the Pipfile using `pip`.
 
-## Provide the environment variables:
+## Provide the environment variables
 
 Make sure you have provided the required `BOT_TOKEN` environment variable, containing your token found in the Discord Developer Portal. If you are using a PostgreSQL database, be sure to also provide the `DATABASE_URL` environment variable, containing the URL to your database.
 
 This can be done either by using a `.env` file or by setting the variables directly.
 
-## Provide the required intents:
+## Provide the required intents
 
 Make sure to have the "Server Members" privileged gateway intent activated in the Discord Developer Portal, as this is required for some of the bot's functions, such as deleting the data related to a member when the member leaves the guild.
 
-## Provide the required permissions:
+## Provide the required permissions
 
 Here is a list containing each command and the permissions required for it to function properly. Be sure to enable the required permissions for commands you want to use:
 
@@ -125,15 +126,15 @@ Here is a list containing each command and the permissions required for it to fu
 - `unban`
   - Ban Members
 
-## Run the bot:
+## Run the bot
 
 On the terminal, run `python bot.py` to run the bot.
 
-# Configuring Loxley to your guild:
+# Configuring Loxley to your guild
 
 Once you have deployed your own instance and invited the bot to join your guild, be sure to configure the guild's prefix, timezone and locale, as these are used in many functions throughout the bot, such as checking for birthdays. Optionally, also configure the guild's birthday, copypasta, and logging channels.
 
-# Command usage:
+# Command usage
 
 - `about`: Get more information about the bot.
   - Usage:
@@ -331,3 +332,13 @@ Once you have deployed your own instance and invited the bot to join your guild,
       - Unban three users.
     - `unban (referencing/replying a message) user#0001 user#0003`
       - Unban the author of referenced message and two more users.
+
+# Contributing
+
+Pull requests are welcome.
+
+Please open an issue to discuss what you'd like to change before making major changes.
+
+Please make sure to update and/or add appropriate tests when applicable.
+
+This project is licensed under the [GPL-3.0 License](https://github.com/ckc-dev/LoxleyBot/blob/main/LICENSE).

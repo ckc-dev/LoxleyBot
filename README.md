@@ -29,6 +29,7 @@ Loxley is a Discord bot that I made just for fun using [discord.py](https://gith
 - [Configuring Loxley to your guild](#configuring-loxley-to-your-guild)
 - [Command usage](#command-usage)
 - [Contributing](#contributing)
+  - [Contributing without coding](#contributing-without-coding)
 
 ## File tree
 
@@ -342,3 +343,7 @@ Please open an issue to discuss what you'd like to change before making major ch
 Please make sure to update and/or add appropriate tests when applicable.
 
 This project is licensed under the [GPL-3.0 License](https://github.com/ckc-dev/LoxleyBot/blob/main/LICENSE).
+
+## Contributing without coding
+
+If you have little or no coding experience, you can also contribute by adding more localizations to the `localization.json` file, just make sure to follow an already existing model in it.
